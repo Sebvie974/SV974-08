@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Budget</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --expense-color: #e53935;
+            --card-bg: #fff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- HEADER --- */
+        .sticky-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--bg-color); /* Fond de la même couleur que la page pour cacher le texte au défilement */
+            padding-bottom: 5px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 950px !important;
+            margin: 0 auto;
+            box-sizing: border-box;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .bank-management {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .bank-management select {
+            width: 150px;
+            padding: 0.3rem;
+            border-radius: 4px;
+            border: none;
+        }
+
+        .btn-icon {
+            background: var(--card-bg);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .btn-secondary {
+            background-color: #607d8b;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: auto;
+            font-size: 0.85rem;
+        }
+
+        .header-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .month-selector button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            padding: 0.3rem 0.6rem;
+            cursor: pointer;
+        }
+
+        .month-selector h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: normal;
+            min-width: 120px;
+            text-align: center;
+            text-transform: capitalize;
+        }
+
+        .budget-summary {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 0.9rem;
+        }
+
+        .summary-item { margin: 2px 0; }
+        .summary-item .label { opacity: 0.8; font-size: 0.8rem; margin-right: 5px; }
+        .summary-item .amount { font-weight: bold; font-size: 1rem; }
+
+        /* --- CONTENU PRINCIPAL --- */
+        main { 
+            padding-bottom: 80px; 
+            max-width: 950px; /* Limite la largeur pour compacter la liste */
+            margin: 0 auto; /* Centre le bloc sur l'écran */
+        }
+
+        /* Nouveaux boutons d'action (Import/Export) */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto; /* Pousse les boutons vers la droite */
+        }
+
+        /* Grille avec 8 colonnes */
+        .operations-header {
+            display: grid;
+            grid-template-columns: 30px 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #666;
+            border-bottom: 2px solid #ddd;
+            margin: 0.5rem auto 0; /* Centré avec une marge au-dessus */
+            max-width: 950px; /* Aligné avec le header */
+            box-sizing: border-box;
+        }
+
+        .operations-list {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .operation-item {
+            display: grid;
+            grid-template-columns: 30px 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr;
+            background: white;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            gap: 0.5rem;
+            transition: background-color 0.2s ease; /* Ajout d'une transition douce */
+        }
+
+        /* NOUVEAU : Style pour la ligne pointée */
+        .operation-item.op-pointee {
+            background-color: #f0db9b; /* Jaune pastel clair */
+        }
+
+        /* Centrage de la case à cocher */
+        .col-check {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .col-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* Style des boutons d'action */
+        .col-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+        
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 2px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .btn-action:hover:not([disabled]) {
+            background: #eee;
+        }
+
+        .btn-action[disabled] {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .op-report {
+            background: #e3f2fd;
+            font-style: italic;
+        }
+
+        .op-details { display: flex; flex-direction: column; }
+        .op-date { font-size: 0.75rem; color: #666; margin-bottom: 2px; }
+        .op-objet { font-weight: bold; font-size: 1rem; }
+        
+               
+        /* Champs éditables dans la liste */
+        .inline-input {
+            border: 1px solid transparent;
+            background: transparent;
+            font-size: 0.8rem;
+            width: 90%;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #555;
+            transition: all 0.2s;
+        }
+        .inline-input:hover, .inline-input:focus {
+            border-color: #ccc;
+            background: white;
+            outline: none;
+        }
+
+        .col-out, .col-in, .col-balance { text-align: right; font-weight: bold; font-size: 0.95rem; }
+        .col-out { color: var(--expense-color); }
+        .col-in { color: var(--primary-color); }
+        .col-balance { color: #333; }
+
+        .floating-btn {
+            position: fixed; bottom: 2rem; right: 2rem;
+            background-color: var(--primary-color); color: white;
+            border: none; border-radius: 50%; width: 60px; height: 60px;
+            font-size: 2rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* --- MODALES --- */
+        dialog {
+            border: none; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            padding: 1.5rem; width: 90%; max-width: 400px;
+        }
+        dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+        dialog h2 { margin-top: 0; font-size: 1.2rem; margin-bottom: 1rem; }
+
+        .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 0.3rem; font-size: 0.9rem; font-weight: bold; }
+        .form-group input { padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        .checkbox-group { flex-direction: row; align-items: center; }
+        .checkbox-group input { margin-right: 0.5rem; width: auto; }
+
+        /* Sélecteur Entrée / Sortie */
+        .type-toggle {
+            display: flex;
+            flex-direction: row;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            margin-bottom: 1rem;
+        }
+        .type-toggle input[type="radio"] { display: none; }
+        .type-toggle label {
+            flex: 1;
+            text-align: center;
+            padding: 0.6rem;
+            cursor: pointer;
+            background: #f4f7f6;
+            transition: all 0.2s;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        #typeSortie:checked + label { background: var(--expense-color); color: white; }
+        #typeEntree:checked + label { background: var(--primary-color); color: white; }
+
+        .modal-actions { display: flex; justify-content: space-between; margin-top: 1.5rem; }
+        .btn-cancel, .btn-submit, .btn-danger {
+            padding: 0.6rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold;
+        }
+        .btn-cancel { background-color: #e0e0e0; color: #333; }
+        .btn-submit { background-color: var(--primary-color); color: white; }
+        .btn-danger { background-color: var(--expense-color); color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem;}
+
+        .bank-list { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+        .bank-list-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0.5rem; border-bottom: 1px solid #eee; 
+        }
+        .bank-actions { display: flex; gap: 0.5rem; }
+        .add-bank-row { display: flex; gap: 0.5rem; margin-bottom: 1rem;}
+        .add-bank-row input { flex-grow: 1; }
+
+    /* Styles pour le paiement en X fois */
+        .installment-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+        .installment-row input {
+            flex: 1;
+            padding: 0.4rem;
+            font-size: 0.9rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .installment-row span {
+            width: 30px;
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <datalist id="categoriesList">
+        <option value="Alimentation">
+        <option value="Logement">
+        <option value="Transport">
+        <option value="Loisirs">
+        <option value="Santé">
+        <option value="Autre">
+    </datalist>
+
+    <datalist id="modesList">
+        <option value="Carte Bancaire">
+        <option value="Virement">
+        <option value="Prélèvement">
+        <option value="Espèces">
+        <option value="Chèque">
+    </datalist>
+
+    <div class="sticky-wrapper">
+        <header>
+            <div class="bank-management">
+                <select id="bankSelector"></select>
+                <button id="btnManageBanks" class="btn-icon" title="Gérer les banques">⚙️</button>
+                <button id="btnInitBalance" class="btn-secondary">Solde Initial</button>
+                
+                <div class="action-buttons">
+                    <button id="btnOpenSearch" class="btn-secondary" title="Rechercher une opération">🔍 Rechercher</button>
+                    <button id="btnExport" class="btn-secondary" title="Sauvegarder les données">💾 Exporter</button>
+                    <button id="btnImport" class="btn-secondary" title="Importer des données">📂 Importer</button>
+                    <input type="file" id="fileImport" accept=".json" style="display: none;">
+                </div>
+            </div>
+            
+            <div class="header-bottom">
+                <div class="month-selector">
+                    <button id="prevMonth">&lt;</button>
+                    <h2 id="currentMonthLabel">Juin 2026</h2>
+                    <button id="nextMonth">&gt;</button>
+                </div>
+                
+                <div class="budget-summary">
+                    <div class="summary-item">
+                        <span class="label">Prévu</span>
+                        <span class="amount" id="totalPrevu">0.00 €</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Pointé</span>
+                        <span class="amount" id="totalPointe">0.00 €</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="operations-header">
+            <div class="col-check" title="Pointage bancaire">✔</div>
+            <div class="col-details">Date & Objet</div>
+            <div class="col-cat" id="headerCat" title="Voir les statistiques par catégorie" style="cursor: pointer; color: #2196F3; text-decoration: underline;">Catégorie 📊</div>
+            <div class="col-mode">Mode</div>
+            <div class="col-out">Sorties</div>
+            <div class="col-in">Entrées</div>
+            <div class="col-balance">Solde</div>
+            <div class="col-actions" style="text-align: right; padding-right: 5px;">Actions</div>
+        </div>
+    </div>
+
+    <main>
+        <section class="operations-list" id="operationsList"></section>
+
+        <button id="btnOpenModal" class="floating-btn">+</button>
+    </main>
+
+    <dialog id="modalOperation">
+        <form id="formOperation" method="dialog">
+            
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <button type="button" id="btnOpenInstallments" class="btn-secondary" style="background-color: #ff9800; padding: 0.4rem 0.6rem;">⏱️ Paiement X fois</button>
+                <h2 style="margin: 0;">Nouvelle opération</h2>
+            </div>
+            
+            <div class="form-group">
+                <label for="dateOp">Date initiale</label>
+                <input type="date" id="dateOp" name="dateOp" required>
+            </div>
+
+            <div class="type-toggle">
+                <input type="radio" id="typeSortie" name="opType" value="sortie" checked>
+                <label for="typeSortie">Sortie (-)</label>
+                
+                <input type="radio" id="typeEntree" name="opType" value="entree">
+                <label for="typeEntree">Entrée (+)</label>
+            </div>
+
+            <div class="form-group">
+                <label for="objet">Objet</label>
+                <input type="text" id="objet" name="objet" placeholder="Ex: Internet, Assurance..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="montant">Montant total absolu (€)</label>
+                <input type="number" step="0.01" min="0" id="montant" name="montant" placeholder="50.00" required>
+            </div>
+
+            <div class="form-group">
+                <label for="modeReglement">Mode de règlement</label>
+                <input list="modesList" id="modeReglement" name="modeReglement" placeholder="Commencez à taper..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="categorie">Catégorie</label>
+                <input list="categoriesList" id="categorie" name="categorie" placeholder="Commencez à taper..." required>
+            </div>
+
+            <div class="form-group checkbox-group" id="abonnementContainer" style="flex-wrap: wrap; margin-bottom: 0.5rem;">
+                <input type="checkbox" id="isAbonnement" name="isAbonnement">
+                <label for="isAbonnement" style="margin-bottom: 0;">Abonnement</label>
+                
+                <div id="abonnementSettingsWrapper" style="display: none; width: 100%; margin-top: 10px; background: #e8f5e9; padding: 10px; border-radius: 4px; box-sizing: border-box;">
+                    <label for="freqAbonnement" style="font-size: 0.85rem;">Fréquence :</label>
+                    <select id="freqAbonnement" name="freqAbonnement" style="width: 100%; padding: 0.4rem; box-sizing: border-box; margin-top: 0.2rem;">
+                        <option value="1">Mensuel</option>
+                        <option value="12">Annuel</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group checkbox-group" id="recurrentContainer" style="flex-wrap: wrap;">
+                <input type="checkbox" id="isRecurrent" name="isRecurrent">
+                <label for="isRecurrent" style="margin-bottom: 0;">Opération récurrente personnalisée</label>
+                
+                <div id="recurrentSettingsWrapper" style="display: none; width: 100%; margin-top: 10px; background: #e3f2fd; padding: 10px; border-radius: 4px; box-sizing: border-box;">
+                    <label for="intervalMois" style="font-size: 0.85rem;">Fréquence (en mois) :</label>
+                    <input type="number" id="intervalMois" name="intervalMois" min="1" value="1" style="width: 100%; padding: 0.4rem; box-sizing: border-box; margin-top: 0.2rem; margin-bottom: 0.8rem;">
+
+                    <label for="dateFinRecurrence" style="font-size: 0.85rem;">Date de fin (vide = 10 ans) :</label>
+                    <input type="month" id="dateFinRecurrence" name="dateFinRecurrence" style="width: 100%; padding: 0.4rem; box-sizing: border-box; margin-top: 0.2rem;">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="btnCancelModal" class="btn-cancel">Annuler</button>
+                <button type="submit" class="btn-submit">Valider</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="modalInstallments">
+        <h2 style="margin-bottom: 1rem;">Échéancier</h2>
+        <div class="form-group">
+            <label for="installmentsCount">Nombre de mensualités</label>
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="number" id="installmentsCount" min="2" max="48" value="3" style="flex: 1;">
+                <button type="button" id="btnGenerateInstallments" class="btn-secondary">Calculer</button>
+            </div>
+        </div>
+        
+        <div id="installmentsList" style="max-height: 250px; overflow-y: auto; margin-bottom: 1rem; padding-right: 5px;">
+            </div>
+
+        <div class="modal-actions">
+            <button type="button" id="btnCancelInstallments" class="btn-cancel">Annuler</button>
+            <button type="button" id="btnSaveInstallments" class="btn-submit">Valider l'échéancier</button>
+        </div>
+    </dialog>
+
+    <dialog id="modalSearch" style="max-width: 600px; width: 95%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 style="margin: 0;">Rechercher</h2>
+            <button type="button" id="btnCloseSearch" class="btn-action" style="font-size: 1.5rem;">❌</button>
+        </div>
+        
+        <input type="text" id="searchInput" placeholder="Mot-clé, montant, catégorie, date (AAAA-MM-JJ)..." style="width: 100%; padding: 0.8rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem;">
+        
+        <div id="searchResults" style="max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+            </div>
+    </dialog>
+
+    <dialog id="modalInitBalance">
+        <form id="formInitBalance" method="dialog">
+            <h2>Solde Initial</h2>
+            <div class="form-group">
+                <label for="dateInit">Date</label>
+                <input type="date" id="dateInit" name="dateInit" required>
+            </div>
+            <div class="form-group">
+                <label for="montantInit">Montant (€)</label>
+                <input type="number" step="0.01" id="montantInit" name="montantInit" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="btnCancelInit" class="btn-cancel">Annuler</button>
+                <button type="submit" class="btn-submit">Valider</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="modalBankManager">
+        <h2>Gérer les comptes</h2>
+        <div class="add-bank-row">
+            <input type="text" id="newBankName" placeholder="Nouveau compte...">
+            <button type="button" id="btnAddNewBank" class="btn-submit" style="padding: 0.4rem;">Ajouter</button>
+        </div>
+        <ul class="bank-list" id="bankListContainer"></ul>
+        <div class="modal-actions" style="justify-content: flex-end;">
+            <button type="button" id="btnCloseBankManager" class="btn-cancel">Fermer</button>
+        </div>
+    </dialog>
+
+    <dialog id="modalStats" style="max-width: 500px; width: 95%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 style="margin: 0;">Statistiques par Catégorie</h2>
+            <button type="button" id="btnCloseStats" class="btn-action" style="font-size: 1.5rem;">❌</button>
+        </div>
+        
+        <div class="form-group">
+            <label for="statType">Type d'analyse</label>
+            <select id="statType" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid #ccc;">
+                <option value="depenses">Dépenses (Sorties)</option>
+                <option value="recettes">Recettes (Entrées)</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group" style="flex: 1;">
+                <label for="statStartDate">Du (optionnel)</label>
+                <input type="date" id="statStartDate" style="width: 100%; padding: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc;">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="statEndDate">Au (optionnel)</label>
+                <input type="date" id="statEndDate" style="width: 100%; padding: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc;">
+            </div>
+        </div>
+
+        <div id="statsResults" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; border-top: 1px solid #eee; padding-top: 1rem;">
+            </div>
+    </dialog>
+
+    <script>
+        // --- ÉTAT GLOBAL & LOCALSTORAGE ---
+        // On récupère les données sauvegardées, sinon on utilise les valeurs par défaut
+        let operations = JSON.parse(localStorage.getItem('budget_operations')) || [];
+        let banks = JSON.parse(localStorage.getItem('budget_banks')) || [
+            { id: 'bank_1', name: 'Compte Courant' } 
+        ];
+        let currentBankId = localStorage.getItem('budget_currentBankId') || 'bank_1';
+        let editingOpId = null; // Permet de savoir si on modifie une opération existante
+
+        let currentDateObj = new Date();
+        let displayMonth = currentDateObj.getMonth();
+        let displayYear = currentDateObj.getFullYear();
+
+        // Fonction centrale pour mémoriser les données dans le navigateur
+        function saveData() {
+            localStorage.setItem('budget_operations', JSON.stringify(operations));
+            localStorage.setItem('budget_banks', JSON.stringify(banks));
+            localStorage.setItem('budget_currentBankId', currentBankId);
+        }
+
+        // --- SÉLECTEURS DOM ---
+        const bankSelector = document.getElementById('bankSelector');
+        const operationsList = document.getElementById('operationsList');
+        const spanTotalPrevu = document.getElementById('totalPrevu');
+        const spanTotalPointe = document.getElementById('totalPointe');
+        const currentMonthLabel = document.getElementById('currentMonthLabel');
+
+        document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+        document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+
+        // --- DÉLÉGATION D'ÉVÉNEMENTS POUR L'ÉDITION EN LIGNE (Catégories / Modes) ---
+        // Permet de mettre à jour la BDD locale sans avoir à recharger toute la vue
+        // --- DÉLÉGATION D'ÉVÉNEMENTS POUR L'ÉDITION EN LIGNE ET LE POINTAGE ---
+        // --- DÉLÉGATION D'ÉVÉNEMENTS POUR L'ÉDITION EN LIGNE ET LE POINTAGE ---
+        operationsList.addEventListener('change', (e) => {
+            // Modification des champs textuels
+            if (e.target.classList.contains('edit-cat')) {
+                const opId = parseInt(e.target.dataset.id);
+                const op = operations.find(o => o.id === opId);
+                if (op) { op.categorie = e.target.value; saveData(); }
+            }
+            if (e.target.classList.contains('edit-mode')) {
+                const opId = parseInt(e.target.dataset.id);
+                const op = operations.find(o => o.id === opId);
+                if (op) { op.modeReglement = e.target.value; saveData(); }
+            }
+            
+            // Pointage bancaire
+            if (e.target.classList.contains('check-op')) {
+                const opId = parseInt(e.target.dataset.id);
+                const op = operations.find(o => o.id === opId);
+                if (op) { 
+                    op.pointee = e.target.checked; 
+                    saveData(); 
+                    updateTotals(); // Met à jour le solde "Pointé" en direct
+                    
+                    // Ajoute ou retire visuellement la couleur en direct
+                    const row = e.target.closest('.operation-item');
+                    if (op.pointee) {
+                        row.classList.add('op-pointee');
+                    } else {
+                        row.classList.remove('op-pointee');
+                    }
+                }
+            }
+        });
+
+        // --- GESTION DU TEMPS ---
+        function updateMonthDisplay() {
+            const tempDate = new Date(displayYear, displayMonth);
+            const formatter = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
+            currentMonthLabel.textContent = formatter.format(tempDate);
+        }
+
+        function changeMonth(delta) {
+            displayMonth += delta;
+            if (displayMonth > 11) { displayMonth = 0; displayYear++; } 
+            else if (displayMonth < 0) { displayMonth = 11; displayYear--; }
+            updateMonthDisplay();
+            renderOperations();
+            updateTotals();
+        }
+
+        function parseOpDate(dateString) {
+            const [year, month] = dateString.split('-');
+            return { year: parseInt(year, 10), month: parseInt(month, 10) - 1 };
+        }
+
+        function getCarryoverBalance() {
+            const bankOperations = operations.filter(op => op.bankId === currentBankId);
+            return bankOperations.reduce((sum, op) => {
+                const opDate = parseOpDate(op.date);
+                if (opDate.year < displayYear || (opDate.year === displayYear && opDate.month < displayMonth)) {
+                    return sum + op.montant;
+                }
+                return sum;
+            }, 0);
+        }
+
+        function getCurrentMonthOperations() {
+            return operations.filter(op => {
+                if (op.bankId !== currentBankId) return false;
+                const opDate = parseOpDate(op.date);
+                return opDate.year === displayYear && opDate.month === displayMonth;
+            });
+        }
+
+        // --- AFFICHAGE DES OPÉRATIONS ---
+        function renderOperations() {
+            operationsList.innerHTML = ''; 
+
+            const carryover = getCarryoverBalance();
+            const currentMonthOps = getCurrentMonthOperations();
+            
+            currentMonthOps.sort((a, b) => {
+                if (a.date < b.date) return -1;
+                if (a.date > b.date) return 1;
+                return 0;
+            });
+
+            const reportDiv = document.createElement('div');
+            reportDiv.className = 'operation-item op-report';
+            reportDiv.innerHTML = `
+                <div class="col-check"></div>
+                <div class="op-details">
+                    <span class="op-objet">Report du mois précédent</span>
+                </div>
+                <div></div>
+                <div></div>
+                <div class="col-out"></div>
+                <div class="col-in"></div>
+                <div class="col-balance">${carryover.toFixed(2)} €</div>
+                <div class="col-actions"></div>
+            `;
+            operationsList.appendChild(reportDiv);
+
+            let currentBalance = carryover;
+            const opsWithBalance = currentMonthOps.map(op => {
+                currentBalance += op.montant;
+                return { ...op, soldeEnDirect: currentBalance };
+            });
+
+            opsWithBalance.forEach(op => {
+                const isDépense = op.montant < 0;
+                
+                const [y, m, d] = op.date.split('-');
+                const dateAffichee = `${d}/${m}`;
+                
+                const recurentIcon = (op.isRecurrent && !op.isAbonnement) ? '🔄 ' : '';
+                const aboIcon = op.isAbonnement ? `<span style="background: #4CAF50; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;" title="Abonnement">📅 Abo</span>` : '';
+                const installmentIcon = op.totalInstallments ? `<span style="background: #ff9800; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;" title="Paiement en ${op.totalInstallments} fois">${op.totalInstallments}x</span>` : '';
+
+                const valSortie = isDépense ? Math.abs(op.montant).toFixed(2) + ' €' : '';
+                const valEntree = !isDépense ? '+' + op.montant.toFixed(2) + ' €' : '';
+
+                const isSoldeInit = op.objet === 'Solde Initial';
+                // On garde la désactivation uniquement pour les champs texte (Catégorie / Mode)
+                const disabledInline = isSoldeInit ? 'disabled' : '';
+                
+                const checkedAttr = op.pointee ? 'checked' : '';
+                const pointeeClass = op.pointee ? ' op-pointee' : ''; 
+
+                const opDiv = document.createElement('div');
+                opDiv.className = `operation-item${pointeeClass}`; 
+                opDiv.innerHTML = `
+                    <div class="col-check">
+                        <input type="checkbox" class="check-op" data-id="${op.id}" title="Pointer l'opération" ${checkedAttr}>
+                    </div>
+                    <div class="op-details">
+                        <span class="op-date">${dateAffichee}</span>
+                        <span class="op-objet">${aboIcon}${installmentIcon}${recurentIcon}${op.objet}</span>
+                    </div>
+                    <div>
+                        <input class="inline-input edit-cat" list="categoriesList" value="${op.categorie}" data-id="${op.id}" title="Modifier catégorie" ${disabledInline}>
+                    </div>
+                    <div>
+                        <input class="inline-input edit-mode" list="modesList" value="${op.modeReglement}" data-id="${op.id}" title="Modifier mode" ${disabledInline}>
+                    </div>
+                    <div class="col-out">${valSortie}</div>
+                    <div class="col-in">${valEntree}</div>
+                    <div class="col-balance">${op.soldeEnDirect.toFixed(2)} €</div>
+                    <div class="col-actions">
+                        <button type="button" class="btn-action edit-op" data-id="${op.id}" title="Modifier">✏️</button>
+                        <button type="button" class="btn-action delete-op" data-id="${op.id}" title="Supprimer">🗑️</button>
+                    </div>
+                `;
+                operationsList.appendChild(opDiv);
+            });
+        }
+
+        function updateTotals() {
+            const carryover = getCarryoverBalance();
+            const currentMonthOps = getCurrentMonthOperations();
+
+            const totalPrevu = carryover + currentMonthOps.reduce((acc, curr) => acc + curr.montant, 0);
+            
+            const totalPointe = carryover + currentMonthOps
+                .filter(op => op.pointee)
+                .reduce((acc, curr) => acc + curr.montant, 0);
+
+            spanTotalPrevu.textContent = totalPrevu.toFixed(2) + ' €';
+            spanTotalPointe.textContent = totalPointe.toFixed(2) + ' €';
+        }
+
+        // --- BANQUES ---
+        function renderBanksDropdown() {
+            bankSelector.innerHTML = '';
+            banks.forEach(bank => {
+                const option = document.createElement('option');
+                option.value = bank.id;
+                option.textContent = bank.name;
+                bankSelector.appendChild(option);
+            });
+            bankSelector.value = currentBankId;
+        }
+
+        // --- CHANGEMENT DE BANQUE ---
+        bankSelector.addEventListener('change', (e) => {
+            currentBankId = e.target.value;
+            saveData(); // Mémorise la banque active
+            renderOperations(); 
+            updateTotals();
+        });
+
+        const modalBankManager = document.getElementById('modalBankManager');
+        document.getElementById('btnManageBanks').addEventListener('click', () => { renderBankManagerList(); modalBankManager.showModal(); });
+        document.getElementById('btnCloseBankManager').addEventListener('click', () => { modalBankManager.close(); renderBanksDropdown(); renderOperations(); updateTotals(); });
+
+        function renderBankManagerList() {
+            const container = document.getElementById('bankListContainer');
+            container.innerHTML = '';
+            banks.forEach(bank => {
+                const li = document.createElement('li');
+                li.className = 'bank-list-item';
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = bank.name;
+                if(bank.id === currentBankId) nameSpan.style.fontWeight = 'bold';
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'bank-actions';
+
+                const btnEdit = document.createElement('button');
+                btnEdit.textContent = '✏️'; btnEdit.className = 'btn-icon';
+                btnEdit.onclick = () => {
+                    const newName = prompt('Nouveau nom pour ce compte :', bank.name);
+                    if(newName && newName.trim() !== '') { 
+                        bank.name = newName.trim(); 
+                        saveData(); 
+                        renderBankManagerList(); 
+                    }
+                };
+
+                const btnDelete = document.createElement('button');
+                btnDelete.textContent = '❌'; btnDelete.className = 'btn-danger';
+                btnDelete.onclick = () => {
+                    if(banks.length === 1) return alert("Vous ne pouvez pas supprimer votre seul compte.");
+                    if(confirm(`Supprimer le compte "${bank.name}" ?`)) {
+                        banks = banks.filter(b => b.id !== bank.id);
+                        if(currentBankId === bank.id) currentBankId = banks[0].id;
+                        saveData();
+                        renderBankManagerList();
+                    }
+                };
+                actionsDiv.appendChild(btnEdit); actionsDiv.appendChild(btnDelete);
+                li.appendChild(nameSpan); li.appendChild(actionsDiv); container.appendChild(li);
+            });
+        }
+
+        // --- AJOUT D'UNE NOUVELLE BANQUE ---
+        document.getElementById('btnAddNewBank').addEventListener('click', () => {
+            const input = document.getElementById('newBankName');
+            const name = input.value.trim();
+            if(name !== '') { 
+                banks.push({ id: 'bank_' + Date.now(), name: name }); 
+                input.value = ''; 
+                saveData(); // Mémorise la nouvelle banque
+                renderBankManagerList(); 
+            }
+        });
+
+        // --- SOLDE INITIAL ---
+        // --- LOGIQUE DU SOLDE INITIAL ---
+        const modalInit = document.getElementById('modalInitBalance');
+        
+        document.getElementById('btnInitBalance').addEventListener('click', () => { 
+            editingOpId = null; // Important pour la création
+            document.getElementById('dateInit').value = new Date().toISOString().split('T')[0]; 
+            modalInit.showModal(); 
+        });
+        
+        document.getElementById('btnCancelInit').addEventListener('click', () => { 
+            modalInit.close(); 
+            document.getElementById('formInitBalance').reset(); 
+            editingOpId = null;
+        });
+
+        document.getElementById('formInitBalance').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            
+            if (editingOpId !== null) {
+                // Mode modification du solde existant
+                const op = operations.find(o => o.id === editingOpId);
+                if (op) {
+                    op.date = fd.get('dateInit');
+                    op.montant = parseFloat(fd.get('montantInit'));
+                }
+            } else {
+                // Mode création d'un nouveau solde
+                operations.push({
+                    id: Date.now(), bankId: currentBankId, date: fd.get('dateInit'),
+                    objet: 'Solde Initial', montant: parseFloat(fd.get('montantInit')),
+                    modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true
+                });
+            }
+            
+            editingOpId = null;
+            saveData(); 
+            renderOperations(); 
+            updateTotals(); 
+            modalInit.close(); 
+            e.target.reset();
+        });
+        
+        // --- OPÉRATIONS COURANTES ---
+        document.getElementById('btnOpenModal').addEventListener('click', () => { document.getElementById('dateOp').value = new Date().toISOString().split('T')[0]; modalOp.showModal(); });
+        document.getElementById('btnCancelModal').addEventListener('click', () => { modalOp.close(); document.getElementById('formOperation').reset(); });
+        // --- OPÉRATIONS COURANTES (AJOUT, MODIFICATION, SUPPRESSION, RÉCURRENCE, PAIEMENT X FOIS) ---
+        const modalOp = document.getElementById('modalOperation');
+        const formOp = document.getElementById('formOperation');
+        const recurrentSettingsWrapper = document.getElementById('recurrentSettingsWrapper');
+        const abonnementSettingsWrapper = document.getElementById('abonnementSettingsWrapper');
+        const btnOpenInstallments = document.getElementById('btnOpenInstallments');
+        const recurrentContainer = document.getElementById('recurrentContainer');
+        const abonnementContainer = document.getElementById('abonnementContainer');
+        
+        let installmentsData = null; 
+
+        // --- GESTION DES CASES À COCHER (Mutuellement exclusives) ---
+        document.getElementById('isAbonnement').addEventListener('change', (e) => {
+            abonnementSettingsWrapper.style.display = e.target.checked ? 'block' : 'none';
+            if (e.target.checked) {
+                document.getElementById('isRecurrent').checked = false;
+                recurrentSettingsWrapper.style.display = 'none';
+                btnOpenInstallments.style.display = 'none';
+            } else {
+                btnOpenInstallments.style.display = 'block';
+            }
+        });
+
+        document.getElementById('isRecurrent').addEventListener('change', (e) => {
+            recurrentSettingsWrapper.style.display = e.target.checked ? 'block' : 'none';
+            if (e.target.checked) {
+                document.getElementById('isAbonnement').checked = false;
+                abonnementSettingsWrapper.style.display = 'none';
+                btnOpenInstallments.style.display = 'none';
+            } else {
+                btnOpenInstallments.style.display = 'block';
+            }
+        });
+
+        // --- LOGIQUE PAIEMENT EN X FOIS ---
+        const modalInstallments = document.getElementById('modalInstallments');
+        const installmentsList = document.getElementById('installmentsList');
+
+        btnOpenInstallments.addEventListener('click', () => {
+            const baseAmount = parseFloat(document.getElementById('montant').value);
+            if (isNaN(baseAmount) || baseAmount <= 0) {
+                alert("Veuillez d'abord saisir un 'Montant total' valide dans le formulaire principal.");
+                return;
+            }
+            modalInstallments.showModal();
+        });
+
+        document.getElementById('btnGenerateInstallments').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('installmentsCount').value);
+            const baseAmount = parseFloat(document.getElementById('montant').value);
+            const baseDate = document.getElementById('dateOp').value || new Date().toISOString().split('T')[0];
+            
+            installmentsList.innerHTML = '';
+            const splitAmount = Math.floor((baseAmount / count) * 100) / 100;
+            let remaining = baseAmount;
+
+            let [y, m, d] = baseDate.split('-');
+            let currentY = parseInt(y); let currentM = parseInt(m) - 1; const day = parseInt(d);
+
+            for(let i = 0; i < count; i++) {
+                let tempDate = new Date(currentY, currentM, day);
+                if (tempDate.getMonth() !== currentM) tempDate = new Date(currentY, currentM + 1, 0); 
+                
+                const finalY = tempDate.getFullYear();
+                const finalM = String(tempDate.getMonth() + 1).padStart(2, '0');
+                const finalD = String(tempDate.getDate()).padStart(2, '0');
+                
+                let rowAmount = splitAmount;
+                if (i === count - 1) rowAmount = Math.round(remaining * 100) / 100;
+                else remaining -= splitAmount;
+
+                const div = document.createElement('div');
+                div.className = 'installment-row';
+                div.innerHTML = `
+                    <span>#${i+1}</span>
+                    <input type="date" class="inst-date" value="${finalY}-${finalM}-${finalD}" required>
+                    <input type="number" step="0.01" class="inst-amount" value="${rowAmount.toFixed(2)}" required>
+                `;
+                installmentsList.appendChild(div);
+
+                currentM++;
+                if (currentM > 11) { currentM = 0; currentY++; }
+            }
+        });
+
+        document.getElementById('btnCancelInstallments').addEventListener('click', () => {
+            installmentsData = null;
+            btnOpenInstallments.textContent = "⏱️ Paiement X fois";
+            recurrentContainer.style.display = 'flex';
+            abonnementContainer.style.display = 'flex';
+            modalInstallments.close();
+        });
+
+        document.getElementById('btnSaveInstallments').addEventListener('click', () => {
+            const rows = installmentsList.querySelectorAll('.installment-row');
+            if(rows.length === 0) { alert("Veuillez calculer l'échéancier."); return; }
+            
+            installmentsData = [];
+            let checkTotal = 0;
+            rows.forEach((row, idx) => {
+                const d = row.querySelector('.inst-date').value;
+                const a = parseFloat(row.querySelector('.inst-amount').value);
+                installmentsData.push({ part: idx + 1, totalParts: rows.length, date: d, amount: a });
+                checkTotal += a;
+            });
+
+            btnOpenInstallments.textContent = `✅ En ${rows.length} fois (${checkTotal.toFixed(2)}€)`;
+            
+            // Désactive et masque la récurrence et l'abonnement
+            document.getElementById('isRecurrent').checked = false;
+            document.getElementById('isAbonnement').checked = false;
+            recurrentContainer.style.display = 'none'; 
+            abonnementContainer.style.display = 'none'; 
+            
+            modalInstallments.close();
+        });
+
+        // --- OUVERTURE DE LA MODALE PRINCIPALE ---
+        document.getElementById('btnOpenModal').addEventListener('click', () => { 
+            editingOpId = null;
+            installmentsData = null;
+            document.querySelector('#modalOperation h2').textContent = "Nouvelle opération";
+            
+            // Réinitialisation de l'affichage
+            btnOpenInstallments.style.display = 'block';
+            btnOpenInstallments.textContent = "⏱️ Paiement X fois";
+            recurrentContainer.style.display = 'flex';
+            abonnementContainer.style.display = 'flex';
+            
+            formOp.reset();
+            recurrentSettingsWrapper.style.display = 'none'; 
+            abonnementSettingsWrapper.style.display = 'none'; 
+            document.getElementById('dateOp').value = new Date().toISOString().split('T')[0]; 
+            modalOp.showModal(); 
+        });
+        
+        document.getElementById('btnCancelModal').addEventListener('click', () => { 
+            modalOp.close(); formOp.reset(); installmentsData = null;
+        });
+
+        // --- VALIDATION DU FORMULAIRE ---
+        formOp.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const montantSaisi = Math.abs(parseFloat(fd.get('montant')));
+            const opType = fd.get('opType');
+            const montantFinal = opType === 'sortie' ? -montantSaisi : montantSaisi;
+            
+            const isAbo = fd.get('isAbonnement') === 'on';
+            const isRecurrent = fd.get('isRecurrent') === 'on' || isAbo;
+
+            if (editingOpId !== null) {
+                // --- MODE MODIFICATION ---
+                const currentOp = operations.find(o => o.id === editingOpId);
+                let applyToFuture = false;
+                
+                if (currentOp.recurringId) {
+                    const answer = prompt("Opération liée :\nTapez 1 : Modifier UNIQUEMENT ce mois\nTapez 2 : Modifier ce mois ET LES SUIVANTS");
+                    if(answer === "2") applyToFuture = true;
+                    if(answer !== "1" && answer !== "2") return; 
+                }
+
+                if (applyToFuture) {
+                    // NOUVEAU : On extrait le nouveau jour pour l'appliquer à la cascade
+                    const newDateStr = fd.get('dateOp');
+                    const [newY, newM, newD] = newDateStr.split('-');
+                    const originalDate = currentOp.date; // On mémorise l'ancienne date pour la boucle
+                    
+                    operations.forEach(op => {
+                        // On cherche toutes les opérations de cette boucle qui sont dans le futur
+                        if (op.recurringId === currentOp.recurringId && op.date >= originalDate) {
+                            op.objet = fd.get('objet');
+                            op.montant = montantFinal;
+                            op.modeReglement = fd.get('modeReglement');
+                            op.categorie = fd.get('categorie');
+                            
+                            // On modifie le jour tout en conservant le mois et l'année de chaque itération
+                            const [oldY, oldM, oldD] = op.date.split('-');
+                            
+                            let tempDate = new Date(parseInt(oldY), parseInt(oldM) - 1, parseInt(newD));
+                            
+                            // Sécurité pour les fins de mois (ex: décaler un prélèvement du 28 au 31 en février ramène au 28)
+                            if (tempDate.getMonth() !== parseInt(oldM) - 1) {
+                                tempDate = new Date(parseInt(oldY), parseInt(oldM), 0);
+                            }
+                            
+                            const finalY = tempDate.getFullYear();
+                            const finalM = String(tempDate.getMonth() + 1).padStart(2, '0');
+                            const finalD = String(tempDate.getDate()).padStart(2, '0');
+                            
+                            op.date = `${finalY}-${finalM}-${finalD}`;
+                        }
+                    });
+                } else {
+                    currentOp.date = fd.get('dateOp');
+                    currentOp.objet = fd.get('objet');
+                    currentOp.montant = montantFinal;
+                    currentOp.modeReglement = fd.get('modeReglement');
+                    currentOp.categorie = fd.get('categorie');
+                }
+            } else {
+                // --- MODE CRÉATION ---
+                
+                if (installmentsData && installmentsData.length > 0) {
+                    // PAIEMENT EN X FOIS
+                    const installmentId = Date.now();
+                    const totalInstallments = installmentsData.length;
+                    
+                    installmentsData.forEach((inst, index) => {
+                        const instMontantFinal = opType === 'sortie' ? -inst.amount : inst.amount;
+                        operations.push({
+                            id: Date.now() + index, installmentId: installmentId, totalInstallments: totalInstallments, 
+                            bankId: currentBankId, date: inst.date,
+                            objet: `${fd.get('objet')} (${inst.part}/${inst.totalParts})`, 
+                            montant: instMontantFinal, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'),
+                            isRecurrent: false, pointee: false
+                        });
+                    });
+                } 
+                else if (isRecurrent) {
+                    // RÉCURRENCE OU ABONNEMENT
+                    const recurringId = Date.now();
+                    let intervalMois = 1;
+                    let dateFinStr = null;
+                    let maxOperations = 120; 
+                    
+                    if (isAbo) {
+                        intervalMois = parseInt(fd.get('freqAbonnement')) || 1;
+                        if (intervalMois === 12) maxOperations = 10; 
+                    } else {
+                        intervalMois = parseInt(fd.get('intervalMois')) || 1; 
+                        dateFinStr = fd.get('dateFinRecurrence');
+                    }
+                    
+                    let endYear = 2099, endMonth = 11;
+                    if (dateFinStr) {
+                        const [y, m] = dateFinStr.split('-');
+                        endYear = parseInt(y); endMonth = parseInt(m) - 1; maxOperations = 1200; 
+                    }
+
+                    let [baseY, baseM, baseD] = fd.get('dateOp').split('-');
+                    let currentY = parseInt(baseY); let currentM = parseInt(baseM) - 1; const day = parseInt(baseD);
+
+                    for (let i = 0; i < maxOperations; i++) {
+                        if (currentY > endYear || (currentY === endYear && currentM > endMonth)) break;
+
+                        let tempDate = new Date(currentY, currentM, day);
+                        if (tempDate.getMonth() !== currentM) tempDate = new Date(currentY, currentM + 1, 0); 
+                        
+                        const finalY = tempDate.getFullYear();
+                        const finalM = String(tempDate.getMonth() + 1).padStart(2, '0');
+                        const finalD = String(tempDate.getDate()).padStart(2, '0');
+                        
+                        operations.push({
+                            id: recurringId + i, recurringId: recurringId, bankId: currentBankId, date: `${finalY}-${finalM}-${finalD}`,
+                            objet: fd.get('objet'), montant: montantFinal,
+                            modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'),
+                            isRecurrent: true, isAbonnement: isAbo, intervalMois: intervalMois, pointee: false
+                        });
+
+                        currentM += intervalMois;
+                        while (currentM > 11) { currentM -= 12; currentY++; }
+                    }
+                } else {
+                    // CRÉATION UNIQUE
+                    operations.push({
+                        id: Date.now(), bankId: currentBankId, date: fd.get('dateOp'),
+                        objet: fd.get('objet'), montant: montantFinal,
+                        modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'),
+                        isRecurrent: false, pointee: false
+                    });
+                }
+            }
+
+            saveData(); renderOperations(); updateTotals(); modalOp.close(); formOp.reset(); 
+            editingOpId = null; installmentsData = null;
+        });
+
+        // --- INTERCEPTION CLICS DANS LA LISTE (Édition / Suppression) ---
+        operationsList.addEventListener('click', (e) => {
+            
+            // SUPPRESSION
+            if (e.target.closest('.delete-op')) {
+                const btn = e.target.closest('.delete-op');
+                if (btn.hasAttribute('disabled')) return;
+                
+                const opId = parseInt(btn.dataset.id);
+                const opToDelete = operations.find(o => o.id === opId);
+
+                if (opToDelete.recurringId) {
+                    const answer = prompt("Opération liée :\nTapez 1 : Supprimer UNIQUEMENT ce mois\nTapez 2 : Supprimer en cascade (ce mois et les suivants)");
+                    if (answer === "1") {
+                        operations = operations.filter(o => o.id !== opId);
+                    } else if (answer === "2") {
+                        // CORRECTION ICI : "o.date" au lieu de "op.date"
+                        operations = operations.filter(o => !(o.recurringId === opToDelete.recurringId && o.date >= opToDelete.date));
+                    } else { return; }
+                } else if (opToDelete.installmentId) {
+                    const answer = prompt("Paiement en plusieurs fois :\nTapez 1 : Supprimer UNIQUEMENT cette échéance\nTapez 2 : Supprimer TOUTES les échéances liées");
+                    if (answer === "1") {
+                        operations = operations.filter(o => o.id !== opId);
+                    } else if (answer === "2") {
+                        operations = operations.filter(o => o.installmentId !== opToDelete.installmentId);
+                    } else { return; }
+                } else {
+                    if (!confirm('Voulez-vous vraiment supprimer cette opération ?')) return;
+                    operations = operations.filter(o => o.id !== opId);
+                }
+                saveData(); renderOperations(); updateTotals();
+            }
+
+            // MODIFICATION
+            if (e.target.closest('.edit-op')) {
+                const btn = e.target.closest('.edit-op');
+                if (btn.hasAttribute('disabled')) return;
+                
+                const opId = parseInt(btn.dataset.id);
+                const op = operations.find(o => o.id === opId);
+                
+                if (op) {
+                    editingOpId = opId;
+
+                    // NOUVEAU : Redirection vers la modale du Solde Initial
+                    if (op.objet === 'Solde Initial') {
+                        document.getElementById('dateInit').value = op.date;
+                        document.getElementById('montantInit').value = op.montant.toFixed(2);
+                        document.getElementById('modalInitBalance').showModal();
+                        return; // On arrête l'exécution ici pour ne pas ouvrir la grande modale
+                    }
+                    
+                    document.querySelector('#modalOperation h2').textContent = "Modifier l'opération";
+                    btnOpenInstallments.style.display = 'none';
+                    
+                    document.getElementById('dateOp').value = op.date;
+                    document.getElementById('objet').value = op.objet;
+                    document.getElementById('montant').value = Math.abs(op.montant).toFixed(2);
+                    document.getElementById(op.montant < 0 ? 'typeSortie' : 'typeEntree').checked = true;
+                    document.getElementById('modeReglement').value = op.modeReglement;
+                    document.getElementById('categorie').value = op.categorie;
+                    
+                    const cbRecurrent = document.getElementById('isRecurrent');
+                    if(cbRecurrent) cbRecurrent.checked = op.isRecurrent && !op.isAbonnement;
+                    
+                    const cbAbonnement = document.getElementById('isAbonnement');
+                    if(cbAbonnement) cbAbonnement.checked = op.isAbonnement || false;
+                    
+                    recurrentSettingsWrapper.style.display = 'none';
+                    abonnementSettingsWrapper.style.display = 'none';
+                    modalOp.showModal();
+                }
+            }
+        });
+
+        // --- LOGIQUE DE RECHERCHE GLOBALE ---
+        const modalSearch = document.getElementById('modalSearch');
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+
+        // Ouverture de la modale
+        document.getElementById('btnOpenSearch').addEventListener('click', () => {
+            searchInput.value = '';
+            searchResults.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">Tapez au moins 2 caractères pour lancer la recherche sur tout l\'historique du compte.</div>';
+            modalSearch.showModal();
+            setTimeout(() => searchInput.focus(), 50);
+        });
+
+        // Fermeture de la modale
+        document.getElementById('btnCloseSearch').addEventListener('click', () => {
+            modalSearch.close();
+        });
+
+        // Filtrage en temps réel à chaque frappe au clavier
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            searchResults.innerHTML = '';
+            
+            if (term.length < 2) {
+                searchResults.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">Tapez au moins 2 caractères pour lancer la recherche sur tout l\'historique du compte.</div>';
+                return;
+            }
+
+            const bankOps = operations.filter(op => op.bankId === currentBankId);
+            
+            const results = bankOps.filter(op => {
+                const searchStr = `${op.date} ${op.objet} ${op.montant} ${op.categorie} ${op.modeReglement}`.toLowerCase();
+                return searchStr.includes(term);
+            });
+
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">Aucun résultat trouvé pour cette recherche.</div>';
+                return;
+            }
+
+            // Tri par date croissante (du plus ancien au plus récent)
+            results.sort((a, b) => {
+                if (a.date < b.date) return -1;
+                if (a.date > b.date) return 1;
+                return 0;
+            });
+
+            // Séparation en deux catégories
+            const nonPointees = results.filter(op => !op.pointee);
+            const pointees = results.filter(op => op.pointee);
+
+            // Fonction utilitaire pour générer le visuel d'une ligne de résultat
+            const generateOpHtml = (op) => {
+                const isDépense = op.montant < 0;
+                const sign = isDépense ? '' : '+';
+                const colorHex = isDépense ? '#e53935' : '#4CAF50';
+                
+                const [y, m, d] = op.date.split('-');
+                const dateAffichee = `${d}/${m}/${y}`;
+
+                return `
+                    <div style="background: #f9f9f9; padding: 0.8rem; border-radius: 6px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-size: 0.8rem; color: #666;">${dateAffichee} - ${op.categorie} (${op.modeReglement})</span>
+                            <span style="font-weight: bold; font-size: 1rem;">${op.objet}</span>
+                        </div>
+                        <div style="color: ${colorHex}; font-weight: bold; font-size: 1.1rem; text-align: right;">
+                            ${sign}${op.montant.toFixed(2)} €
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Injection des Pointées (affichées en priorité en haut)
+            if (pointees.length > 0) {
+                searchResults.innerHTML += `<h3 style="margin: 0.5rem 0; color: #4CAF50; font-size: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem;">✅ Opérations pointées</h3>`;
+                pointees.forEach(op => {
+                    searchResults.innerHTML += generateOpHtml(op);
+                });
+            }
+
+            // Injection des Non Pointées (affichées en dessous)
+            if (nonPointees.length > 0) {
+                searchResults.innerHTML += `<h3 style="margin: 1rem 0 0.5rem 0; color: #e53935; font-size: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem;">⚠️ Opérations non pointées</h3>`;
+                nonPointees.forEach(op => {
+                    searchResults.innerHTML += generateOpHtml(op);
+                });
+            }
+        });
+
+        // --- LOGIQUE IMPORT / EXPORT JSON ---
+        document.getElementById('btnExport').addEventListener('click', () => {
+            // Prépare les données à exporter
+            const dataToExport = {
+                operations: operations,
+                banks: banks,
+                currentBankId: currentBankId
+            };
+            
+            // Crée un fichier virtuel et lance le téléchargement
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport));
+            const downloadNode = document.createElement('a');
+            downloadNode.setAttribute("href", dataStr);
+            downloadNode.setAttribute("download", "budget_sauvegarde.json");
+            document.body.appendChild(downloadNode);
+            downloadNode.click();
+            downloadNode.remove();
+        });
+
+        document.getElementById('btnImport').addEventListener('click', () => {
+            // Simule un clic sur l'input file invisible
+            document.getElementById('fileImport').click();
+        });
+
+        document.getElementById('fileImport').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (importedData.operations && importedData.banks) {
+                        operations = importedData.operations;
+                        banks = importedData.banks;
+                        currentBankId = importedData.currentBankId || banks[0].id;
+                        
+                        saveData(); // Sauvegarde immédiate des nouvelles données
+                        renderBanksDropdown();
+                        renderOperations();
+                        updateTotals();
+                        alert("Données importées avec succès !");
+                    } else {
+                        alert("Le fichier ne contient pas les bonnes données.");
+                    }
+                } catch (err) {
+                    alert("Erreur de lecture du fichier.");
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Réinitialise l'input
+        });
+
+        // --- INIT ---
+        updateMonthDisplay(); renderBanksDropdown(); renderOperations(); updateTotals();
+
+    // --- LOGIQUE DES STATISTIQUES PAR CATÉGORIE ---
+        const modalStats = document.getElementById('modalStats');
+        const headerCat = document.getElementById('headerCat');
+        const statTypeInput = document.getElementById('statType');
+        const statStartInput = document.getElementById('statStartDate');
+        const statEndInput = document.getElementById('statEndDate');
+        const statsResults = document.getElementById('statsResults');
+
+        // Fonction de calcul et d'affichage
+        function calculateStats() {
+            const type = statTypeInput.value;
+            const start = statStartInput.value;
+            const end = statEndInput.value;
+
+            // 1. Filtrer les opérations du compte courant (en excluant le Solde Initial pour ne pas fausser les graphiques)
+            let filteredOps = operations.filter(op => op.bankId === currentBankId && op.objet !== 'Solde Initial');
+
+            // 2. Appliquer les filtres de dates si renseignés
+            if (start) filteredOps = filteredOps.filter(op => op.date >= start);
+            if (end) filteredOps = filteredOps.filter(op => op.date <= end);
+
+            const catTotals = {};
+            let totalGlobal = 0;
+
+            // 3. Agréger les données par catégorie
+            filteredOps.forEach(op => {
+                if (type === 'depenses' && op.montant >= 0) return; // On ignore les entrées
+                if (type === 'recettes' && op.montant <= 0) return; // On ignore les sorties
+
+                const cat = op.categorie && op.categorie.trim() !== '' ? op.categorie : 'Non catégorisé';
+                if (!catTotals[cat]) catTotals[cat] = 0;
+                
+                catTotals[cat] += op.montant;
+                totalGlobal += op.montant;
+            });
+
+            // 4. Trier les catégories par montant (valeur absolue décroissante)
+            const sortedCats = Object.entries(catTotals).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+
+            statsResults.innerHTML = '';
+            
+            if (sortedCats.length === 0) {
+                statsResults.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">Aucune opération trouvée pour ces critères.</div>';
+                return;
+            }
+
+            // Affichage du total global en haut
+            const absTotalGlobal = Math.abs(totalGlobal);
+            const colorGlobal = type === 'depenses' ? '#e53935' : '#4CAF50';
+            statsResults.innerHTML += `<div style="font-weight: bold; margin-bottom: 0.5rem; text-align: right; font-size: 1.1rem; color: ${colorGlobal}; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Total analysé : ${absTotalGlobal.toFixed(2)} €</div>`;
+
+            // 5. Génération des barres de progression
+            sortedCats.forEach(([cat, amount]) => {
+                const absAmount = Math.abs(amount);
+                const percentage = absTotalGlobal > 0 ? (absAmount / absTotalGlobal) * 100 : 0;
+                const barColor = type === 'depenses' ? '#ffcdd2' : '#c8e6c9'; // Couleur de fond de barre
+                const progressColor = type === 'depenses' ? '#f44336' : '#4CAF50'; // Couleur de progression
+
+                statsResults.innerHTML += `
+                    <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                            <span style="font-weight: bold; color: #333;">${cat}</span>
+                            <span style="color: #666;">${absAmount.toFixed(2)} € <small>(${percentage.toFixed(1)}%)</small></span>
+                        </div>
+                        <div style="width: 100%; background: #eee; height: 12px; border-radius: 6px; overflow: hidden;">
+                            <div style="width: ${percentage}%; background: ${progressColor}; height: 100%; border-radius: 6px;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- ÉVÉNEMENTS ---
+        // Ouvrir la modale au clic sur l'en-tête "Catégorie"
+        headerCat.addEventListener('click', () => {
+            // Par défaut, on filtre sur le mois en cours (pour éviter d'analyser 10 ans d'un coup)
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            // Format YYYY-MM-DD
+            statStartInput.value = `${firstDay.getFullYear()}-${String(firstDay.getMonth() + 1).padStart(2, '0')}-01`;
+            statEndInput.value = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+            
+            calculateStats();
+            modalStats.showModal();
+        });
+
+        // Fermer la modale
+        document.getElementById('btnCloseStats').addEventListener('click', () => {
+            modalStats.close();
+        });
+
+        // Relancer le calcul automatiquement à chaque changement de critère
+        statTypeInput.addEventListener('change', calculateStats);
+        statStartInput.addEventListener('change', calculateStats);
+        statEndInput.addEventListener('change', calculateStats);
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker enregistré avec succès.', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('Échec de l\'enregistrement du Service Worker:', err);
+                    });
+            });
+        }
+    </script>
+    
+</body>
+</body>
+</html>
