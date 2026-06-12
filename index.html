@@ -572,30 +572,36 @@
             </div>
     </dialog>
 
-    <button id="btnMigrateDB" class="btn-secondary" style="background-color: #9c27b0;">🚀 Migrer vers la DB</button>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         // --- INITIALISATION SUPABASE ---
+        let supabase = null;
+        try {
+            if (window.supabase) {
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            } else {
+                console.warn("Le module Supabase n'a pas pu charger (hors-ligne ou bloqueur de pub).");
+            }
+        } catch (err) {
+            console.error("Erreur critique d'initialisation de la BDD :", err);
+        }
 
         // --- FONCTION DE MIGRATION ---
         document.getElementById('btnMigrateDB').addEventListener('click', async () => {
+            if (!supabase) return alert("La connexion à Supabase a échoué (vérifie ta connexion).");
             if (!confirm("Veux-tu envoyer toutes tes données locales actuelles vers la base de données ?")) return;
 
-            // Remplace 'donnees_budget' par le nom de la clé que tu utilises dans ton localStorage
-            const localDataStr = localStorage.getItem('donnees_budget'); 
+            // CORRECTION : On utilise ta vraie clé de sauvegarde (budget_operations)
+            const localDataStr = localStorage.getItem('budget_operations'); 
             
-            if (!localDataStr) {
+            if (!localDataStr || localDataStr === "[]") {
                 alert("Aucune donnée trouvée en local.");
                 return;
             }
 
-            // On récupère le tableau d'opérations. Si tu sauvegardes un objet complexe (avec les banques etc), 
-            // il faut extraire juste le tableau `operations` ici.
             const localOperations = JSON.parse(localDataStr); 
 
             try {
@@ -610,7 +616,7 @@
                 
             } catch (err) {
                 console.error("Erreur de migration:", err);
-                alert("Erreur lors de la migration. Regarde la console.");
+                alert("Erreur lors de la migration. Regarde la console (F12) pour plus de détails.");
             }
         });
         
