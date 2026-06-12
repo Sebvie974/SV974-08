@@ -570,7 +570,48 @@
             </div>
     </dialog>
 
+    <button id="btnMigrateDB" class="btn-secondary" style="background-color: #9c27b0;">🚀 Migrer vers la DB</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
+        // --- INITIALISATION SUPABASE ---
+        const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
+        const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // --- FONCTION DE MIGRATION ---
+        document.getElementById('btnMigrateDB').addEventListener('click', async () => {
+            if (!confirm("Veux-tu envoyer toutes tes données locales actuelles vers la base de données ?")) return;
+
+            // Remplace 'donnees_budget' par le nom de la clé que tu utilises dans ton localStorage
+            const localDataStr = localStorage.getItem('donnees_budget'); 
+            
+            if (!localDataStr) {
+                alert("Aucune donnée trouvée en local.");
+                return;
+            }
+
+            // On récupère le tableau d'opérations. Si tu sauvegardes un objet complexe (avec les banques etc), 
+            // il faut extraire juste le tableau `operations` ici.
+            const localOperations = JSON.parse(localDataStr); 
+
+            try {
+                // Supabase permet d'insérer un tableau complet en une seule requête !
+                const { data, error } = await supabase
+                    .from('operations')
+                    .insert(localOperations);
+
+                if (error) throw error;
+                
+                alert("✅ Migration réussie ! Tes " + localOperations.length + " opérations sont en base.");
+                
+            } catch (err) {
+                console.error("Erreur de migration:", err);
+                alert("Erreur lors de la migration. Regarde la console.");
+            }
+        });
+        
         // --- ÉTAT GLOBAL & LOCALSTORAGE ---
         // On récupère les données sauvegardées, sinon on utilise les valeurs par défaut
         let operations = JSON.parse(localStorage.getItem('budget_operations')) || [];
