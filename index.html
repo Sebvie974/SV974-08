@@ -575,49 +575,46 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // --- INITIALISATION SUPABASE (Sécurisée) ---
-        let supabase = null;
-        try {
-            if (window.supabase) {
-                const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
-                const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
-                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-            } else {
-                console.warn("Le module Supabase n'a pas pu charger (hors-ligne ou bloqueur de pub).");
-            }
-        } catch (err) {
-            console.error("Erreur critique d'initialisation de la BDD :", err);
+        // 1. Tuer l'ancien Service Worker pour forcer la mise à jour
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) { registration.unregister(); }
+            });
         }
 
-        // --- FONCTION DE MIGRATION ---
+        // 2. Initialisation Supabase (Sécurisée)
+        let supabase = null;
+        try {
+            const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
+            const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
+            if (window.supabase) {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch (err) {
+            console.error("Erreur init Supabase :", err);
+        }
+
+        // 3. Fonction de migration
         document.getElementById('btnMigrateDB').addEventListener('click', async () => {
-            if (!supabase) return alert("La connexion à Supabase a échoué (vérifie ta connexion).");
-            if (!confirm("Veux-tu envoyer toutes tes données locales actuelles vers la base de données ?")) return;
+            if (!supabase) return alert("Supabase non connecté.");
+            if (!confirm("Envoyer tes données vers la base de données ?")) return;
 
             const localDataStr = localStorage.getItem('budget_operations'); 
-            
-            if (!localDataStr || localDataStr === "[]") {
-                alert("Aucune donnée trouvée en local.");
-                return;
-            }
+            if (!localDataStr || localDataStr === "[]") return alert("Aucune donnée locale.");
 
             const localOperations = JSON.parse(localDataStr); 
-
             try {
-                const { data, error } = await supabase
-                    .from('operations')
-                    .insert(localOperations);
-
+                const { error } = await supabase.from('operations').insert(localOperations);
                 if (error) throw error;
-                
-                alert("✅ Migration réussie ! Tes " + localOperations.length + " opérations sont en base.");
-                
+                alert("Migration réussie !");
             } catch (err) {
-                console.error("Erreur de migration:", err);
-                alert("Erreur lors de la migration. Regarde la console (F12) pour plus de détails.");
+                console.error(err);
+                alert("Erreur de migration (voir console).");
             }
         });
-        
+    </script>
+
+    <script>     
         // --- ÉTAT GLOBAL & LOCALSTORAGE ---
         // On récupère les données sauvegardées, sinon on utilise les valeurs par défaut
         let operations = JSON.parse(localStorage.getItem('budget_operations')) || [];
