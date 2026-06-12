@@ -575,13 +575,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // --- INITIALISATION SUPABASE ---
+        // --- INITIALISATION SUPABASE (Sécurisée) ---
         let supabase = null;
         try {
             if (window.supabase) {
-        const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
-        const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
-        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
+                const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
             } else {
                 console.warn("Le module Supabase n'a pas pu charger (hors-ligne ou bloqueur de pub).");
             }
@@ -594,7 +594,6 @@
             if (!supabase) return alert("La connexion à Supabase a échoué (vérifie ta connexion).");
             if (!confirm("Veux-tu envoyer toutes tes données locales actuelles vers la base de données ?")) return;
 
-            // CORRECTION : On utilise ta vraie clé de sauvegarde (budget_operations)
             const localDataStr = localStorage.getItem('budget_operations'); 
             
             if (!localDataStr || localDataStr === "[]") {
@@ -605,7 +604,6 @@
             const localOperations = JSON.parse(localDataStr); 
 
             try {
-                // Supabase permet d'insérer un tableau complet en une seule requête !
                 const { data, error } = await supabase
                     .from('operations')
                     .insert(localOperations);
