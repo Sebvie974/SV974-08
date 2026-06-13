@@ -253,7 +253,7 @@
         // --- INIT SUPABASE DIRECT ---
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         // --- ÉTAT GLOBAL ---
         let operations = []; // Les opérations sont exclusivement alimentées par le Cloud
@@ -279,7 +279,7 @@
         async function fetchCloudData() {
             showLoading();
             try {
-                const { data, error } = await supabase.from('operations').select('*').order('date', { ascending: true });
+                const { data, error } = await supabaseClient.from('operations').select('*').order('date', { ascending: true });
                 if (error) throw error;
                 operations = data || [];
                 renderOperations(); updateTotals();
@@ -290,7 +290,7 @@
         }
 
         function setupRealtime() {
-            supabase.channel('public:operations')
+            supabaseClient.channel('public:operations')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'operations' }, (payload) => {
                 const statusDot = document.getElementById('statusDot');
                 statusDot.style.backgroundColor = '#ffeb3b'; // Clignote jaune pendant le traitement
@@ -400,7 +400,7 @@
             Object.assign(op, updatePayload); renderOperations(); updateTotals();
             
             // Envoi au Cloud en arrière-plan
-            const { error } = await supabase.from('operations').update(updatePayload).eq('id', id);
+            const { error } = await supabaseClient.from('operations').update(updatePayload).eq('id', id);
             if(error) { alert("Erreur de sauvegarde"); await fetchCloudData(); } // Revert si erreur
         });
 
@@ -439,7 +439,7 @@
             e.preventDefault(); showLoading();
             const opData = { bankId: currentBankId, date: document.getElementById('dateInit').value, objet: 'Solde Initial', montant: parseFloat(document.getElementById('montantInit').value), modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true };
             if (editingOpId) opData.id = editingOpId; else opData.id = Date.now();
-            await supabase.from('operations').upsert(opData);
+            await supabaseClient.from('operations').upsert(opData);
             modalInit.close(); e.target.reset(); editingOpId = null; hideLoading();
         });
 
@@ -506,7 +506,7 @@
                 }
             }
 
-            const { error } = await supabase.from('operations').upsert(opsToPush);
+            const { error } = await supabaseClient.from('operations').upsert(opsToPush);
             if(error) { alert("Erreur base de données"); console.error(error); }
             
             modalOp.close(); formOp.reset(); editingOpId = null; installmentsData = null; hideLoading();
@@ -522,7 +522,7 @@
                 else { if(!confirm('Supprimer définitivement ?')) return; ids.push(opId); }
                 
                 showLoading();
-                await supabase.from('operations').delete().in('id', ids);
+                await supabaseClient.from('operations').delete().in('id', ids);
                 hideLoading(); // L'UI se mettra à jour via Realtime
             }
 
@@ -559,11 +559,11 @@
                         showLoading();
                         banks = imported.banks; currentBankId = imported.currentBankId || banks[0].id; saveLocalBanks(); renderBanksDropdown();
                         
-                        await supabase.from('operations').delete().neq('id', -1); // Nettoyage total
+                        await supabaseClient.from('operations').delete().neq('id', -1); // Nettoyage total
                         
                         // Injection par paquets de 100 pour la stabilité
                         for (let i = 0; i < imported.operations.length; i += 100) {
-                            await supabase.from('operations').insert(imported.operations.slice(i, i + 100));
+                            await supabaseClient.from('operations').insert(imported.operations.slice(i, i + 100));
                         }
                         
                         alert("✅ Restauration réussie sur le Cloud !");
