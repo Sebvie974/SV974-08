@@ -1067,18 +1067,30 @@
             const downloadNode = document.createElement('a'); downloadNode.setAttribute("href", dataStr); downloadNode.setAttribute("download", "budget_sauvegarde.json"); document.body.appendChild(downloadNode); downloadNode.click(); downloadNode.remove();
         });
         document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
-        document.getElementById('fileImport').addEventListener('change', (e) => {
+        document.getElementById('fileImport').addEventListener('change', async (e) => {
             const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = async function(event) {
                 try {
                     const importedData = JSON.parse(event.target.result);
                     if (importedData.operations && importedData.banks) {
                         operations = importedData.operations; banks = importedData.banks; currentBankId = importedData.currentBankId || banks[0].id;
-                        saveData(); renderBanksDropdown(); renderOperations(); updateTotals(); alert("Données importées avec succès !");
-                        // On pourrait synchroniser en masse ici si besoin, mais l'export sert surtout de backup local
+                        saveData(); renderBanksDropdown(); renderOperations(); updateTotals(); 
+                        
+                        alert("Données importées en local ! Synchronisation avec le cloud en cours...");
+
+                        // NOUVEAU : On force l'envoi de toutes ces données vers Supabase (Cloud)
+                        if (navigator.onLine && supabaseClient) {
+                            const { error } = await supabaseClient.from('operations').upsert(operations);
+                            if (error) throw error;
+                            alert("Synchronisation Cloud terminée ! Tes autres appareils sont à jour.");
+                        } else {
+                            // Si hors-ligne, on met tout dans la file d'attente
+                            operations.forEach(op => queueSyncAction('UPSERT', op));
+                            alert("Mode hors-ligne : les données seront envoyées au cloud au retour de la connexion.");
+                        }
                     } else alert("Fichier invalide.");
-                } catch (err) { alert("Erreur de lecture."); }
+                } catch (err) { alert("Erreur de lecture ou de synchronisation."); console.error(err); }
             };
             reader.readAsText(file); e.target.value = '';
         });
@@ -1113,23 +1125,25 @@
         ['change'].forEach(evt => { statTypeInput.addEventListener(evt, calculateStats); statStartInput.addEventListener(evt, calculateStats); statEndInput.addEventListener(evt, calculateStats); });
 
     // ==========================================
-        // NOUVEAU : RÉCUPÉRATION DES DONNÉES DU CLOUD
+        // RÉCUPÉRATION DES DONNÉES DU CLOUD
         // ==========================================
         async function fetchCloudData() {
-            // Si on n'a pas internet ou pas de connexion à la base, on arrête
             if (!supabaseClient || !navigator.onLine) return;
             
+            // SÉCURITÉ VITALE : Ne pas écraser les données locales par celles du Cloud 
+            // si le téléphone a des modifications récentes en attente d'envoi !
+            if (syncQueue && syncQueue.length > 0) {
+                console.log("Modifications locales en attente, on ne télécharge pas le cloud pour le moment.");
+                return; 
+            }
+            
             try {
-                // On télécharge toutes les opérations depuis Supabase
                 const { data, error } = await supabaseClient.from('operations').select('*');
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    // On remplace les données locales par celles du cloud
                     operations = data;
-                    saveData(); // On sauvegarde dans le stockage du téléphone/PC
-                    
-                    // On met à jour l'affichage en direct
+                    saveData(); 
                     renderOperations(); 
                     updateTotals();
                 }
