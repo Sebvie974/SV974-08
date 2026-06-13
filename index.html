@@ -334,7 +334,13 @@
         // --- INIT SUPABASE DIRECT ---
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+  global: {
+    headers: {
+      'x-my-secret-key': 'Qvalmsm97410*'
+    }
+  }
+});
 
         // --- ÉTAT GLOBAL ---
         let operations = []; // Les opérations sont exclusivement alimentées par le Cloud
