@@ -1112,8 +1112,40 @@
         document.getElementById('btnCloseStats').addEventListener('click', () => modalStats.close());
         ['change'].forEach(evt => { statTypeInput.addEventListener(evt, calculateStats); statStartInput.addEventListener(evt, calculateStats); statEndInput.addEventListener(evt, calculateStats); });
 
+    // ==========================================
+        // NOUVEAU : RÉCUPÉRATION DES DONNÉES DU CLOUD
+        // ==========================================
+        async function fetchCloudData() {
+            // Si on n'a pas internet ou pas de connexion à la base, on arrête
+            if (!supabaseClient || !navigator.onLine) return;
+            
+            try {
+                // On télécharge toutes les opérations depuis Supabase
+                const { data, error } = await supabaseClient.from('operations').select('*');
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    // On remplace les données locales par celles du cloud
+                    operations = data;
+                    saveData(); // On sauvegarde dans le stockage du téléphone/PC
+                    
+                    // On met à jour l'affichage en direct
+                    renderOperations(); 
+                    updateTotals();
+                }
+            } catch (err) {
+                console.error("Impossible de récupérer les données du cloud :", err);
+            }
+        }    
+
         // --- INIT PRINCIPAL ---
-        updateMonthDisplay(); renderBanksDropdown(); renderOperations(); updateTotals();
+        updateMonthDisplay(); 
+        renderBanksDropdown(); 
+        renderOperations(); 
+        updateTotals();
+        
+        // Lancement du téléchargement des données en arrière-plan au démarrage
+        fetchCloudData(); 
         
         // --- ACTIVATION PWA (Service Worker) ---
         if ('serviceWorker' in navigator) {
