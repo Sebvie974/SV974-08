@@ -575,28 +575,29 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // 1. Tuer l'ancien Service Worker pour forcer la mise à jour (évite les conflits de cache)
+        // 1. Tuer l'ancien Service Worker pour forcer la mise à jour
         if (navigator.serviceWorker) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 for (let registration of registrations) { registration.unregister(); }
             });
         }
 
-        // 2. Initialisation Supabase (Unique et Sécurisée)
-        let supabase = null;
+        // 2. Initialisation avec un NOUVEAU NOM DE VARIABLE : supabaseClient
+        let supabaseClient = null;
         try {
             const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
             const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
             if (window.supabase) {
-                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                // On utilise supabaseClient ici
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
             }
         } catch (err) {
             console.error("Erreur init Supabase :", err);
         }
 
-        // 3. Fonction de migration vers Supabase
+        // 3. Fonction de migration utilisant supabaseClient
         document.getElementById('btnMigrateDB').addEventListener('click', async () => {
-            if (!supabase) return alert("Supabase n'est pas prêt. Vérifie ta connexion internet.");
+            if (!supabaseClient) return alert("Supabase n'est pas prêt. Vérifie ta connexion internet.");
             if (!confirm("Envoyer toutes tes données vers la base de données Supabase ?")) return;
 
             const localDataStr = localStorage.getItem('budget_operations'); 
@@ -604,7 +605,8 @@
 
             const localOperations = JSON.parse(localDataStr); 
             try {
-                const { error } = await supabase.from('operations').insert(localOperations);
+                // On utilise supabaseClient pour l'insertion
+                const { error } = await supabaseClient.from('operations').insert(localOperations);
                 if (error) throw error;
                 alert("✅ Migration réussie avec succès !");
             } catch (err) {
