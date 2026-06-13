@@ -708,6 +708,50 @@
         renderBanksDropdown();
         // Lancement du téléchargement BDD direct !
         fetchCloudData();
+        // ----------------------------------------------------
+        // 11. ÉCOUTE TEMPS RÉEL (SUPABASE REALTIME)
+        // ----------------------------------------------------
+        if (supabaseClient) {
+            supabaseClient
+                .channel('ecoute-operations')
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'operations' },
+                    (payload) => {
+                        console.log('⚡ Changement en direct détecté !', payload.eventType);
+
+                        if (payload.eventType === 'INSERT') {
+                            // Si une nouvelle ligne est créée (ex: depuis le téléphone)
+                            // On vérifie qu'elle n'est pas déjà là (pour éviter les doublons avec nous-même)
+                            if (!operations.find(o => o.id === payload.new.id)) {
+                                operations.push(payload.new);
+                            }
+                        } 
+                        else if (payload.eventType === 'UPDATE') {
+                            // Si une ligne est modifiée (ex: pointage, changement de catégorie)
+                            const index = operations.findIndex(o => o.id === payload.new.id);
+                            if (index !== -1) {
+                                operations[index] = payload.new; // On remplace par la nouvelle version
+                            } else {
+                                operations.push(payload.new); // Au cas où on l'avait ratée
+                            }
+                        } 
+                        else if (payload.eventType === 'DELETE') {
+                            // Si une ligne est supprimée
+                            operations = operations.filter(o => o.id !== payload.old.id);
+                        }
+
+                        // On rafraîchit l'affichage en direct à l'écran
+                        renderOperations();
+                        updateTotals();
+                    }
+                )
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('🟢 Connecté');
+                    }
+                });
+        }
 
     </script>
 </body>
