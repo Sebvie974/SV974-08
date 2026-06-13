@@ -1,40 +1,39 @@
-const CACHE_NAME = 'budget-app-v2';
+const CACHE_NAME = 'budget-app-v3'; // Le v3 force la mise à jour
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json'
 ];
 
-// Installation du Service Worker et mise en cache des fichiers
 self.addEventListener('install', (event) => {
+  self.skipWaiting(); 
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
 });
 
-// Activation et nettoyage des anciens caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.keys().then((keys) => Promise.all(
+      keys.map((key) => {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      })
+    ))
   );
+  self.clients.claim();
 });
 
-// Interception des requêtes pour fonctionner hors-ligne
+// STRATÉGIE "NETWORK FIRST"
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Retourne la version en cache si elle existe, sinon fait la requête réseau
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((response) => {
+        const resClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
+        return response; 
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });
