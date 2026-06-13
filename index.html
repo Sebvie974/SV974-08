@@ -95,10 +95,12 @@
                     <button id="btnManageBanks" class="btn-secondary" title="Gérer les comptes">⚙️ Comptes</button>
                     <button id="btnInitBalance" class="btn-secondary" title="Définir un solde de départ">💰 Solde Initial</button>
                 </div>
+
                 <div class="action-buttons">
+                    <button id="btnForceSync" class="btn-secondary" title="Actualiser les données du cloud">🔄 Actualiser</button>
                     <button id="btnOpenSearch" class="btn-secondary" title="Rechercher une opération">🔍 Rechercher</button>
-                    <button id="btnExport" class="btn-secondary" title="Sauvegarder les données">💾 Exporter</button>
-                    <button id="btnImport" class="btn-secondary" title="Importer des données">📂 Importer</button>
+                    <button id="btnExport" class="btn-secondary" title="Télécharger une sauvegarde locale">💾 Sauvegarder</button>
+                    <button id="btnImport" class="btn-secondary" title="Restaurer une sauvegarde JSON">📂 Restaurer</button>
                     <input type="file" id="fileImport" accept=".json" style="display: none;">
                 </div>
             </div>
@@ -636,34 +638,68 @@
         });
 
         // ----------------------------------------------------
-        // 8. IMPORT / EXPORT (Direct Supabase)
+        // IMPORT / EXPORT (Sauvegarde et Restauration)
         // ----------------------------------------------------
+        
+        // --- SAUVEGARDER (Export JSON) ---
         document.getElementById('btnExport').addEventListener('click', () => {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ operations: operations, banks: banks, currentBankId: currentBankId }));
-            const dn = document.createElement('a'); dn.href = dataStr; dn.download = "budget_sauvegarde.json"; dn.click(); dn.remove();
+            const dn = document.createElement('a'); 
+            dn.href = dataStr; 
+            dn.download = "budget_sauvegarde.json"; 
+            document.body.appendChild(dn); 
+            dn.click(); 
+            dn.remove();
         });
+
+        // --- RESTAURER (Import JSON vers le Cloud) ---
         document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
+        
         document.getElementById('fileImport').addEventListener('change', (e) => {
-            const file = e.target.files[0]; if(!file) return;
+            const file = e.target.files[0]; 
+            if(!file) return;
+            
             const reader = new FileReader();
             reader.onload = async function(ev) {
                 try {
                     const imported = JSON.parse(ev.target.result);
+                    
                     if(imported.operations && imported.banks) {
+                        // Sécurité : demander confirmation avant d'écraser le Cloud
+                        if(!confirm("⚠️ ATTENTION : Cette action va effacer vos données actuelles sur le cloud pour les remplacer par cette sauvegarde.\n\nVoulez-vous continuer ?")) return;
+                        
                         showLoading();
-                        banks = imported.banks; currentBankId = imported.currentBankId || banks[0].id; saveLocalState(); renderBanksDropdown();
-                        // 1. Vide totalement la base de données (id > 0)
+                        
+                        // 1. Restauration des banques en local
+                        banks = imported.banks; 
+                        currentBankId = imported.currentBankId || banks[0].id; 
+                        saveLocalState(); 
+                        renderBanksDropdown();
+                        
+                        // 2. Nettoyage total du Cloud (On supprime tout)
                         await supabaseClient.from('operations').delete().gt('id', 0);
-                        // 2. Insère la sauvegarde
+                        
+                        // 3. Injection de la sauvegarde dans le Cloud
                         const { error } = await supabaseClient.from('operations').insert(imported.operations);
                         if(error) throw error;
-                        alert("Données importées avec succès dans le cloud !");
+                        
+                        alert("✅ Restauration réussie ! Le cloud a été mis à jour avec votre sauvegarde.");
+                        
+                        // 4. On rafraîchit l'affichage
                         await fetchCloudData();
-                    } else alert("Fichier invalide.");
-                } catch(err) { alert("Erreur d'importation BDD."); console.error(err); hideLoading(); }
-            }; reader.readAsText(file); e.target.value='';
+                        
+                    } else {
+                        alert("Fichier de sauvegarde invalide ou corrompu.");
+                    }
+                } catch(err) { 
+                    alert("Erreur lors de la restauration avec la base de données."); 
+                    console.error(err); 
+                    hideLoading(); 
+                }
+            }; 
+            reader.readAsText(file); 
+            e.target.value = ''; // Réinitialise l'input pour pouvoir réimporter le même fichier si besoin
         });
-
         // ----------------------------------------------------
         // 9. RECHERCHE ET STATISTIQUES
         // ----------------------------------------------------
