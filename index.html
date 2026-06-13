@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Budget</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Mon Budget - Synchro Directe</title>
 
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
-    <link rel="apple-touch-icon" href="icon-192.png">
 
     <style>
         :root {
@@ -18,162 +19,36 @@
             --card-bg: #fff;
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-        }
+        body { font-family: Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
 
         /* --- HEADER --- */
-        .sticky-wrapper {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background-color: var(--bg-color);
-            padding-bottom: 5px;
-        }
+        .sticky-wrapper { position: sticky; top: 0; z-index: 100; background-color: var(--bg-color); padding-bottom: 5px; }
 
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.8rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 950px !important;
-            margin: 0 auto;
-            box-sizing: border-box;
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-        }
+        header { background-color: var(--primary-color); color: white; padding: 0.8rem 1rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 950px !important; margin: 0 auto; box-sizing: border-box; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
 
-        .bank-management {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem;
-            border-radius: 4px;
-        }
+        .bank-management { display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.2); padding: 0.5rem; border-radius: 4px; }
+        .bank-management select { width: 150px; padding: 0.3rem; border-radius: 4px; border: none; }
+        .btn-icon { background: var(--card-bg); color: var(--primary-color); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; padding: 0.3rem 0.6rem; }
+        .btn-secondary { background-color: #607d8b; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-left: auto; font-size: 0.85rem; }
 
-        .bank-management select {
-            width: 150px;
-            padding: 0.3rem;
-            border-radius: 4px;
-            border: none;
-        }
+        .header-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .month-selector { display: flex; align-items: center; gap: 0.5rem; }
+        .month-selector button { background: rgba(255, 255, 255, 0.2); border: none; border-radius: 4px; color: white; font-size: 1rem; padding: 0.3rem 0.6rem; cursor: pointer; }
+        .month-selector h2 { margin: 0; font-size: 1.1rem; font-weight: normal; min-width: 120px; text-align: center; text-transform: capitalize; }
 
-        .btn-icon {
-            background: var(--card-bg);
-            color: var(--primary-color);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            padding: 0.3rem 0.6rem;
-        }
-
-        .btn-secondary {
-            background-color: #607d8b;
-            color: white;
-            border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: auto;
-            font-size: 0.85rem;
-        }
-
-        .header-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .month-selector button {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 4px;
-            color: white;
-            font-size: 1rem;
-            padding: 0.3rem 0.6rem;
-            cursor: pointer;
-        }
-
-        .month-selector h2 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: normal;
-            min-width: 120px;
-            text-align: center;
-            text-transform: capitalize;
-        }
-
-        .budget-summary {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            font-size: 0.9rem;
-        }
-
+        .budget-summary { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.9rem; }
         .summary-item { margin: 2px 0; }
         .summary-item .label { opacity: 0.8; font-size: 0.8rem; margin-right: 5px; }
         .summary-item .amount { font-weight: bold; font-size: 1rem; }
 
         /* --- CONTENU PRINCIPAL --- */
-        main { 
-            padding-bottom: 80px; 
-            max-width: 950px; 
-            margin: 0 auto; 
-        }
+        main { padding-bottom: 80px; max-width: 950px; margin: 0 auto; }
+        .action-buttons { display: flex; gap: 0.5rem; margin-left: auto; }
 
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-left: auto; 
-        }
+        .operations-header { display: grid; grid-template-columns: 30px 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr; padding: 0.5rem 1rem; font-weight: bold; font-size: 0.8rem; color: #666; border-bottom: 2px solid #ddd; margin: 0.5rem auto 0; max-width: 950px; box-sizing: border-box; }
+        .operations-list { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
 
-        .operations-header {
-            display: grid;
-            grid-template-columns: 30px 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr;
-            padding: 0.5rem 1rem;
-            font-weight: bold;
-            font-size: 0.8rem;
-            color: #666;
-            border-bottom: 2px solid #ddd;
-            margin: 0.5rem auto 0; 
-            max-width: 950px; 
-            box-sizing: border-box;
-        }
-
-        .operations-list {
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .operation-item {
-            display: grid;
-            grid-template-columns: 30px 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr;
-            background: white;
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            gap: 0.5rem;
-            transition: background-color 0.2s ease; 
-        }
-
+        .operation-item { display: grid; grid-template-columns: 30px 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr; background: white; padding: 0.8rem 1rem; border-radius: 8px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); gap: 0.5rem; transition: background-color 0.2s ease; }
         .operation-item.op-pointee { background-color: #f0db9b; }
 
         .col-check { display: flex; justify-content: center; align-items: center; }
@@ -182,29 +57,22 @@
         .col-actions { display: flex; gap: 5px; justify-content: flex-end; }
         .btn-action { background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 2px; border-radius: 4px; transition: background 0.2s; }
         .btn-action:hover:not([disabled]) { background: #eee; }
-        .btn-action[disabled] { opacity: 0.3; cursor: default; }
 
         .op-report { background: #e3f2fd; font-style: italic; }
-
         .op-details { display: flex; flex-direction: column; }
         .op-date { font-size: 0.75rem; color: #666; margin-bottom: 2px; }
         .op-objet { font-weight: bold; font-size: 1rem; }
         
-        .inline-input {
-            border: 1px solid transparent; background: transparent; font-size: 0.8rem; width: 90%; padding: 2px 4px; border-radius: 3px; color: #555; transition: all 0.2s;
-        }
+        .inline-input { border: 1px solid transparent; background: transparent; font-size: 0.8rem; width: 90%; padding: 2px 4px; border-radius: 3px; color: #555; transition: all 0.2s; }
         .inline-input:hover, .inline-input:focus { border-color: #ccc; background: white; outline: none; }
 
         .col-out, .col-in, .col-balance { text-align: right; font-weight: bold; font-size: 0.95rem; }
         .col-out { color: var(--expense-color); }
         .col-in { color: var(--primary-color); }
-        .col-balance { color: #333; }
 
-        .floating-btn {
-            position: fixed; bottom: 2rem; right: 2rem; background-color: var(--primary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 2rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center;
-        }
+        .floating-btn { position: fixed; bottom: 2rem; right: 2rem; background-color: var(--primary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 2rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; z-index: 90; }
 
-        /* --- MODALES --- */
+        /* --- MODALES & OVERLAY --- */
         dialog { border: none; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); padding: 1.5rem; width: 90%; max-width: 400px; }
         dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
         dialog h2 { margin-top: 0; font-size: 1.2rem; margin-bottom: 1rem; }
@@ -236,16 +104,21 @@
         .installment-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
         .installment-row input { flex: 1; padding: 0.4rem; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
         .installment-row span { width: 30px; font-weight: bold; color: #666; }
+
+        /* Loader global transparent */
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
+        
+        /* Indicateur de statut cloud */
+        .cloud-status { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.1); padding: 4px 8px; border-radius: 12px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ccc; }
+        .status-dot.online { background-color: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
     </style>
 </head>
 <body>
-    <datalist id="categoriesList">
-        <option value="Alimentation"><option value="Logement"><option value="Transport"><option value="Loisirs"><option value="Santé"><option value="Autre">
-    </datalist>
+    <div id="loadingOverlay">Synchronisation avec le Cloud... ⏳</div>
 
-    <datalist id="modesList">
-        <option value="Carte Bancaire"><option value="Virement"><option value="Prélèvement"><option value="Espèces"><option value="Chèque">
-    </datalist>
+    <datalist id="categoriesList"><option value="Alimentation"><option value="Logement"><option value="Transport"><option value="Loisirs"><option value="Santé"><option value="Autre"></datalist>
+    <datalist id="modesList"><option value="Carte Bancaire"><option value="Virement"><option value="Prélèvement"><option value="Espèces"><option value="Chèque"></datalist>
 
     <div class="sticky-wrapper">
         <header>
@@ -255,9 +128,10 @@
                 <button id="btnInitBalance" class="btn-secondary">Solde Initial</button>
                 
                 <div class="action-buttons">
-                    <button id="btnOpenSearch" class="btn-secondary" title="Rechercher une opération">🔍 Rechercher</button>
-                    <button id="btnExport" class="btn-secondary" title="Sauvegarder les données">💾 Exporter</button>
-                    <button id="btnImport" class="btn-secondary" title="Importer des données">📂 Importer</button>
+                    <button id="btnForceSync" class="btn-secondary" title="Forcer la mise à jour">🔄 Actu</button>
+                    <button id="btnOpenSearch" class="btn-secondary" title="Rechercher une opération">🔍</button>
+                    <button id="btnExport" class="btn-secondary" title="Télécharger une sauvegarde locale">💾 Sauvegarder</button>
+                    <button id="btnImport" class="btn-secondary" title="Restaurer une sauvegarde">📂 Restaurer</button>
                     <input type="file" id="fileImport" accept=".json" style="display: none;">
                 </div>
             </div>
@@ -270,14 +144,9 @@
                 </div>
                 
                 <div class="budget-summary">
-                    <div class="summary-item">
-                        <span class="label">Prévu</span>
-                        <span class="amount" id="totalPrevu">0.00 €</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="label">Pointé</span>
-                        <span class="amount" id="totalPointe">0.00 €</span>
-                    </div>
+                    <div class="summary-item"><span class="label">Prévu</span><span class="amount" id="totalPrevu">0.00 €</span></div>
+                    <div class="summary-item"><span class="label">Pointé</span><span class="amount" id="totalPointe">0.00 €</span></div>
+                    <div class="cloud-status" title="Statut de connexion à Supabase"><div id="statusDot" class="status-dot"></div><span id="statusText">Connexion...</span></div>
                 </div>
             </div>
         </header>
@@ -299,7 +168,6 @@
         <button id="btnOpenModal" class="floating-btn">+</button>
     </main>
 
-    <!-- Modales -->
     <dialog id="modalOperation">
         <form id="formOperation" method="dialog">
             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
@@ -321,9 +189,7 @@
                 <input type="checkbox" id="isAbonnement" name="isAbonnement"><label for="isAbonnement" style="margin-bottom: 0;">Abonnement</label>
                 <div id="abonnementSettingsWrapper" style="display: none; width: 100%; margin-top: 10px; background: #e8f5e9; padding: 10px; border-radius: 4px; box-sizing: border-box;">
                     <label for="freqAbonnement" style="font-size: 0.85rem;">Fréquence :</label>
-                    <select id="freqAbonnement" name="freqAbonnement" style="width: 100%; padding: 0.4rem; box-sizing: border-box; margin-top: 0.2rem;">
-                        <option value="1">Mensuel</option><option value="12">Annuel</option>
-                    </select>
+                    <select id="freqAbonnement" name="freqAbonnement" style="width: 100%; padding: 0.4rem; box-sizing: border-box; margin-top: 0.2rem;"><option value="1">Mensuel</option><option value="12">Annuel</option></select>
                 </div>
             </div>
 
@@ -334,25 +200,15 @@
                     <label for="dateFinRecurrence" style="font-size: 0.85rem;">Date de fin (vide = 10 ans) :</label><input type="month" id="dateFinRecurrence" name="dateFinRecurrence" style="width: 100%; padding: 0.4rem; box-sizing: border-box; margin-top: 0.2rem;">
                 </div>
             </div>
-
             <div class="modal-actions"><button type="button" id="btnCancelModal" class="btn-cancel">Annuler</button><button type="submit" class="btn-submit">Valider</button></div>
         </form>
     </dialog>
 
     <dialog id="modalInstallments">
         <h2 style="margin-bottom: 1rem;">Échéancier</h2>
-        <div class="form-group">
-            <label for="installmentsCount">Nombre de mensualités</label>
-            <div style="display: flex; gap: 0.5rem;"><input type="number" id="installmentsCount" min="2" max="48" value="3" style="flex: 1;"><button type="button" id="btnGenerateInstallments" class="btn-secondary">Calculer</button></div>
-        </div>
+        <div class="form-group"><label for="installmentsCount">Nombre de mensualités</label><div style="display: flex; gap: 0.5rem;"><input type="number" id="installmentsCount" min="2" max="48" value="3" style="flex: 1;"><button type="button" id="btnGenerateInstallments" class="btn-secondary">Calculer</button></div></div>
         <div id="installmentsList" style="max-height: 250px; overflow-y: auto; margin-bottom: 1rem; padding-right: 5px;"></div>
         <div class="modal-actions"><button type="button" id="btnCancelInstallments" class="btn-cancel">Annuler</button><button type="button" id="btnSaveInstallments" class="btn-submit">Valider l'échéancier</button></div>
-    </dialog>
-
-    <dialog id="modalSearch" style="max-width: 600px; width: 95%;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;"><h2 style="margin: 0;">Rechercher</h2><button type="button" id="btnCloseSearch" class="btn-action" style="font-size: 1.5rem;">❌</button></div>
-        <input type="text" id="searchInput" placeholder="Mot-clé, montant, catégorie, date (AAAA-MM-JJ)..." style="width: 100%; padding: 0.8rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem;">
-        <div id="searchResults" style="max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;"></div>
     </dialog>
 
     <dialog id="modalInitBalance">
@@ -364,6 +220,12 @@
         </form>
     </dialog>
 
+    <dialog id="modalSearch" style="max-width: 600px; width: 95%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;"><h2 style="margin: 0;">Rechercher</h2><button type="button" id="btnCloseSearch" class="btn-action" style="font-size: 1.5rem;">❌</button></div>
+        <input type="text" id="searchInput" placeholder="Mot-clé, montant, catégorie, date (AAAA-MM-JJ)..." style="width: 100%; padding: 0.8rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem;">
+        <div id="searchResults" style="max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;"></div>
+    </dialog>
+
     <dialog id="modalBankManager">
         <h2>Gérer les comptes</h2>
         <div class="add-bank-row"><input type="text" id="newBankName" placeholder="Nouveau compte..."><button type="button" id="btnAddNewBank" class="btn-submit" style="padding: 0.4rem;">Ajouter</button></div>
@@ -373,27 +235,28 @@
 
     <dialog id="modalStats" style="max-width: 500px; width: 95%;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;"><h2 style="margin: 0;">Statistiques</h2><button type="button" id="btnCloseStats" class="btn-action" style="font-size: 1.5rem;">❌</button></div>
-        <div class="form-group">
-            <label for="statType">Type d'analyse</label>
-            <select id="statType" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid #ccc;"><option value="depenses">Dépenses (Sorties)</option><option value="recettes">Recettes (Entrées)</option></select>
-        </div>
+        <div class="form-group"><label for="statType">Type</label><select id="statType" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; border: 1px solid #ccc;"><option value="depenses">Dépenses</option><option value="recettes">Recettes</option></select></div>
         <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group" style="flex: 1;"><label for="statStartDate">Du (optionnel)</label><input type="date" id="statStartDate" style="width: 100%; padding: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc;"></div>
-            <div class="form-group" style="flex: 1;"><label for="statEndDate">Au (optionnel)</label><input type="date" id="statEndDate" style="width: 100%; padding: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc;"></div>
+            <div class="form-group" style="flex: 1;"><label for="statStartDate">Du</label><input type="date" id="statStartDate" style="width: 100%; padding: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc;"></div>
+            <div class="form-group" style="flex: 1;"><label for="statEndDate">Au</label><input type="date" id="statEndDate" style="width: 100%; padding: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc;"></div>
         </div>
         <div id="statsResults" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; border-top: 1px solid #eee; padding-top: 1rem;"></div>
     </dialog>
 
-    <script>
-        // Désinscription immédiate de tout Service Worker pour éviter les bugs de cache
-        if (navigator.serviceWorker) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                for (let registration of registrations) { registration.unregister(); }
-            });
-        }
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-        // --- ÉTAT GLOBAL & LOCALSTORAGE ---
-        let operations = JSON.parse(localStorage.getItem('budget_operations')) || [];
+    <script>
+        // --- DESTRUCTION DES ANCIENS CACHES ---
+        if (navigator.serviceWorker) { navigator.serviceWorker.getRegistrations().then(registrations => { for (let r of registrations) r.unregister(); }); }
+        localStorage.removeItem('budget_operations'); localStorage.removeItem('budget_sync_queue');
+
+        // --- INIT SUPABASE DIRECT ---
+        const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
+        const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // --- ÉTAT GLOBAL ---
+        let operations = []; // Les opérations sont exclusivement alimentées par le Cloud
         let banks = JSON.parse(localStorage.getItem('budget_banks')) || [{ id: 'bank_1', name: 'Compte Courant' }];
         let currentBankId = localStorage.getItem('budget_currentBankId') || 'bank_1';
         let editingOpId = null;
@@ -402,12 +265,61 @@
         let displayMonth = currentDateObj.getMonth();
         let displayYear = currentDateObj.getFullYear();
 
-        function saveData() {
-            localStorage.setItem('budget_operations', JSON.stringify(operations));
+        // UI Helpers
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const showLoading = () => loadingOverlay.style.display = 'flex';
+        const hideLoading = () => loadingOverlay.style.display = 'none';
+
+        function saveLocalBanks() {
             localStorage.setItem('budget_banks', JSON.stringify(banks));
             localStorage.setItem('budget_currentBankId', currentBankId);
         }
 
+        // --- MOTEUR CLOUD ET TEMPS RÉEL ---
+        async function fetchCloudData() {
+            showLoading();
+            try {
+                const { data, error } = await supabase.from('operations').select('*').order('date', { ascending: true });
+                if (error) throw error;
+                operations = data || [];
+                renderOperations(); updateTotals();
+            } catch (err) {
+                console.error("Erreur de récupération :", err);
+                alert("Impossible de charger les données depuis le cloud.");
+            } finally { hideLoading(); }
+        }
+
+        function setupRealtime() {
+            supabase.channel('public:operations')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'operations' }, (payload) => {
+                const statusDot = document.getElementById('statusDot');
+                statusDot.style.backgroundColor = '#ffeb3b'; // Clignote jaune pendant le traitement
+                setTimeout(() => statusDot.style.backgroundColor = '#4CAF50', 500);
+
+                if (payload.eventType === 'INSERT') {
+                    if (!operations.some(o => o.id === payload.new.id)) operations.push(payload.new);
+                } else if (payload.eventType === 'UPDATE') {
+                    const idx = operations.findIndex(o => o.id === payload.new.id);
+                    if (idx !== -1) operations[idx] = payload.new;
+                    else operations.push(payload.new);
+                } else if (payload.eventType === 'DELETE') {
+                    operations = operations.filter(o => o.id !== payload.old.id);
+                }
+                renderOperations(); updateTotals();
+            })
+            .subscribe((status) => {
+                const statusDot = document.getElementById('statusDot');
+                const statusText = document.getElementById('statusText');
+                if (status === 'SUBSCRIBED') {
+                    statusDot.classList.add('online');
+                    statusText.textContent = 'En direct';
+                }
+            });
+        }
+
+        document.getElementById('btnForceSync').addEventListener('click', fetchCloudData);
+
+        // --- AFFICHAGE ET DOM ---
         const bankSelector = document.getElementById('bankSelector');
         const operationsList = document.getElementById('operationsList');
         const spanTotalPrevu = document.getElementById('totalPrevu');
@@ -417,361 +329,293 @@
         document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
         document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
 
-        operationsList.addEventListener('change', (e) => {
-            if (e.target.classList.contains('edit-cat')) {
-                const opId = parseInt(e.target.dataset.id); const op = operations.find(o => o.id === opId);
-                if (op) { op.categorie = e.target.value; saveData(); }
-            }
-            if (e.target.classList.contains('edit-mode')) {
-                const opId = parseInt(e.target.dataset.id); const op = operations.find(o => o.id === opId);
-                if (op) { op.modeReglement = e.target.value; saveData(); }
-            }
-            if (e.target.classList.contains('check-op')) {
-                const opId = parseInt(e.target.dataset.id); const op = operations.find(o => o.id === opId);
-                if (op) { 
-                    op.pointee = e.target.checked; saveData(); updateTotals(); 
-                    const row = e.target.closest('.operation-item');
-                    if (op.pointee) row.classList.add('op-pointee'); else row.classList.remove('op-pointee');
-                }
-            }
-        });
-
-        function updateMonthDisplay() {
-            const tempDate = new Date(displayYear, displayMonth);
-            const formatter = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
-            currentMonthLabel.textContent = formatter.format(tempDate);
-        }
-
         function changeMonth(delta) {
             displayMonth += delta;
-            if (displayMonth > 11) { displayMonth = 0; displayYear++; } 
-            else if (displayMonth < 0) { displayMonth = 11; displayYear--; }
-            updateMonthDisplay(); renderOperations(); updateTotals();
-        }
-
-        function parseOpDate(dateString) {
-            const [year, month] = dateString.split('-');
-            return { year: parseInt(year, 10), month: parseInt(month, 10) - 1 };
+            if (displayMonth > 11) { displayMonth = 0; displayYear++; } else if (displayMonth < 0) { displayMonth = 11; displayYear--; }
+            currentMonthLabel.textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(displayYear, displayMonth));
+            renderOperations(); updateTotals();
         }
 
         function getCarryoverBalance() {
-            const bankOperations = operations.filter(op => op.bankId === currentBankId);
-            return bankOperations.reduce((sum, op) => {
-                const opDate = parseOpDate(op.date);
-                if (opDate.year < displayYear || (opDate.year === displayYear && opDate.month < displayMonth)) return sum + op.montant;
+            return operations.filter(op => op.bankId === currentBankId).reduce((sum, op) => {
+                const [y, m] = op.date.split('-');
+                if (parseInt(y) < displayYear || (parseInt(y) === displayYear && parseInt(m) - 1 < displayMonth)) return sum + op.montant;
                 return sum;
             }, 0);
         }
 
-        function getCurrentMonthOperations() {
+        function getCurrentMonthOps() {
             return operations.filter(op => {
                 if (op.bankId !== currentBankId) return false;
-                const opDate = parseOpDate(op.date);
-                return opDate.year === displayYear && opDate.month === displayMonth;
-            });
+                const [y, m] = op.date.split('-');
+                return parseInt(y) === displayYear && parseInt(m) - 1 === displayMonth;
+            }).sort((a, b) => a.date < b.date ? -1 : 1);
         }
 
         function renderOperations() {
             operationsList.innerHTML = ''; 
             const carryover = getCarryoverBalance();
-            const currentMonthOps = getCurrentMonthOperations();
+            const currentMonthOps = getCurrentMonthOps();
             
-            currentMonthOps.sort((a, b) => { if (a.date < b.date) return -1; if (a.date > b.date) return 1; return 0; });
-
-            const reportDiv = document.createElement('div');
-            reportDiv.className = 'operation-item op-report';
+            const reportDiv = document.createElement('div'); reportDiv.className = 'operation-item op-report';
             reportDiv.innerHTML = `<div class="col-check"></div><div class="op-details"><span class="op-objet">Report du mois précédent</span></div><div></div><div></div><div class="col-out"></div><div class="col-in"></div><div class="col-balance">${carryover.toFixed(2)} €</div><div class="col-actions"></div>`;
             operationsList.appendChild(reportDiv);
 
             let currentBalance = carryover;
-            const opsWithBalance = currentMonthOps.map(op => { currentBalance += op.montant; return { ...op, soldeEnDirect: currentBalance }; });
-
-            opsWithBalance.forEach(op => {
-                const isDépense = op.montant < 0; const [y, m, d] = op.date.split('-'); const dateAffichee = `${d}/${m}`;
-                const recurentIcon = (op.isRecurrent && !op.isAbonnement) ? '🔄 ' : '';
-                const aboIcon = op.isAbonnement ? `<span style="background: #4CAF50; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;" title="Abonnement">📅 Abo</span>` : '';
-                const installmentIcon = op.totalInstallments ? `<span style="background: #ff9800; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;" title="Paiement en ${op.totalInstallments} fois">${op.totalInstallments}x</span>` : '';
-
-                const valSortie = isDépense ? Math.abs(op.montant).toFixed(2) + ' €' : '';
-                const valEntree = !isDépense ? '+' + op.montant.toFixed(2) + ' €' : '';
-                const isSoldeInit = op.objet === 'Solde Initial'; const disabledInline = isSoldeInit ? 'disabled' : '';
-                const checkedAttr = op.pointee ? 'checked' : ''; const pointeeClass = op.pointee ? ' op-pointee' : ''; 
-
-                const opDiv = document.createElement('div');
-                opDiv.className = `operation-item${pointeeClass}`; 
+            currentMonthOps.forEach(op => {
+                currentBalance += op.montant;
+                const isDép = op.montant < 0; const [y, m, d] = op.date.split('-');
+                const icons = `${op.isAbonnement ? '📅 ' : ''}${op.totalInstallments ? op.totalInstallments+'x ' : ''}${(op.isRecurrent && !op.isAbonnement) ? '🔄 ' : ''}`;
+                
+                const opDiv = document.createElement('div'); opDiv.className = `operation-item ${op.pointee ? 'op-pointee' : ''}`; 
                 opDiv.innerHTML = `
-                    <div class="col-check"><input type="checkbox" class="check-op" data-id="${op.id}" title="Pointer l'opération" ${checkedAttr}></div>
-                    <div class="op-details"><span class="op-date">${dateAffichee}</span><span class="op-objet">${aboIcon}${installmentIcon}${recurentIcon}${op.objet}</span></div>
-                    <div><input class="inline-input edit-cat" list="categoriesList" value="${op.categorie}" data-id="${op.id}" title="Modifier catégorie" ${disabledInline}></div>
-                    <div><input class="inline-input edit-mode" list="modesList" value="${op.modeReglement}" data-id="${op.id}" title="Modifier mode" ${disabledInline}></div>
-                    <div class="col-out">${valSortie}</div><div class="col-in">${valEntree}</div>
-                    <div class="col-balance">${op.soldeEnDirect.toFixed(2)} €</div>
-                    <div class="col-actions">
-                        <button type="button" class="btn-action edit-op" data-id="${op.id}" title="Modifier">✏️</button>
-                        <button type="button" class="btn-action delete-op" data-id="${op.id}" title="Supprimer">🗑️</button>
-                    </div>`;
+                    <div class="col-check"><input type="checkbox" class="check-op" data-id="${op.id}" ${op.pointee ? 'checked' : ''}></div>
+                    <div class="op-details"><span class="op-date">${d}/${m}</span><span class="op-objet">${icons}${op.objet}</span></div>
+                    <div><input class="inline-input edit-cat" list="categoriesList" value="${op.categorie}" data-id="${op.id}" ${op.objet==='Solde Initial'?'disabled':''}></div>
+                    <div><input class="inline-input edit-mode" list="modesList" value="${op.modeReglement}" data-id="${op.id}" ${op.objet==='Solde Initial'?'disabled':''}></div>
+                    <div class="col-out">${isDép ? Math.abs(op.montant).toFixed(2) + ' €' : ''}</div>
+                    <div class="col-in">${!isDép ? '+' + op.montant.toFixed(2) + ' €' : ''}</div>
+                    <div class="col-balance">${currentBalance.toFixed(2)} €</div>
+                    <div class="col-actions"><button type="button" class="btn-action edit-op" data-id="${op.id}">✏️</button><button type="button" class="btn-action delete-op" data-id="${op.id}">🗑️</button></div>
+                `;
                 operationsList.appendChild(opDiv);
             });
         }
 
         function updateTotals() {
-            const carryover = getCarryoverBalance(); const currentMonthOps = getCurrentMonthOperations();
-            const totalPrevu = carryover + currentMonthOps.reduce((acc, curr) => acc + curr.montant, 0);
-            const totalPointe = carryover + currentMonthOps.filter(op => op.pointee).reduce((acc, curr) => acc + curr.montant, 0);
-            spanTotalPrevu.textContent = totalPrevu.toFixed(2) + ' €'; spanTotalPointe.textContent = totalPointe.toFixed(2) + ' €';
+            const carryover = getCarryoverBalance(); const currentMonthOps = getCurrentMonthOps();
+            spanTotalPrevu.textContent = (carryover + currentMonthOps.reduce((a, c) => a + c.montant, 0)).toFixed(2) + ' €';
+            spanTotalPointe.textContent = (carryover + currentMonthOps.filter(o => o.pointee).reduce((a, c) => a + c.montant, 0)).toFixed(2) + ' €';
         }
 
-        function renderBanksDropdown() {
-            bankSelector.innerHTML = '';
-            banks.forEach(bank => { const option = document.createElement('option'); option.value = bank.id; option.textContent = bank.name; bankSelector.appendChild(option); });
-            bankSelector.value = currentBankId;
-        }
+        // --- INTERCEPTIONS EN LIGNE (Modifications rapides) ---
+        operationsList.addEventListener('change', async (e) => {
+            const id = parseInt(e.target.dataset.id); const op = operations.find(o => o.id === id); if (!op) return;
+            let updatePayload = {};
+            if (e.target.classList.contains('edit-cat')) updatePayload = { categorie: e.target.value };
+            if (e.target.classList.contains('edit-mode')) updatePayload = { modeReglement: e.target.value };
+            if (e.target.classList.contains('check-op')) updatePayload = { pointee: e.target.checked };
+            
+            // Mise à jour locale immédiate (Optimistic UI) pour que l'interface reste fluide
+            Object.assign(op, updatePayload); renderOperations(); updateTotals();
+            
+            // Envoi au Cloud en arrière-plan
+            const { error } = await supabase.from('operations').update(updatePayload).eq('id', id);
+            if(error) { alert("Erreur de sauvegarde"); await fetchCloudData(); } // Revert si erreur
+        });
 
-        bankSelector.addEventListener('change', (e) => { currentBankId = e.target.value; saveData(); renderOperations(); updateTotals(); });
-
+        // --- GESTION DES BANQUES (Reste local pour l'instant) ---
+        function renderBanksDropdown() { bankSelector.innerHTML = ''; banks.forEach(b => bankSelector.add(new Option(b.name, b.id))); bankSelector.value = currentBankId; }
+        bankSelector.addEventListener('change', (e) => { currentBankId = e.target.value; saveLocalBanks(); renderOperations(); updateTotals(); });
+        
         const modalBankManager = document.getElementById('modalBankManager');
-        document.getElementById('btnManageBanks').addEventListener('click', () => { renderBankManagerList(); modalBankManager.showModal(); });
-        document.getElementById('btnCloseBankManager').addEventListener('click', () => { modalBankManager.close(); renderBanksDropdown(); renderOperations(); updateTotals(); });
-
-        function renderBankManagerList() {
+        document.getElementById('btnManageBanks').addEventListener('click', () => { 
             const container = document.getElementById('bankListContainer'); container.innerHTML = '';
             banks.forEach(bank => {
                 const li = document.createElement('li'); li.className = 'bank-list-item';
-                const nameSpan = document.createElement('span'); nameSpan.textContent = bank.name; if(bank.id === currentBankId) nameSpan.style.fontWeight = 'bold';
-                const actionsDiv = document.createElement('div'); actionsDiv.className = 'bank-actions';
-                const btnEdit = document.createElement('button'); btnEdit.textContent = '✏️'; btnEdit.className = 'btn-icon';
-                btnEdit.onclick = () => { const newName = prompt('Nouveau nom pour ce compte :', bank.name); if(newName && newName.trim() !== '') { bank.name = newName.trim(); saveData(); renderBankManagerList(); } };
-                const btnDelete = document.createElement('button'); btnDelete.textContent = '❌'; btnDelete.className = 'btn-danger';
-                btnDelete.onclick = () => { if(banks.length === 1) return alert("Vous ne pouvez pas supprimer votre seul compte."); if(confirm(`Supprimer le compte "${bank.name}" ?`)) { banks = banks.filter(b => b.id !== bank.id); if(currentBankId === bank.id) currentBankId = banks[0].id; saveData(); renderBankManagerList(); } };
-                actionsDiv.appendChild(btnEdit); actionsDiv.appendChild(btnDelete); li.appendChild(nameSpan); li.appendChild(actionsDiv); container.appendChild(li);
+                li.innerHTML = `<span style="${bank.id === currentBankId ? 'font-weight:bold' : ''}">${bank.name}</span> <div class="bank-actions"><button class="btn-icon" onclick="renameBank('${bank.id}')">✏️</button><button class="btn-danger" onclick="deleteBank('${bank.id}')">❌</button></div>`;
+                container.appendChild(li);
             });
-        }
+            modalBankManager.showModal(); 
+        });
+        document.getElementById('btnCloseBankManager').addEventListener('click', () => { modalBankManager.close(); renderBanksDropdown(); renderOperations(); updateTotals(); });
+        
+        window.renameBank = (id) => { const b = banks.find(x=>x.id===id); const nn = prompt('Nouveau nom:', b.name); if(nn) { b.name = nn.trim(); saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
+        window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible de supprimer le dernier compte."); if(confirm('Supprimer ?')) { banks = banks.filter(b=>b.id!==id); if(currentBankId===id) currentBankId=banks[0].id; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
+        document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value.trim(); if(n) { banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } });
 
-        document.getElementById('btnAddNewBank').addEventListener('click', () => { const input = document.getElementById('newBankName'); const name = input.value.trim(); if(name !== '') { banks.push({ id: 'bank_' + Date.now(), name: name }); input.value = ''; saveData(); renderBankManagerList(); } });
+        // --- FORMULAIRES DE CRÉATION / ÉDITION ---
+        const modalOp = document.getElementById('modalOperation'); const formOp = document.getElementById('formOperation');
+        let installmentsData = null;
 
+        document.getElementById('isAbonnement').addEventListener('change', (e) => { document.getElementById('abonnementSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if (e.target.checked) { document.getElementById('isRecurrent').checked = false; document.getElementById('recurrentSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
+        document.getElementById('isRecurrent').addEventListener('change', (e) => { document.getElementById('recurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if (e.target.checked) { document.getElementById('isAbonnement').checked = false; document.getElementById('abonnementSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
+
+        // Modales Annexes (Solde Initial & X Fois)
         const modalInit = document.getElementById('modalInitBalance');
         document.getElementById('btnInitBalance').addEventListener('click', () => { editingOpId = null; document.getElementById('dateInit').value = new Date().toISOString().split('T')[0]; modalInit.showModal(); });
         document.getElementById('btnCancelInit').addEventListener('click', () => { modalInit.close(); document.getElementById('formInitBalance').reset(); editingOpId = null; });
-
-        document.getElementById('formInitBalance').addEventListener('submit', (e) => {
-            e.preventDefault(); const fd = new FormData(e.target);
-            if (editingOpId !== null) { const op = operations.find(o => o.id === editingOpId); if (op) { op.date = fd.get('dateInit'); op.montant = parseFloat(fd.get('montantInit')); } } 
-            else { operations.push({ id: Date.now(), bankId: currentBankId, date: fd.get('dateInit'), objet: 'Solde Initial', montant: parseFloat(fd.get('montantInit')), modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true }); }
-            editingOpId = null; saveData(); renderOperations(); updateTotals(); modalInit.close(); e.target.reset();
+        document.getElementById('formInitBalance').addEventListener('submit', async (e) => {
+            e.preventDefault(); showLoading();
+            const opData = { bankId: currentBankId, date: document.getElementById('dateInit').value, objet: 'Solde Initial', montant: parseFloat(document.getElementById('montantInit').value), modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true };
+            if (editingOpId) opData.id = editingOpId; else opData.id = Date.now();
+            await supabase.from('operations').upsert(opData);
+            modalInit.close(); e.target.reset(); editingOpId = null; hideLoading();
         });
-        
-        const modalOp = document.getElementById('modalOperation'); const formOp = document.getElementById('formOperation');
-        const recurrentSettingsWrapper = document.getElementById('recurrentSettingsWrapper'); const abonnementSettingsWrapper = document.getElementById('abonnementSettingsWrapper');
-        const btnOpenInstallments = document.getElementById('btnOpenInstallments'); const recurrentContainer = document.getElementById('recurrentContainer'); const abonnementContainer = document.getElementById('abonnementContainer');
-        let installmentsData = null; 
 
-        document.getElementById('isAbonnement').addEventListener('change', (e) => { abonnementSettingsWrapper.style.display = e.target.checked ? 'block' : 'none'; if (e.target.checked) { document.getElementById('isRecurrent').checked = false; recurrentSettingsWrapper.style.display = 'none'; btnOpenInstallments.style.display = 'none'; } else { btnOpenInstallments.style.display = 'block'; } });
-        document.getElementById('isRecurrent').addEventListener('change', (e) => { recurrentSettingsWrapper.style.display = e.target.checked ? 'block' : 'none'; if (e.target.checked) { document.getElementById('isAbonnement').checked = false; abonnementSettingsWrapper.style.display = 'none'; btnOpenInstallments.style.display = 'none'; } else { btnOpenInstallments.style.display = 'block'; } });
-
-        const modalInstallments = document.getElementById('modalInstallments'); const installmentsList = document.getElementById('installmentsList');
-        btnOpenInstallments.addEventListener('click', () => { const baseAmount = parseFloat(document.getElementById('montant').value); if (isNaN(baseAmount) || baseAmount <= 0) { alert("Veuillez d'abord saisir un 'Montant total' valide."); return; } modalInstallments.showModal(); });
-
+        // Modale Échéancier
+        const modalInst = document.getElementById('modalInstallments'); const instList = document.getElementById('installmentsList');
+        document.getElementById('btnOpenInstallments').addEventListener('click', () => { if (parseFloat(document.getElementById('montant').value) > 0) modalInst.showModal(); else alert("Saisir un montant valide d'abord."); });
+        document.getElementById('btnCancelInstallments').addEventListener('click', () => { installmentsData = null; document.getElementById('btnOpenInstallments').textContent = "⏱️ Paiement X fois"; modalInst.close(); });
         document.getElementById('btnGenerateInstallments').addEventListener('click', () => {
-            const count = parseInt(document.getElementById('installmentsCount').value); const baseAmount = parseFloat(document.getElementById('montant').value); const baseDate = document.getElementById('dateOp').value || new Date().toISOString().split('T')[0];
-            installmentsList.innerHTML = ''; const splitAmount = Math.floor((baseAmount / count) * 100) / 100; let remaining = baseAmount;
-            let [y, m, d] = baseDate.split('-'); let currentY = parseInt(y); let currentM = parseInt(m) - 1; const day = parseInt(d);
-            for(let i = 0; i < count; i++) {
-                let tempDate = new Date(currentY, currentM, day); if (tempDate.getMonth() !== currentM) tempDate = new Date(currentY, currentM + 1, 0); 
-                const finalY = tempDate.getFullYear(); const finalM = String(tempDate.getMonth() + 1).padStart(2, '0'); const finalD = String(tempDate.getDate()).padStart(2, '0');
-                let rowAmount = splitAmount; if (i === count - 1) rowAmount = Math.round(remaining * 100) / 100; else remaining -= splitAmount;
-                const div = document.createElement('div'); div.className = 'installment-row'; div.innerHTML = `<span>#${i+1}</span><input type="date" class="inst-date" value="${finalY}-${finalM}-${finalD}" required><input type="number" step="0.01" class="inst-amount" value="${rowAmount.toFixed(2)}" required>`;
-                installmentsList.appendChild(div); currentM++; if (currentM > 11) { currentM = 0; currentY++; }
+            const count = parseInt(document.getElementById('installmentsCount').value); const baseAmt = parseFloat(document.getElementById('montant').value); let [y, m, d] = (document.getElementById('dateOp').value || new Date().toISOString().split('T')[0]).split('-');
+            instList.innerHTML = ''; const splitAmt = Math.floor((baseAmt/count)*100)/100; let rem = baseAmt; let cy = parseInt(y), cm = parseInt(m)-1;
+            for(let i=0; i<count; i++) {
+                let tDate = new Date(cy, cm, parseInt(d)); if(tDate.getMonth()!==cm) tDate = new Date(cy, cm+1, 0);
+                let rAmt = (i===count-1) ? Math.round(rem*100)/100 : splitAmt; rem -= splitAmt;
+                instList.innerHTML += `<div class="installment-row"><span>#${i+1}</span><input type="date" class="inst-date" value="${tDate.toISOString().split('T')[0]}"><input type="number" step="0.01" class="inst-amount" value="${rAmt.toFixed(2)}"></div>`;
+                cm++; if(cm>11){cm=0; cy++;}
             }
         });
-
-        document.getElementById('btnCancelInstallments').addEventListener('click', () => { installmentsData = null; btnOpenInstallments.textContent = "⏱️ Paiement X fois"; recurrentContainer.style.display = 'flex'; abonnementContainer.style.display = 'flex'; modalInstallments.close(); });
-
         document.getElementById('btnSaveInstallments').addEventListener('click', () => {
-            const rows = installmentsList.querySelectorAll('.installment-row'); if(rows.length === 0) { alert("Veuillez calculer l'échéancier."); return; }
-            installmentsData = []; let checkTotal = 0;
-            rows.forEach((row, idx) => { const d = row.querySelector('.inst-date').value; const a = parseFloat(row.querySelector('.inst-amount').value); installmentsData.push({ part: idx + 1, totalParts: rows.length, date: d, amount: a }); checkTotal += a; });
-            btnOpenInstallments.textContent = `✅ En ${rows.length} fois (${checkTotal.toFixed(2)}€)`; document.getElementById('isRecurrent').checked = false; document.getElementById('isAbonnement').checked = false; recurrentContainer.style.display = 'none'; abonnementContainer.style.display = 'none'; modalInstallments.close();
+            const rows = instList.querySelectorAll('.installment-row'); if(!rows.length) return; installmentsData = [];
+            rows.forEach((r,i) => installmentsData.push({ part: i+1, totalParts: rows.length, date: r.querySelector('.inst-date').value, amount: parseFloat(r.querySelector('.inst-amount').value) }));
+            document.getElementById('btnOpenInstallments').textContent = `✅ En ${rows.length} fois`; document.getElementById('isRecurrent').checked = false; document.getElementById('isAbonnement').checked = false; modalInst.close();
         });
 
-        document.getElementById('btnOpenModal').addEventListener('click', () => { 
-            editingOpId = null; installmentsData = null; document.querySelector('#modalOperation h2').textContent = "Nouvelle opération"; btnOpenInstallments.style.display = 'block'; btnOpenInstallments.textContent = "⏱️ Paiement X fois"; recurrentContainer.style.display = 'flex'; abonnementContainer.style.display = 'flex'; formOp.reset(); recurrentSettingsWrapper.style.display = 'none'; abonnementSettingsWrapper.style.display = 'none'; document.getElementById('dateOp').value = new Date().toISOString().split('T')[0]; modalOp.showModal(); 
-        });
-        
-        document.getElementById('btnCancelModal').addEventListener('click', () => { modalOp.close(); formOp.reset(); installmentsData = null; });
+        // Validation Formulaire Principal
+        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; installmentsData=null; document.getElementById('btnOpenInstallments').style.display='block'; document.getElementById('btnOpenInstallments').textContent="⏱️ Paiement X fois"; formOp.reset(); document.getElementById('dateOp').value = new Date().toISOString().split('T')[0]; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
+        document.getElementById('btnCancelModal').addEventListener('click', () => { modalOp.close(); formOp.reset(); });
 
-        formOp.addEventListener('submit', (e) => {
-            e.preventDefault(); const fd = new FormData(e.target); const montantSaisi = Math.abs(parseFloat(fd.get('montant'))); const opType = fd.get('opType'); const montantFinal = opType === 'sortie' ? -montantSaisi : montantSaisi;
-            const isAbo = fd.get('isAbonnement') === 'on'; const isRecurrent = fd.get('isRecurrent') === 'on' || isAbo;
+        formOp.addEventListener('submit', async (e) => {
+            e.preventDefault(); showLoading();
+            const fd = new FormData(e.target); const amt = Math.abs(parseFloat(fd.get('montant'))); const finalAmt = fd.get('opType') === 'sortie' ? -amt : amt;
+            const isAbo = fd.get('isAbonnement') === 'on'; const isRec = fd.get('isRecurrent') === 'on' || isAbo;
+            let opsToPush = [];
 
-            if (editingOpId !== null) {
-                const currentOp = operations.find(o => o.id === editingOpId); let applyToFuture = false;
-                if (currentOp.recurringId) { const answer = prompt("Opération liée :\nTapez 1 : Modifier UNIQUEMENT ce mois\nTapez 2 : Modifier ce mois ET LES SUIVANTS"); if(answer === "2") applyToFuture = true; if(answer !== "1" && answer !== "2") return; }
-                if (applyToFuture) {
-                    const newDateStr = fd.get('dateOp'); const [newY, newM, newD] = newDateStr.split('-'); const originalDate = currentOp.date;
-                    operations.forEach(op => {
-                        if (op.recurringId === currentOp.recurringId && op.date >= originalDate) {
-                            op.objet = fd.get('objet'); op.montant = montantFinal; op.modeReglement = fd.get('modeReglement'); op.categorie = fd.get('categorie');
-                            const [oldY, oldM, oldD] = op.date.split('-'); let tempDate = new Date(parseInt(oldY), parseInt(oldM) - 1, parseInt(newD)); if (tempDate.getMonth() !== parseInt(oldM) - 1) { tempDate = new Date(parseInt(oldY), parseInt(oldM), 0); }
-                            const finalY = tempDate.getFullYear(); const finalM = String(tempDate.getMonth() + 1).padStart(2, '0'); const finalD = String(tempDate.getDate()).padStart(2, '0');
-                            op.date = `${finalY}-${finalM}-${finalD}`;
-                        }
+            if (editingOpId) {
+                const cop = operations.find(o => o.id === editingOpId);
+                let applyFuture = false;
+                if(cop.recurringId) { const ans = prompt("1: Ce mois uniquement\n2: Ce mois ET les suivants"); if(ans==='2') applyFuture=true; else if(ans!=='1'){hideLoading();return;} }
+                
+                if(applyFuture) {
+                    const [ny, nm, nd] = fd.get('dateOp').split('-');
+                    operations.filter(o => o.recurringId === cop.recurringId && o.date >= cop.date).forEach(o => {
+                        const [oy, om] = o.date.split('-'); let td = new Date(parseInt(oy), parseInt(om)-1, parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td = new Date(parseInt(oy), parseInt(om), 0);
+                        opsToPush.push({ ...o, date: td.toISOString().split('T')[0], objet: fd.get('objet'), montant: finalAmt, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie') });
                     });
-                } else { currentOp.date = fd.get('dateOp'); currentOp.objet = fd.get('objet'); currentOp.montant = montantFinal; currentOp.modeReglement = fd.get('modeReglement'); currentOp.categorie = fd.get('categorie'); }
+                } else {
+                    opsToPush.push({ ...cop, date: fd.get('dateOp'), objet: fd.get('objet'), montant: finalAmt, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie') });
+                }
             } else {
-                if (installmentsData && installmentsData.length > 0) {
-                    const installmentId = Date.now(); const totalInstallments = installmentsData.length;
-                    installmentsData.forEach((inst, index) => { const instMontantFinal = opType === 'sortie' ? -inst.amount : inst.amount; operations.push({ id: Date.now() + index, installmentId: installmentId, totalInstallments: totalInstallments, bankId: currentBankId, date: inst.date, objet: `${fd.get('objet')} (${inst.part}/${inst.totalParts})`, montant: instMontantFinal, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: false, pointee: false }); });
-                } else if (isRecurrent) {
-                    const recurringId = Date.now(); let intervalMois = 1; let dateFinStr = null; let maxOperations = 120; 
-                    if (isAbo) { intervalMois = parseInt(fd.get('freqAbonnement')) || 1; if (intervalMois === 12) maxOperations = 10; } else { intervalMois = parseInt(fd.get('intervalMois')) || 1; dateFinStr = fd.get('dateFinRecurrence'); }
-                    let endYear = 2099, endMonth = 11; if (dateFinStr) { const [y, m] = dateFinStr.split('-'); endYear = parseInt(y); endMonth = parseInt(m) - 1; maxOperations = 1200; }
-                    let [baseY, baseM, baseD] = fd.get('dateOp').split('-'); let currentY = parseInt(baseY); let currentM = parseInt(baseM) - 1; const day = parseInt(baseD);
-                    for (let i = 0; i < maxOperations; i++) {
-                        if (currentY > endYear || (currentY === endYear && currentM > endMonth)) break;
-                        let tempDate = new Date(currentY, currentM, day); if (tempDate.getMonth() !== currentM) tempDate = new Date(currentY, currentM + 1, 0); 
-                        const finalY = tempDate.getFullYear(); const finalM = String(tempDate.getMonth() + 1).padStart(2, '0'); const finalD = String(tempDate.getDate()).padStart(2, '0');
-                        operations.push({ id: recurringId + i, recurringId: recurringId, bankId: currentBankId, date: `${finalY}-${finalM}-${finalD}`, objet: fd.get('objet'), montant: montantFinal, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: true, isAbonnement: isAbo, intervalMois: intervalMois, pointee: false });
-                        currentM += intervalMois; while (currentM > 11) { currentM -= 12; currentY++; }
+                if (installmentsData) {
+                    const instId = Date.now();
+                    installmentsData.forEach((inst, i) => opsToPush.push({ id: Date.now()+i, installmentId: instId, totalInstallments: installmentsData.length, bankId: currentBankId, date: inst.date, objet: `${fd.get('objet')} (${inst.part}/${inst.totalParts})`, montant: fd.get('opType')==='sortie'?-inst.amount:inst.amount, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: false, pointee: false }));
+                } else if (isRec) {
+                    const recId = Date.now(); let intM = isAbo ? parseInt(fd.get('freqAbonnement'))||1 : parseInt(fd.get('intervalMois'))||1;
+                    let maxOp = isAbo ? (intM===12?10:120) : 120; let endY = 2099, endM = 11; if(!isAbo && fd.get('dateFinRecurrence')) { const [y,m]=fd.get('dateFinRecurrence').split('-'); endY=parseInt(y); endM=parseInt(m)-1; maxOp=1200; }
+                    let [cy, cm, d] = fd.get('dateOp').split('-'); cy=parseInt(cy); cm=parseInt(cm)-1; d=parseInt(d);
+                    for (let i=0; i<maxOp; i++) {
+                        if(cy>endY || (cy===endY && cm>endM)) break;
+                        let td = new Date(cy, cm, d); if(td.getMonth()!==cm) td = new Date(cy, cm+1, 0);
+                        opsToPush.push({ id: recId+i, recurringId: recId, bankId: currentBankId, date: td.toISOString().split('T')[0], objet: fd.get('objet'), montant: finalAmt, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: true, isAbonnement: isAbo, intervalMois: intM, pointee: false });
+                        cm += intM; while(cm>11){cm-=12; cy++;}
                     }
-                } else { operations.push({ id: Date.now(), bankId: currentBankId, date: fd.get('dateOp'), objet: fd.get('objet'), montant: montantFinal, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: false, pointee: false }); }
+                } else {
+                    opsToPush.push({ id: Date.now(), bankId: currentBankId, date: fd.get('dateOp'), objet: fd.get('objet'), montant: finalAmt, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: false, pointee: false });
+                }
             }
-            saveData(); renderOperations(); updateTotals(); modalOp.close(); formOp.reset(); editingOpId = null; installmentsData = null;
+
+            const { error } = await supabase.from('operations').upsert(opsToPush);
+            if(error) { alert("Erreur base de données"); console.error(error); }
+            
+            modalOp.close(); formOp.reset(); editingOpId = null; installmentsData = null; hideLoading();
+            // Pas besoin d'appeler fetchCloudData ici, le listener Realtime mettra l'UI à jour automatiquement !
         });
 
-        operationsList.addEventListener('click', (e) => {
+        // --- GESTION DES CLICS LISTE (Modifier/Supprimer) ---
+        operationsList.addEventListener('click', async (e) => {
             if (e.target.closest('.delete-op')) {
-                const btn = e.target.closest('.delete-op'); if (btn.hasAttribute('disabled')) return;
-                const opId = parseInt(btn.dataset.id); const opToDelete = operations.find(o => o.id === opId);
-                if (opToDelete.recurringId) {
-                    const answer = prompt("Opération liée :\nTapez 1 : Supprimer UNIQUEMENT ce mois\nTapez 2 : Supprimer en cascade (ce mois et les suivants)");
-                    if (answer === "1") { operations = operations.filter(o => o.id !== opId); } else if (answer === "2") { operations = operations.filter(o => !(o.recurringId === opToDelete.recurringId && o.date >= opToDelete.date)); } else { return; }
-                } else if (opToDelete.installmentId) {
-                    const answer = prompt("Paiement en plusieurs fois :\nTapez 1 : Supprimer UNIQUEMENT cette échéance\nTapez 2 : Supprimer TOUTES les échéances liées");
-                    if (answer === "1") { operations = operations.filter(o => o.id !== opId); } else if (answer === "2") { operations = operations.filter(o => o.installmentId !== opToDelete.installmentId); } else { return; }
-                } else { if (!confirm('Voulez-vous vraiment supprimer cette opération ?')) return; operations = operations.filter(o => o.id !== opId); }
-                saveData(); renderOperations(); updateTotals();
+                const btn = e.target.closest('.delete-op'); const opId = parseInt(btn.dataset.id); const op = operations.find(o => o.id === opId); let ids = [];
+                if (op.recurringId) { const ans = prompt("1: Ce mois\n2: Cascade (ce mois + suivants)"); if(ans==='1') ids.push(opId); else if(ans==='2') ids = operations.filter(o=>o.recurringId===op.recurringId && o.date>=op.date).map(o=>o.id); else return; }
+                else if (op.installmentId) { const ans = prompt("1: Cette échéance\n2: Toutes les échéances"); if(ans==='1') ids.push(opId); else if(ans==='2') ids = operations.filter(o=>o.installmentId===op.installmentId).map(o=>o.id); else return; }
+                else { if(!confirm('Supprimer définitivement ?')) return; ids.push(opId); }
+                
+                showLoading();
+                await supabase.from('operations').delete().in('id', ids);
+                hideLoading(); // L'UI se mettra à jour via Realtime
             }
+
             if (e.target.closest('.edit-op')) {
-                const btn = e.target.closest('.edit-op'); if (btn.hasAttribute('disabled')) return;
-                const opId = parseInt(btn.dataset.id); const op = operations.find(o => o.id === opId);
+                const btn = e.target.closest('.edit-op'); const opId = parseInt(btn.dataset.id); const op = operations.find(o => o.id === opId);
                 if (op) {
                     editingOpId = opId;
-                    if (op.objet === 'Solde Initial') { document.getElementById('dateInit').value = op.date; document.getElementById('montantInit').value = op.montant.toFixed(2); document.getElementById('modalInitBalance').showModal(); return; }
-                    document.querySelector('#modalOperation h2').textContent = "Modifier l'opération"; btnOpenInstallments.style.display = 'none';
-                    document.getElementById('dateOp').value = op.date; document.getElementById('objet').value = op.objet; document.getElementById('montant').value = Math.abs(op.montant).toFixed(2); document.getElementById(op.montant < 0 ? 'typeSortie' : 'typeEntree').checked = true; document.getElementById('modeReglement').value = op.modeReglement; document.getElementById('categorie').value = op.categorie;
-                    const cbRecurrent = document.getElementById('isRecurrent'); if(cbRecurrent) cbRecurrent.checked = op.isRecurrent && !op.isAbonnement;
-                    const cbAbonnement = document.getElementById('isAbonnement'); if(cbAbonnement) cbAbonnement.checked = op.isAbonnement || false;
-                    recurrentSettingsWrapper.style.display = 'none'; abonnementSettingsWrapper.style.display = 'none'; modalOp.showModal();
+                    if (op.objet === 'Solde Initial') { document.getElementById('dateInit').value = op.date; document.getElementById('montantInit').value = op.montant; document.getElementById('modalInitBalance').showModal(); return; }
+                    document.getElementById('dateOp').value = op.date; document.getElementById('objet').value = op.objet; document.getElementById('montant').value = Math.abs(op.montant);
+                    document.getElementById(op.montant < 0 ? 'typeSortie' : 'typeEntree').checked = true;
+                    document.getElementById('modeReglement').value = op.modeReglement; document.getElementById('categorie').value = op.categorie;
+                    document.getElementById('btnOpenInstallments').style.display = 'none';
+                    if(op.isRecurrent && !op.isAbonnement) document.getElementById('isRecurrent').checked = true;
+                    if(op.isAbonnement) document.getElementById('isAbonnement').checked = true;
+                    modalOp.showModal();
                 }
             }
         });
 
-        const modalSearch = document.getElementById('modalSearch'); const searchInput = document.getElementById('searchInput'); const searchResults = document.getElementById('searchResults');
-        document.getElementById('btnOpenSearch').addEventListener('click', () => { searchInput.value = ''; searchResults.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">Tapez au moins 2 caractères pour lancer la recherche sur tout l\'historique du compte.</div>'; modalSearch.showModal(); setTimeout(() => searchInput.focus(), 50); });
-        document.getElementById('btnCloseSearch').addEventListener('click', () => { modalSearch.close(); });
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase().trim(); searchResults.innerHTML = '';
-            if (term.length < 2) { searchResults.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">Tapez au moins 2 caractères pour lancer la recherche sur tout l\'historique du compte.</div>'; return; }
-            const bankOps = operations.filter(op => op.bankId === currentBankId);
-            const results = bankOps.filter(op => { const searchStr = `${op.date} ${op.objet} ${op.montant} ${op.categorie} ${op.modeReglement}`.toLowerCase(); return searchStr.includes(term); });
-            if (results.length === 0) { searchResults.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">Aucun résultat trouvé pour cette recherche.</div>'; return; }
-            results.sort((a, b) => { if (a.date < b.date) return -1; if (a.date > b.date) return 1; return 0; });
-            const nonPointees = results.filter(op => !op.pointee); const pointees = results.filter(op => op.pointee);
-            const generateOpHtml = (op) => {
-                const isDépense = op.montant < 0; const sign = isDépense ? '' : '+'; const colorHex = isDépense ? '#e53935' : '#4CAF50'; const [y, m, d] = op.date.split('-'); const dateAffichee = `${d}/${m}/${y}`;
-                return `<div style="background: #f9f9f9; padding: 0.8rem; border-radius: 6px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"><div style="display: flex; flex-direction: column;"><span style="font-size: 0.8rem; color: #666;">${dateAffichee} - ${op.categorie} (${op.modeReglement})</span><span style="font-weight: bold; font-size: 1rem;">${op.objet}</span></div><div style="color: ${colorHex}; font-weight: bold; font-size: 1.1rem; text-align: right;">${sign}${op.montant.toFixed(2)} €</div></div>`;
-            };
-            if (pointees.length > 0) { searchResults.innerHTML += `<h3 style="margin: 0.5rem 0; color: #4CAF50; font-size: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem;">✅ Opérations pointées</h3>`; pointees.forEach(op => { searchResults.innerHTML += generateOpHtml(op); }); }
-            if (nonPointees.length > 0) { searchResults.innerHTML += `<h3 style="margin: 1rem 0 0.5rem 0; color: #e53935; font-size: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem;">⚠️ Opérations non pointées</h3>`; nonPointees.forEach(op => { searchResults.innerHTML += generateOpHtml(op); }); }
-        });
-
+        // --- IMPORT / EXPORT (Direct vers/depuis Cloud) ---
         document.getElementById('btnExport').addEventListener('click', () => {
-            const dataToExport = { operations: operations, banks: banks, currentBankId: currentBankId };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport));
-            const downloadNode = document.createElement('a'); downloadNode.setAttribute("href", dataStr); downloadNode.setAttribute("download", "budget_sauvegarde.json"); document.body.appendChild(downloadNode); downloadNode.click(); downloadNode.remove();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ operations, banks, currentBankId }));
+            const dn = document.createElement('a'); dn.href = dataStr; dn.download = "budget_sauvegarde_cloud.json"; document.body.appendChild(dn); dn.click(); dn.remove();
         });
 
-        // --- IMPORTATION RÉPARÉE ---
-        document.getElementById('btnImport').addEventListener('click', () => { document.getElementById('fileImport').click(); });
-        
-        document.getElementById('fileImport').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            // On force l'encodage en UTF-8, souvent la cause des erreurs de lecture
-            reader.readAsText(file, "UTF-8");
-
-            reader.onload = function(event) {
+        document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
+        document.getElementById('fileImport').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.readAsText(file, "UTF-8");
+            reader.onload = async function(ev) {
                 try {
-                    const content = event.target.result;
-                    // Nettoyage : parfois des caractères invisibles (BOM) se cachent au tout début du fichier
-                    const cleanContent = content.trim().replace(/^\uFEFF/, "");
-                    const importedData = JSON.parse(cleanContent);
-
-                    if (importedData.operations && importedData.banks) {
-                        operations = importedData.operations;
-                        banks = importedData.banks;
-                        currentBankId = importedData.currentBankId || banks[0].id;
+                    const imported = JSON.parse(ev.target.result.trim().replace(/^\uFEFF/, ""));
+                    if(imported.operations && imported.banks) {
+                        if(!confirm(`Votre fichier contient ${imported.operations.length} lignes.\nVous allez effacer la base Cloud actuelle pour injecter ce fichier. OK ?`)) return;
+                        showLoading();
+                        banks = imported.banks; currentBankId = imported.currentBankId || banks[0].id; saveLocalBanks(); renderBanksDropdown();
                         
-                        saveData();
-                        renderBanksDropdown();
-                        renderOperations();
-                        updateTotals();
-                        alert("✅ Importation réussie !");
-                    } else {
-                        alert("Le format du fichier JSON n'est pas reconnu par l'application.");
-                    }
-                } catch (err) {
-                    console.error("Erreur détaillée lors du JSON.parse :", err);
-                    alert("Erreur critique lors de la lecture du fichier : " + err.message);
-                }
-            };
-            
-            reader.onerror = function() {
-                alert("Impossible de lire le fichier.");
-            };
-            
-            e.target.value = ''; // Réinitialisation
+                        await supabase.from('operations').delete().neq('id', -1); // Nettoyage total
+                        
+                        // Injection par paquets de 100 pour la stabilité
+                        for (let i = 0; i < imported.operations.length; i += 100) {
+                            await supabase.from('operations').insert(imported.operations.slice(i, i + 100));
+                        }
+                        
+                        alert("✅ Restauration réussie sur le Cloud !");
+                        await fetchCloudData();
+                    } else alert("Fichier invalide.");
+                } catch(err) { alert("Erreur de restauration."); console.error(err); } finally { hideLoading(); }
+            }; e.target.value = '';
         });
 
-        const modalStats = document.getElementById('modalStats'); const headerCat = document.getElementById('headerCat'); const statTypeInput = document.getElementById('statType'); const statStartInput = document.getElementById('statStartDate'); const statEndInput = document.getElementById('statEndDate'); const statsResults = document.getElementById('statsResults');
-        function calculateStats() {
-            const type = statTypeInput.value; const start = statStartInput.value; const end = statEndInput.value;
-            let filteredOps = operations.filter(op => op.bankId === currentBankId && op.objet !== 'Solde Initial');
-            if (start) filteredOps = filteredOps.filter(op => op.date >= start); if (end) filteredOps = filteredOps.filter(op => op.date <= end);
-            const catTotals = {}; let totalGlobal = 0;
-            filteredOps.forEach(op => {
-                if (type === 'depenses' && op.montant >= 0) return; if (type === 'recettes' && op.montant <= 0) return;
-                const cat = op.categorie && op.categorie.trim() !== '' ? op.categorie : 'Non catégorisé'; if (!catTotals[cat]) catTotals[cat] = 0; catTotals[cat] += op.montant; totalGlobal += op.montant;
+        // --- RECHERCHE ET STATISTIQUES ---
+        const modalSearch = document.getElementById('modalSearch'); const searchInput = document.getElementById('searchInput'); const searchResults = document.getElementById('searchResults');
+        document.getElementById('btnOpenSearch').addEventListener('click', () => { searchInput.value=''; searchResults.innerHTML=''; modalSearch.showModal(); setTimeout(()=>searchInput.focus(), 50); });
+        document.getElementById('btnCloseSearch').addEventListener('click', () => modalSearch.close());
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim(); searchResults.innerHTML=''; if(term.length<2) return;
+            const res = operations.filter(o=>o.bankId===currentBankId).filter(o=>`${o.date} ${o.objet} ${o.montant} ${o.categorie} ${o.modeReglement}`.toLowerCase().includes(term));
+            res.sort((a,b)=>a.date<b.date?-1:1).forEach(o => {
+                searchResults.innerHTML += `<div style="background:#f9f9f9; padding:0.5rem; border:1px solid #eee; margin-bottom:0.5rem; display:flex; justify-content:space-between;"><div><span style="font-size:0.8rem; color:#666;">${o.date} - ${o.categorie}</span><br><b>${o.objet}</b></div><div style="color:${o.montant<0?'#e53935':'#4CAF50'}; font-weight:bold;">${o.montant} €</div></div>`;
             });
-            const sortedCats = Object.entries(catTotals).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])); statsResults.innerHTML = '';
-            if (sortedCats.length === 0) { statsResults.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">Aucune opération trouvée pour ces critères.</div>'; return; }
-            const absTotalGlobal = Math.abs(totalGlobal); const colorGlobal = type === 'depenses' ? '#e53935' : '#4CAF50';
-            statsResults.innerHTML += `<div style="font-weight: bold; margin-bottom: 0.5rem; text-align: right; font-size: 1.1rem; color: ${colorGlobal}; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Total analysé : ${absTotalGlobal.toFixed(2)} €</div>`;
-            sortedCats.forEach(([cat, amount]) => {
-                const absAmount = Math.abs(amount); const percentage = absTotalGlobal > 0 ? (absAmount / absTotalGlobal) * 100 : 0; const progressColor = type === 'depenses' ? '#f44336' : '#4CAF50';
-                statsResults.innerHTML += `<div style="display: flex; flex-direction: column; gap: 0.2rem;"><div style="display: flex; justify-content: space-between; font-size: 0.9rem;"><span style="font-weight: bold; color: #333;">${cat}</span><span style="color: #666;">${absAmount.toFixed(2)} € <small>(${percentage.toFixed(1)}%)</small></span></div><div style="width: 100%; background: #eee; height: 12px; border-radius: 6px; overflow: hidden;"><div style="width: ${percentage}%; background: ${progressColor}; height: 100%; border-radius: 6px;"></div></div></div>`;
+        });
+
+        const modalStats = document.getElementById('modalStats'); const statTypeInput = document.getElementById('statType'); const statStartInput = document.getElementById('statStartDate'); const statEndInput = document.getElementById('statEndDate'); const statsResults = document.getElementById('statsResults');
+        function calculateStats() {
+            const type = statTypeInput.value, start = statStartInput.value, end = statEndInput.value;
+            let fOps = operations.filter(o=>o.bankId===currentBankId && o.objet!=='Solde Initial');
+            if(start) fOps = fOps.filter(o=>o.date>=start); if(end) fOps = fOps.filter(o=>o.date<=end);
+            const totals = {}; let gTotal = 0;
+            fOps.forEach(o => { if((type==='depenses'&&o.montant>=0)||(type==='recettes'&&o.montant<=0)) return; const c = o.categorie||'Non catégorisé'; totals[c]=(totals[c]||0)+o.montant; gTotal+=o.montant; });
+            statsResults.innerHTML = `<div style="text-align:right; font-weight:bold; color:${type==='depenses'?'#e53935':'#4CAF50'}">Total : ${Math.abs(gTotal).toFixed(2)} €</div>`;
+            Object.entries(totals).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).forEach(([c, amt]) => {
+                const pct = gTotal!==0 ? (Math.abs(amt)/Math.abs(gTotal))*100 : 0;
+                statsResults.innerHTML += `<div style="margin-bottom:0.5rem;"><div style="display:flex; justify-content:space-between; font-size:0.9rem;"><span>${c}</span><span>${Math.abs(amt).toFixed(2)}€ (${pct.toFixed(1)}%)</span></div><div style="background:#eee; height:8px; border-radius:4px;"><div style="width:${pct}%; background:${type==='depenses'?'#f44336':'#4CAF50'}; height:100%; border-radius:4px;"></div></div></div>`;
             });
         }
-        headerCat.addEventListener('click', () => {
-            const today = new Date(); const firstDay = new Date(today.getFullYear(), today.getMonth(), 1); const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            statStartInput.value = `${firstDay.getFullYear()}-${String(firstDay.getMonth() + 1).padStart(2, '0')}-01`; statEndInput.value = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+        document.getElementById('headerCat').addEventListener('click', () => {
+            const d = new Date(), fd = new Date(d.getFullYear(), d.getMonth(), 1), ld = new Date(d.getFullYear(), d.getMonth()+1, 0);
+            statStartInput.value=`${fd.getFullYear()}-${String(fd.getMonth()+1).padStart(2,'0')}-01`; statEndInput.value=`${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`;
             calculateStats(); modalStats.showModal();
         });
-        document.getElementById('btnCloseStats').addEventListener('click', () => { modalStats.close(); });
-        statTypeInput.addEventListener('change', calculateStats); statStartInput.addEventListener('change', calculateStats); statEndInput.addEventListener('change', calculateStats);
+        document.getElementById('btnCloseStats').addEventListener('click', () => modalStats.close());
+        ['change'].forEach(evt => { statTypeInput.addEventListener(evt, calculateStats); statStartInput.addEventListener(evt, calculateStats); statEndInput.addEventListener(evt, calculateStats); });
 
-        // --- INIT ---
-        updateMonthDisplay(); renderBanksDropdown(); renderOperations(); updateTotals();
+        // --- INIT PRINCIPAL ---
+        currentMonthLabel.textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(displayYear, displayMonth));
+        renderBanksDropdown();
+        
+        // 1. Lance la récupération complète
+        fetchCloudData().then(() => {
+            // 2. Ouvre les écoutes temps réel
+            setupRealtime();
+        });
 
-        // Ce code peut rester si tu veux que ton application fonctionne hors-ligne un jour,
-        // sinon tu peux l'ignorer, il n'impactera pas le fonctionnement local.
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
-            });
-        }
     </script>
 </body>
 </html>
