@@ -652,7 +652,7 @@
             dn.remove();
         });
 
-        // --- RESTAURER (Import JSON vers le Cloud) ---
+        // --- RESTAURER (Import JSON Blindé) ---
         document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
         
         document.getElementById('fileImport').addEventListener('change', (e) => {
@@ -665,40 +665,55 @@
                     const imported = JSON.parse(ev.target.result);
                     
                     if(imported.operations && imported.banks) {
-                        // Sécurité : demander confirmation avant d'écraser le Cloud
-                        if(!confirm("⚠️ ATTENTION : Cette action va effacer vos données actuelles sur le cloud pour les remplacer par cette sauvegarde.\n\nVoulez-vous continuer ?")) return;
+                        
+                        // 1. LE DIAGNOSTIC CRUCIAL
+                        const confirmation = confirm(`⚠️ DIAGNOSTIC :\nVotre fichier contient exactement ${imported.operations.length} opérations.\n\nSi ce chiffre vous paraît correct (c'est bien vos données à jour), cliquez sur OK pour écraser le cloud.`);
+                        if(!confirmation) return;
                         
                         showLoading();
                         
-                        // 1. Restauration des banques en local
                         banks = imported.banks; 
                         currentBankId = imported.currentBankId || banks[0].id; 
                         saveLocalState(); 
                         renderBanksDropdown();
                         
-                        // 2. Nettoyage total du Cloud (On supprime tout)
-                        await supabaseClient.from('operations').delete().gt('id', 0);
+                        // 2. Nettoyage absolu (neq -1 garantit de contourner certaines sécurités Supabase)
+                        const { error: delError } = await supabaseClient.from('operations').delete().neq('id', -1);
+                        if(delError) {
+                            console.error("Erreur de suppression du Cloud:", delError);
+                            alert("Supabase a refusé de vider l'ancienne base ! Regardez la console.");
+                            throw delError;
+                        }
                         
-                        // 3. Injection de la sauvegarde dans le Cloud
-                        const { error } = await supabaseClient.from('operations').insert(imported.operations);
-                        if(error) throw error;
+                        // 3. Insertion par paquets (Chunks) pour ne jamais faire planter le serveur
+                        const chunkSize = 100;
+                        for (let i = 0; i < imported.operations.length; i += chunkSize) {
+                            const chunk = imported.operations.slice(i, i + chunkSize);
+                            const { error: insError } = await supabaseClient.from('operations').insert(chunk);
+                            
+                            if (insError) {
+                                console.error("Erreur d'insertion au paquet", i, ":", insError);
+                                alert("Supabase a bloqué l'insertion d'une partie des données !");
+                                throw insError;
+                            }
+                        }
                         
-                        alert("✅ Restauration réussie ! Le cloud a été mis à jour avec votre sauvegarde.");
+                        alert("✅ Restauration 100% validée ! Le cloud a parfaitement ingéré votre fichier.");
                         
-                        // 4. On rafraîchit l'affichage
                         await fetchCloudData();
                         
                     } else {
                         alert("Fichier de sauvegarde invalide ou corrompu.");
                     }
                 } catch(err) { 
-                    alert("Erreur lors de la restauration avec la base de données."); 
+                    alert("Le processus a été interrompu par une erreur. Vérifiez la console avec F12."); 
                     console.error(err); 
+                } finally {
                     hideLoading(); 
                 }
             }; 
             reader.readAsText(file); 
-            e.target.value = ''; // Réinitialise l'input pour pouvoir réimporter le même fichier si besoin
+            e.target.value = ''; 
         });
         // ----------------------------------------------------
         // 9. RECHERCHE ET STATISTIQUES
