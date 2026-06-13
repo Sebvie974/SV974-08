@@ -575,14 +575,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // 1. Tuer l'ancien Service Worker pour forcer la mise à jour
+        // 1. Tuer l'ancien Service Worker pour forcer la mise à jour (évite les conflits de cache)
         if (navigator.serviceWorker) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 for (let registration of registrations) { registration.unregister(); }
             });
         }
 
-        // 2. Initialisation Supabase (Sécurisée)
+        // 2. Initialisation Supabase (Unique et Sécurisée)
         let supabase = null;
         try {
             const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
@@ -594,27 +594,25 @@
             console.error("Erreur init Supabase :", err);
         }
 
-        // 3. Fonction de migration
+        // 3. Fonction de migration vers Supabase
         document.getElementById('btnMigrateDB').addEventListener('click', async () => {
-            if (!supabase) return alert("Supabase non connecté.");
-            if (!confirm("Envoyer tes données vers la base de données ?")) return;
+            if (!supabase) return alert("Supabase n'est pas prêt. Vérifie ta connexion internet.");
+            if (!confirm("Envoyer toutes tes données vers la base de données Supabase ?")) return;
 
             const localDataStr = localStorage.getItem('budget_operations'); 
-            if (!localDataStr || localDataStr === "[]") return alert("Aucune donnée locale.");
+            if (!localDataStr || localDataStr === "[]") return alert("Aucune donnée locale à migrer.");
 
             const localOperations = JSON.parse(localDataStr); 
             try {
                 const { error } = await supabase.from('operations').insert(localOperations);
                 if (error) throw error;
-                alert("Migration réussie !");
+                alert("✅ Migration réussie avec succès !");
             } catch (err) {
-                console.error(err);
-                alert("Erreur de migration (voir console).");
+                console.error("Erreur détaillée :", err);
+                alert("Erreur lors de la migration. Regarde la console (F12).");
             }
         });
-    </script>
 
-    <script>     
         // --- ÉTAT GLOBAL & LOCALSTORAGE ---
         // On récupère les données sauvegardées, sinon on utilise les valeurs par défaut
         let operations = JSON.parse(localStorage.getItem('budget_operations')) || [];
