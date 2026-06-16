@@ -6,21 +6,12 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Mon Budget - En Ligne</title>
-
+    <title>Mon Budget</title>
     <style>
-        :root {
-            --primary-color: #4CAF50;
-            --bg-color: #f4f7f6;
-            --text-color: #333;
-            --expense-color: #e53935;
-            --card-bg: #fff;
-        }
-
+        :root { --primary-color: #4CAF50; --bg-color: #f4f7f6; --text-color: #333; --expense-color: #e53935; --card-bg: #fff; }
         body { font-family: Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
 
         .sticky-wrapper { position: sticky; top: 0; z-index: 100; background-color: var(--bg-color); padding-bottom: 5px; }
-
         header { background-color: var(--primary-color); color: white; padding: 0.8rem 1rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .header-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .header-top h1 { margin: 0; font-size: 1.5rem; }
@@ -43,9 +34,9 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 
+        /* DESIGN PC ORIGINAL */
         .operations-header { display: grid; grid-template-columns: 40px 2.5fr 1fr 1fr 100px 100px 120px 80px; gap: 10px; background: #e0e0e0; padding: 10px; font-weight: bold; border-radius: 8px 8px 0 0; text-align: center; align-items: center; font-size: 0.9rem; }
         .operations-list { background: var(--card-bg); border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 2rem; min-height: 200px; }
-        
         .operation-item { display: grid; grid-template-columns: 40px 2.5fr 1fr 1fr 100px 100px 120px 80px; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; align-items: center; transition: background-color 0.2s; }
         .operation-item:hover { background-color: #f9f9f9; }
         .operation-item.op-pointee { background-color: #e8f5e9; }
@@ -71,6 +62,7 @@
         .floating-add { position: fixed; bottom: 2rem; right: 2rem; background: var(--primary-color); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s; z-index: 10; }
         .floating-add:hover { transform: scale(1.1); }
 
+        /* MODALES */
         dialog { border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 1.5rem; min-width: 300px; }
         dialog::backdrop { background: rgba(0,0,0,0.5); }
         .form-group { margin-bottom: 1rem; }
@@ -78,13 +70,49 @@
         .form-group input, .form-group select { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .dialog-buttons { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
         .btn-primary { background: var(--primary-color); color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 4px; cursor: pointer; }
-        
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; font-size: 1.5rem; font-weight: bold; color: var(--primary-color); display: none; }
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
+        .cloud-status { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.1); padding: 4px 8px; border-radius: 12px; margin-top: 10px; justify-content: center; width: fit-content; margin-left: auto; margin-right: auto;}
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ccc; }
+        .status-dot.online { background-color: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
+
+        /* ========================================= */
+        /* 📱 ADAPTATION SMARTPHONE (Ne s'active que sur mobile) */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            .header-top { flex-direction: column; text-align: center; }
+            .bank-controls, .action-buttons { justify-content: center; }
+            .summary-cards { flex-direction: column; gap: 0.5rem; }
+            
+            .operations-header { display: none; }
+            
+            .operation-item { display: grid; grid-template-columns: 35px 1fr 1fr; grid-template-rows: auto auto auto; gap: 10px 5px; padding: 15px 10px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+            .col-check { grid-column: 1; grid-row: 1 / 4; align-self: start; padding-top: 5px; }
+            .col-check input[type="checkbox"] { transform: scale(1.3); }
+            
+            .op-details { grid-column: 2; grid-row: 1; }
+            .col-out, .col-in { grid-column: 3; grid-row: 1; text-align: right; font-size: 1.1rem; }
+            .col-out:empty, .col-in:empty { display: none; }
+            
+            .operation-item > div:nth-child(3) { grid-column: 2; grid-row: 2; }
+            .operation-item > div:nth-child(4) { grid-column: 3; grid-row: 2; }
+            .inline-input { width: 100%; background: #f9f9f9; border: 1px solid #eee; border-radius: 4px; }
+            
+            .col-balance { grid-column: 2; grid-row: 3; text-align: left; background: none; padding: 0; color: #666; }
+            .col-balance::before { content: "Solde : "; }
+            .col-actions { grid-column: 3; grid-row: 3; text-align: right; }
+            
+            .operation-item.op-report { display: flex; justify-content: space-between; }
+            .operation-item.op-report > div { display: none; }
+            .operation-item.op-report .op-details, .operation-item.op-report .col-balance { display: block; }
+            .operation-item.op-report .col-balance::before { content: ""; }
+            dialog { width: 95%; padding: 1rem; }
+            .dialog-buttons { flex-direction: column; gap: 0.5rem; }
+            .dialog-buttons button { width: 100%; }
+        }
     </style>
 </head>
 <body>
-
-    <div id="loadingOverlay">Chargement avec le Cloud... ⏳</div>
+    <div id="loadingOverlay">Synchronisation avec le Cloud... ⏳</div>
 
     <div class="sticky-wrapper">
         <header>
@@ -93,29 +121,24 @@
                 <div class="bank-controls">
                     <select id="bankSelector" title="Changer de compte"></select>
                     <button id="btnManageBanks" class="btn-secondary" title="Gérer les comptes">⚙️ Comptes</button>
-                    <button id="btnInitBalance" class="btn-secondary" title="Définir un solde de départ">💰 Solde Initial</button>
+                    <button id="btnInitBalance" class="btn-secondary" title="Définir un solde de départ">💰 Solde</button>
+                    <button id="btnTransfer" class="btn-secondary" title="Virement entre comptes">🔁 Virement</button>
                 </div>
-
                 <div class="action-buttons">
-                    <button id="btnForceSync" class="btn-secondary" title="Actualiser les données du cloud">🔄 Actualiser</button>
-                    <button id="btnOpenSearch" class="btn-secondary" title="Rechercher une opération">🔍 Rechercher</button>
-                    <button id="btnExport" class="btn-secondary" title="Télécharger une sauvegarde locale">💾 Sauvegarder</button>
-                    <button id="btnImport" class="btn-secondary" title="Restaurer une sauvegarde JSON">📂 Restaurer</button>
+                    <button id="btnForceSync" class="btn-secondary" title="Actualiser le cloud">🔄 Actu</button>
+                    <button id="btnOpenSearch" class="btn-secondary" title="Rechercher">🔍</button>
+                    <button id="btnExport" class="btn-secondary" title="Sauvegarder">💾 Exporter</button>
+                    <button id="btnImport" class="btn-secondary" title="Restaurer">📂 Importer</button>
                     <input type="file" id="fileImport" accept=".json" style="display: none;">
                 </div>
             </div>
         </header>
 
         <div class="summary-cards">
-            <div class="card">
-                <h3>Solde Prévu Fin de Mois</h3>
-                <div class="amount" id="totalPrevu">0.00 €</div>
-            </div>
-            <div class="card">
-                <h3>Solde Réel (Pointé)</h3>
-                <div class="amount" id="totalPointe" style="color: var(--primary-color);">0.00 €</div>
-            </div>
+            <div class="card"><h3>Prévu Fin de Mois</h3><div class="amount" id="totalPrevu">0.00 €</div></div>
+            <div class="card"><h3>Réel (Pointé)</h3><div class="amount" id="totalPointe" style="color: var(--primary-color);">0.00 €</div></div>
         </div>
+        <div class="cloud-status" title="Statut Supabase"><div id="statusDot" class="status-dot"></div><span id="statusText">Connexion...</span></div>
 
         <div class="month-selector">
             <button id="prevMonth">◀</button>
@@ -125,685 +148,299 @@
 
         <div class="container">
             <div class="operations-header">
-                <div class="col-check" title="Pointage bancaire">✔</div>
+                <div class="col-check" title="Pointage">✔</div>
                 <div class="col-details">Date & Objet</div>
-                <div class="col-cat" id="headerCat" title="Voir les statistiques par catégorie" style="cursor: pointer; color: #2196F3; text-decoration: underline;">Catégorie 📊</div>
+                <div class="col-cat" id="headerCat" style="cursor: pointer; color: #2196F3; text-decoration: underline;">Catégorie 📊</div>
                 <div class="col-mode">Mode</div>
                 <div class="col-out">Sorties</div>
                 <div class="col-in">Entrées</div>
                 <div class="col-balance">Solde</div>
-                <div class="col-actions" style="text-align: right; padding-right: 5px;">Actions</div>
+                <div class="col-actions">Actions</div>
             </div>
         </div>
     </div>
 
-    <div class="container">
-        <div class="operations-list" id="operationsList">
-            </div>
-    </div>
-
+    <div class="container"><div class="operations-list" id="operationsList"></div></div>
     <button class="floating-add" id="btnOpenModal" title="Nouvelle opération">+</button>
 
     <dialog id="modalOperation">
         <h2 style="margin-top: 0;">Nouvelle Opération</h2>
         <form id="formOperation">
             <div style="display: flex; gap: 1rem;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Type</label>
-                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                        <label><input type="radio" name="opType" id="typeSortie" value="sortie" checked> Dépense</label>
-                        <label><input type="radio" name="opType" id="typeEntree" value="entree"> Recette</label>
-                    </div>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="dateOp">Date</label>
-                    <input type="date" id="dateOp" name="dateOp" required>
-                </div>
+                <div class="form-group" style="flex: 1;"><label>Type</label><div style="display: flex; gap: 1rem; margin-top: 0.5rem;"><label><input type="radio" name="opType" id="typeSortie" value="sortie" checked> Dépense</label><label><input type="radio" name="opType" id="typeEntree" value="entree"> Recette</label></div></div>
+                <div class="form-group" style="flex: 1;"><label for="dateOp">Date</label><input type="date" id="dateOp" name="dateOp" required></div>
             </div>
-
-            <div class="form-group">
-                <label for="objet">Objet</label>
-                <input type="text" id="objet" name="objet" required placeholder="Ex: Courses Carrefour">
-            </div>
-
+            <div class="form-group"><label for="objet">Objet</label><input type="text" id="objet" name="objet" required></div>
             <div style="display: flex; gap: 1rem;">
-                <div class="form-group" style="flex: 1;">
-                    <label for="montant">Montant total (€)</label>
-                    <input type="number" id="montant" name="montant" step="0.01" min="0.01" required placeholder="0.00">
-                </div>
-                <div class="form-group" style="flex: 1; display: flex; align-items: flex-end;">
-                    <button type="button" id="btnOpenInstallments" class="btn-secondary" style="width: 100%; height: 38px; color: #333; border-color: #ccc;">⏱️ Paiement X fois</button>
-                </div>
+                <div class="form-group" style="flex: 1;"><label for="montant">Montant total (€)</label><input type="number" id="montant" name="montant" step="0.01" min="0.01" required></div>
+                <div class="form-group" style="flex: 1; display: flex; align-items: flex-end;"><button type="button" id="btnOpenInstallments" class="btn-secondary" style="width: 100%; height: 38px; color: #333; border-color: #ccc;">⏱️ Paiement X fois</button></div>
             </div>
-
             <div style="display: flex; gap: 1rem;">
-                <div class="form-group" style="flex: 1;">
-                    <label for="categorie">Catégorie</label>
-                    <input type="text" id="categorie" name="categorie" list="categoriesList" required>
-                    <datalist id="categoriesList">
-                        <option value="Alimentation"><option value="Logement"><option value="Transport"><option value="Loisirs"><option value="Santé"><option value="Salaire"><option value="Épargne">
-                    </datalist>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="modeReglement">Mode de Règl.</label>
-                    <input type="text" id="modeReglement" name="modeReglement" list="modesList" required>
-                    <datalist id="modesList">
-                        <option value="CB"><option value="Prélèvement"><option value="Virement"><option value="Chèque"><option value="Espèces">
-                    </datalist>
-                </div>
+                <div class="form-group" style="flex: 1;"><label for="categorie">Catégorie</label><input type="text" id="categorie" name="categorie" list="categoriesList" required></div>
+                <div class="form-group" style="flex: 1;"><label for="modeReglement">Mode</label><input type="text" id="modeReglement" name="modeReglement" list="modesList" required></div>
             </div>
-
-            <div class="form-group" id="recurrentContainer" style="display: flex; align-items: center; gap: 0.5rem; background: #f0f8ff; padding: 0.5rem; border-radius: 4px;">
-                <input type="checkbox" id="isRecurrent" name="isRecurrent">
-                <label for="isRecurrent" style="margin: 0; font-weight: normal;">Opération récurrente classique</label>
-            </div>
-            
-            <div id="recurrentSettingsWrapper" style="display: none; background: #f0f8ff; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #cce5ff;">
-                <div style="display: flex; gap: 1rem;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Répéter tous les (mois) :</label>
-                        <input type="number" id="intervalMois" name="intervalMois" min="1" value="1">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Date de fin (Optionnel) :</label>
-                        <input type="date" id="dateFinRecurrence" name="dateFinRecurrence">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group" id="abonnementContainer" style="display: flex; align-items: center; gap: 0.5rem; background: #e8f5e9; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
-                <input type="checkbox" id="isAbonnement" name="isAbonnement">
-                <label for="isAbonnement" style="margin: 0; font-weight: normal; color: #2e7d32; font-weight: bold;">Abonnement (Internet, Netflix...)</label>
-            </div>
-
-            <div id="abonnementSettingsWrapper" style="display: none; background: #e8f5e9; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #c8e6c9;">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Fréquence de l'abonnement :</label>
-                    <select id="freqAbonnement" name="freqAbonnement">
-                        <option value="1">Mensuel (Tous les mois)</option>
-                        <option value="12">Annuel (Une fois par an)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="dialog-buttons">
-                <button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelModal">Annuler</button>
-                <button type="submit" class="btn-primary">Enregistrer</button>
-            </div>
+            <div class="form-group" id="recurrentContainer" style="display: flex; align-items: center; gap: 0.5rem; background: #f0f8ff; padding: 0.5rem; border-radius: 4px;"><input type="checkbox" id="isRecurrent" name="isRecurrent"><label for="isRecurrent" style="margin: 0; font-weight: normal;">Opération récurrente classique</label></div>
+            <div id="recurrentSettingsWrapper" style="display: none; background: #f0f8ff; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #cce5ff;"><div style="display: flex; gap: 1rem;"><div class="form-group" style="flex: 1;"><label>Répéter tous les (mois):</label><input type="number" id="intervalMois" name="intervalMois" min="1" value="1"></div><div class="form-group" style="flex: 1;"><label>Date de fin (Optionnel):</label><input type="date" id="dateFinRecurrence" name="dateFinRecurrence"></div></div></div>
+            <div class="form-group" id="abonnementContainer" style="display: flex; align-items: center; gap: 0.5rem; background: #e8f5e9; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;"><input type="checkbox" id="isAbonnement" name="isAbonnement"><label for="isAbonnement" style="margin: 0; font-weight: normal; color: #2e7d32; font-weight: bold;">Abonnement</label></div>
+            <div id="abonnementSettingsWrapper" style="display: none; background: #e8f5e9; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #c8e6c9;"><div class="form-group" style="margin-bottom: 0;"><label>Fréquence :</label><select id="freqAbonnement" name="freqAbonnement"><option value="1">Mensuel</option><option value="12">Annuel</option></select></div></div>
+            <div class="dialog-buttons"><button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelModal">Annuler</button><button type="submit" class="btn-primary">Enregistrer</button></div>
         </form>
     </dialog>
 
     <dialog id="modalInstallments">
-        <h2 style="margin-top: 0;">Créer un échéancier</h2>
-        <div class="form-group">
-            <label>Nombre d'échéances</label>
-            <div style="display: flex; gap: 1rem;">
-                <input type="number" id="installmentsCount" min="2" max="24" value="3" style="flex: 1;">
-                <button type="button" id="btnGenerateInstallments" class="btn-secondary" style="color:#333; border-color:#ccc;">Calculer</button>
-            </div>
-        </div>
-        <div id="installmentsList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
-            </div>
-        <div class="dialog-buttons">
-            <button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelInstallments">Annuler</button>
-            <button type="button" class="btn-primary" id="btnSaveInstallments">Valider l'échéancier</button>
-        </div>
+        <h2 style="margin-top: 0;">Échéancier</h2>
+        <div class="form-group"><label>Nombre d'échéances</label><div style="display: flex; gap: 1rem;"><input type="number" id="installmentsCount" min="2" max="24" value="3" style="flex: 1;"><button type="button" id="btnGenerateInstallments" class="btn-secondary" style="color:#333; border-color:#ccc;">Calculer</button></div></div>
+        <div id="installmentsList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
+        <div class="dialog-buttons"><button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelInstallments">Annuler</button><button type="button" class="btn-primary" id="btnSaveInstallments">Valider</button></div>
     </dialog>
 
     <dialog id="modalInitBalance">
         <h2 style="margin-top: 0;">Solde Initial</h2>
-        <p style="font-size: 0.9rem; color: #666;">Définissez le solde de départ pour ce compte.</p>
         <form id="formInitBalance">
-            <div class="form-group">
-                <label for="dateInit">Date</label>
-                <input type="date" id="dateInit" name="dateInit" required>
-            </div>
-            <div class="form-group">
-                <label for="montantInit">Montant (€)</label>
-                <input type="number" id="montantInit" name="montantInit" step="0.01" required>
-            </div>
-            <div class="dialog-buttons">
-                <button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelInit">Annuler</button>
-                <button type="submit" class="btn-primary">Enregistrer</button>
-            </div>
+            <div class="form-group"><label>Date</label><input type="date" id="dateInit" required></div>
+            <div class="form-group"><label>Montant (€)</label><input type="number" id="montantInit" step="0.01" required></div>
+            <div class="dialog-buttons"><button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelInit">Annuler</button><button type="submit" class="btn-primary">Valider</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="modalTransfer">
+        <form id="formTransfer" method="dialog">
+            <h2 style="margin-top: 0;">Virement Interne</h2>
+            <div class="form-group"><label for="dateTransfer">Date du virement</label><input type="date" id="dateTransfer" required></div>
+            <div class="form-group"><label for="montantTransfer">Montant transféré (€)</label><input type="number" step="0.01" min="0.01" id="montantTransfer" required></div>
+            <div class="form-group"><label for="compteSource">Depuis (Débité)</label><select id="compteSource" required></select></div>
+            <div class="form-group"><label for="compteDest">Vers (Crédité)</label><select id="compteDest" required></select></div>
+            <div class="dialog-buttons"><button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelTransfer">Annuler</button><button type="submit" class="btn-primary">Transférer</button></div>
         </form>
     </dialog>
 
     <dialog id="modalBankManager">
         <h2 style="margin-top: 0;">Gérer les Comptes</h2>
         <ul id="bankListContainer" style="list-style: none; padding: 0; margin-bottom: 1.5rem;"></ul>
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-            <input type="text" id="newBankName" placeholder="Nouveau compte..." style="flex: 1; padding: 0.5rem;">
-            <button type="button" id="btnAddNewBank" class="btn-primary">Ajouter</button>
-        </div>
-        <div class="dialog-buttons" style="border-top: 1px solid #eee; padding-top: 1rem;">
-            <button type="button" id="btnCloseBankManager" class="btn-primary">Fermer</button>
-        </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;"><input type="text" id="newBankName" placeholder="Nouveau compte..." style="flex: 1; padding: 0.5rem;"><button type="button" id="btnAddNewBank" class="btn-primary">Ajouter</button></div>
+        <div class="dialog-buttons" style="border-top: 1px solid #eee; padding-top: 1rem;"><button type="button" id="btnCloseBankManager" class="btn-primary">Fermer</button></div>
     </dialog>
 
     <dialog id="modalSearch">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h2 style="margin: 0;">Rechercher</h2>
-            <button type="button" id="btnCloseSearch" class="btn-action" style="font-size: 1.5rem;">❌</button>
-        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;"><h2 style="margin: 0;">Rechercher</h2><button type="button" id="btnCloseSearch" class="btn-action">❌</button></div>
         <input type="text" id="searchInput" placeholder="Mot clé, montant, date..." style="width: 100%; padding: 0.8rem; font-size: 1rem; border: 2px solid var(--primary-color); border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem;">
         <div id="searchResults" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;"></div>
     </dialog>
 
     <dialog id="modalStats" style="max-width: 500px; width: 95%;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h2 style="margin: 0;">Statistiques par Catégorie</h2>
-            <button type="button" id="btnCloseStats" class="btn-action" style="font-size: 1.5rem;">❌</button>
-        </div>
-        <div class="form-group">
-            <label for="statType">Type d'analyse</label>
-            <select id="statType">
-                <option value="depenses">Dépenses (Sorties)</option>
-                <option value="recettes">Recettes (Entrées)</option>
-            </select>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group" style="flex: 1;">
-                <label for="statStartDate">Du</label>
-                <input type="date" id="statStartDate">
-            </div>
-            <div class="form-group" style="flex: 1;">
-                <label for="statEndDate">Au</label>
-                <input type="date" id="statEndDate">
-            </div>
-        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;"><h2 style="margin: 0;">Statistiques</h2><button type="button" id="btnCloseStats" class="btn-action">❌</button></div>
+        <div class="form-group"><label>Type</label><select id="statType"><option value="depenses">Dépenses</option><option value="recettes">Recettes</option></select></div>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;"><div class="form-group" style="flex: 1;"><label>Du</label><input type="date" id="statStartDate"></div><div class="form-group" style="flex: 1;"><label>Au</label><input type="date" id="statEndDate"></div></div>
         <div id="statsResults" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; border-top: 1px solid #eee; padding-top: 1rem;"></div>
     </dialog>
+
+    <datalist id="categoriesList"><option value="Alimentation"><option value="Logement"><option value="Transport"><option value="Loisirs"><option value="Santé"><option value="Salaire"><option value="Virement interne"></datalist>
+    <datalist id="modesList"><option value="CB"><option value="Prélèvement"><option value="Virement"><option value="Chèque"><option value="Espèces"></datalist>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // ----------------------------------------------------
-        // 1. DÉSINFECTION DU NAVIGATEUR (Anti-Cache / Anti-Zombies)
-        // ----------------------------------------------------
-        if (navigator.serviceWorker) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                for (let r of registrations) r.unregister();
-            });
-        }
-        // Suppression totale des anciennes sauvegardes locales pour éviter les conflits
+        if (navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(r => r.forEach(x => x.unregister()));
         localStorage.removeItem('budget_operations');
-        localStorage.removeItem('budget_sync_queue');
 
-        // ----------------------------------------------------
-        // 2. INITIALISATION SUPABASE (Connexion Directe)
-        // ----------------------------------------------------
-        let supabaseClient = null;
-        try {
-            if (window.supabase) {
-                supabaseClient = window.supabase.createClient('https://zwbwkhqyjeeykixtpldi.supabase.co', 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC');
-            }
-        } catch (err) { console.error("Erreur init Supabase :", err); }
+        // INITIALISATION SUPABASE AVEC LE SECRET (Met ton mot de passe ici)
+        const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
+        const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+            global: { headers: { 'x-my-secret-key': 'MON_MOT_DE_PASSE_SECRET' } }
+        });
 
-        // ----------------------------------------------------
-        // 3. ÉTAT GLOBAL
-        // ----------------------------------------------------
-        let operations = []; // Sera TOUJOURS rempli par Supabase, jamais par le navigateur
+        let operations = []; 
         let banks = JSON.parse(localStorage.getItem('budget_banks')) || [{ id: 'bank_1', name: 'Compte Courant' }];
         let currentBankId = localStorage.getItem('budget_currentBankId') || 'bank_1';
         let editingOpId = null;
 
-        let currentDateObj = new Date();
-        let displayMonth = currentDateObj.getMonth();
-        let displayYear = currentDateObj.getFullYear();
+        let displayMonth = new Date().getMonth(); let displayYear = new Date().getFullYear();
 
         const loadingOverlay = document.getElementById('loadingOverlay');
-        function showLoading() { loadingOverlay.style.display = 'flex'; }
-        function hideLoading() { loadingOverlay.style.display = 'none'; }
+        const showLoading = () => loadingOverlay.style.display = 'flex';
+        const hideLoading = () => loadingOverlay.style.display = 'none';
 
-        // Sauvegarde locale (UNIQUEMENT pour les banques)
-        function saveLocalState() {
-            localStorage.setItem('budget_banks', JSON.stringify(banks));
-            localStorage.setItem('budget_currentBankId', currentBankId);
-        }
+        function saveLocalState() { localStorage.setItem('budget_banks', JSON.stringify(banks)); localStorage.setItem('budget_currentBankId', currentBankId); }
 
-        // ----------------------------------------------------
-        // 4. MOTEUR DE SYNCHRONISATION DIRECTE
-        // ----------------------------------------------------
         async function fetchCloudData() {
-            if (!supabaseClient) return alert("Erreur BDD : Client introuvable.");
             showLoading();
             try {
-                const { data, error } = await supabaseClient.from('operations').select('*');
+                const { data, error } = await supabaseClient.from('operations').select('*').order('date', { ascending: true });
                 if (error) throw error;
-                operations = data || [];
-                renderOperations();
-                updateTotals();
-            } catch (err) {
-                console.error("Erreur téléchargement BDD :", err);
-                alert("Impossible de récupérer les données. Vérifie ta connexion.");
-            } finally { hideLoading(); }
+                operations = data || []; renderOperations(); updateTotals();
+            } catch (err) { console.error(err); alert("Erreur cloud."); } finally { hideLoading(); }
         }
 
-        // ----------------------------------------------------
-        // 5. AFFICHAGE ET INTERFACE
-        // ----------------------------------------------------
-        const bankSelector = document.getElementById('bankSelector');
-        const operationsList = document.getElementById('operationsList');
-        const spanTotalPrevu = document.getElementById('totalPrevu');
-        const spanTotalPointe = document.getElementById('totalPointe');
-        const currentMonthLabel = document.getElementById('currentMonthLabel');
+        function setupRealtime() {
+            supabaseClient.channel('public:operations').on('postgres_changes', { event: '*', schema: 'public', table: 'operations' }, (payload) => {
+                const dot = document.getElementById('statusDot'); dot.style.backgroundColor = '#ffeb3b'; setTimeout(() => dot.style.backgroundColor = '#4CAF50', 500);
+                if (payload.eventType === 'INSERT' && !operations.some(o => o.id === payload.new.id)) operations.push(payload.new);
+                else if (payload.eventType === 'UPDATE') { const idx = operations.findIndex(o => o.id === payload.new.id); if (idx !== -1) operations[idx] = payload.new; else operations.push(payload.new); }
+                else if (payload.eventType === 'DELETE') operations = operations.filter(o => o.id !== payload.old.id);
+                renderOperations(); updateTotals();
+            }).subscribe((status) => { if(status === 'SUBSCRIBED') { document.getElementById('statusDot').classList.add('online'); document.getElementById('statusText').textContent = 'En direct'; } });
+        }
 
+        document.getElementById('btnForceSync').addEventListener('click', fetchCloudData);
         document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
         document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
 
-        function updateMonthDisplay() {
-            const tempDate = new Date(displayYear, displayMonth);
-            currentMonthLabel.textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(tempDate);
-        }
-
         function changeMonth(delta) {
-            displayMonth += delta;
-            if (displayMonth > 11) { displayMonth = 0; displayYear++; } 
-            else if (displayMonth < 0) { displayMonth = 11; displayYear--; }
-            updateMonthDisplay(); renderOperations(); updateTotals();
+            displayMonth += delta; if (displayMonth > 11) { displayMonth = 0; displayYear++; } else if (displayMonth < 0) { displayMonth = 11; displayYear--; }
+            document.getElementById('currentMonthLabel').textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(displayYear, displayMonth));
+            renderOperations(); updateTotals();
         }
 
-        function parseOpDate(dateString) {
-            const [year, month] = dateString.split('-');
-            return { year: parseInt(year, 10), month: parseInt(month, 10) - 1 };
-        }
-
-        function getCarryoverBalance() {
-            const bankOps = operations.filter(op => op.bankId === currentBankId);
-            return bankOps.reduce((sum, op) => {
-                const opDate = parseOpDate(op.date);
-                if (opDate.year < displayYear || (opDate.year === displayYear && opDate.month < displayMonth)) return sum + op.montant;
-                return sum;
-            }, 0);
-        }
-
-        function getCurrentMonthOperations() {
-            return operations.filter(op => {
-                if (op.bankId !== currentBankId) return false;
-                const opDate = parseOpDate(op.date);
-                return opDate.year === displayYear && opDate.month === displayMonth;
-            });
-        }
+        function getCarryoverBalance() { return operations.filter(op => op.bankId === currentBankId).reduce((sum, op) => { const [y, m] = op.date.split('-'); if (parseInt(y) < displayYear || (parseInt(y) === displayYear && parseInt(m) - 1 < displayMonth)) return sum + op.montant; return sum; }, 0); }
+        function getCurrentMonthOps() { return operations.filter(op => { if (op.bankId !== currentBankId) return false; const [y, m] = op.date.split('-'); return parseInt(y) === displayYear && parseInt(m) - 1 === displayMonth; }).sort((a, b) => a.date < b.date ? -1 : 1); }
 
         function renderOperations() {
-            operationsList.innerHTML = ''; 
-            const carryover = getCarryoverBalance();
-            const currentMonthOps = getCurrentMonthOperations();
+            const list = document.getElementById('operationsList'); list.innerHTML = ''; 
+            const carryover = getCarryoverBalance(); const currentMonthOps = getCurrentMonthOps();
             
-            currentMonthOps.sort((a, b) => (a.date < b.date ? -1 : (a.date > b.date ? 1 : 0)));
-
-            const reportDiv = document.createElement('div');
-            reportDiv.className = 'operation-item op-report';
+            const reportDiv = document.createElement('div'); reportDiv.className = 'operation-item op-report';
             reportDiv.innerHTML = `<div class="col-check"></div><div class="op-details"><span class="op-objet">Report du mois précédent</span></div><div></div><div></div><div class="col-out"></div><div class="col-in"></div><div class="col-balance">${carryover.toFixed(2)} €</div><div class="col-actions"></div>`;
-            operationsList.appendChild(reportDiv);
+            list.appendChild(reportDiv);
 
             let currentBalance = carryover;
-            const opsWithBalance = currentMonthOps.map(op => { currentBalance += op.montant; return { ...op, soldeEnDirect: currentBalance }; });
+            currentMonthOps.forEach(op => {
+                currentBalance += op.montant; const isDep = op.montant < 0; const [y, m, d] = op.date.split('-');
+                
+                // BADGE ABO RETROACTIF ET ICONES
+                const aboIcon = op.isAbonnement ? `<span style="background: #4CAF50; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;">📅 Abo</span>` : '';
+                const instIcon = op.totalInstallments ? `<span style="background: #ff9800; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;">${op.totalInstallments}x</span>` : '';
+                const recIcon = (op.isRecurrent && !op.isAbonnement) ? '🔄 ' : '';
+                const icons = `${aboIcon}${instIcon}${recIcon}`;
 
-            opsWithBalance.forEach(op => {
-                const isDépense = op.montant < 0;
-                const [y, m, d] = op.date.split('-');
-                const recurentIcon = (op.isRecurrent && !op.isAbonnement) ? '🔄 ' : '';
-                const aboIcon = op.isAbonnement ? `<span style="background: #4CAF50; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;" title="Abonnement">📅 Abo</span>` : '';
-                const installmentIcon = op.totalInstallments ? `<span style="background: #ff9800; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;" title="Paiement en ${op.totalInstallments} fois">${op.totalInstallments}x</span>` : '';
-
-                const disabledInline = op.objet === 'Solde Initial' ? 'disabled' : '';
-                const opDiv = document.createElement('div');
-                opDiv.className = `operation-item${op.pointee ? ' op-pointee' : ''}`; 
+                const opDiv = document.createElement('div'); opDiv.className = `operation-item ${op.pointee ? 'op-pointee' : ''}`; 
                 opDiv.innerHTML = `
                     <div class="col-check"><input type="checkbox" class="check-op" data-id="${op.id}" ${op.pointee ? 'checked' : ''}></div>
-                    <div class="op-details"><span class="op-date">${d}/${m}</span><span class="op-objet">${aboIcon}${installmentIcon}${recurentIcon}${op.objet}</span></div>
-                    <div><input class="inline-input edit-cat" list="categoriesList" value="${op.categorie}" data-id="${op.id}" ${disabledInline}></div>
-                    <div><input class="inline-input edit-mode" list="modesList" value="${op.modeReglement}" data-id="${op.id}" ${disabledInline}></div>
-                    <div class="col-out">${isDépense ? Math.abs(op.montant).toFixed(2) + ' €' : ''}</div>
-                    <div class="col-in">${!isDépense ? '+' + op.montant.toFixed(2) + ' €' : ''}</div>
-                    <div class="col-balance">${op.soldeEnDirect.toFixed(2)} €</div>
-                    <div class="col-actions">
-                        <button type="button" class="btn-action edit-op" data-id="${op.id}">✏️</button>
-                        <button type="button" class="btn-action delete-op" data-id="${op.id}">🗑️</button>
-                    </div>`;
-                operationsList.appendChild(opDiv);
+                    <div class="op-details"><span class="op-date">${d}/${m}</span><span class="op-objet">${icons}${op.objet}</span></div>
+                    <div><input class="inline-input edit-cat" list="categoriesList" value="${op.categorie}" data-id="${op.id}" ${op.objet==='Solde Initial'?'disabled':''}></div>
+                    <div><input class="inline-input edit-mode" list="modesList" value="${op.modeReglement}" data-id="${op.id}" ${op.objet==='Solde Initial'?'disabled':''}></div>
+                    <div class="col-out">${isDep ? Math.abs(op.montant).toFixed(2) + ' €' : ''}</div>
+                    <div class="col-in">${!isDep ? '+' + op.montant.toFixed(2) + ' €' : ''}</div>
+                    <div class="col-balance">${currentBalance.toFixed(2)} €</div>
+                    <div class="col-actions"><button type="button" class="btn-action edit-op" data-id="${op.id}">✏️</button><button type="button" class="btn-action delete-op" data-id="${op.id}">🗑️</button></div>
+                `;
+                list.appendChild(opDiv);
             });
         }
 
         function updateTotals() {
-            const currentMonthOps = getCurrentMonthOperations();
-            const carryover = getCarryoverBalance();
-            spanTotalPrevu.textContent = (carryover + currentMonthOps.reduce((acc, curr) => acc + curr.montant, 0)).toFixed(2) + ' €';
-            spanTotalPointe.textContent = (carryover + currentMonthOps.filter(op => op.pointee).reduce((acc, curr) => acc + curr.montant, 0)).toFixed(2) + ' €';
+            const carryover = getCarryoverBalance(); const currentMonthOps = getCurrentMonthOps();
+            document.getElementById('totalPrevu').textContent = (carryover + currentMonthOps.reduce((a, c) => a + c.montant, 0)).toFixed(2) + ' €';
+            document.getElementById('totalPointe').textContent = (carryover + currentMonthOps.filter(o => o.pointee).reduce((a, c) => a + c.montant, 0)).toFixed(2) + ' €';
         }
 
-        // Modification en ligne (Direct Database Update)
-        operationsList.addEventListener('change', async (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const op = operations.find(o => o.id === id);
-            if (!op) return;
-
-            let updatedOp = { ...op };
-            if (e.target.classList.contains('edit-cat')) updatedOp.categorie = e.target.value;
-            if (e.target.classList.contains('edit-mode')) updatedOp.modeReglement = e.target.value;
-            if (e.target.classList.contains('check-op')) updatedOp.pointee = e.target.checked;
-
-            showLoading();
-            const { error } = await supabaseClient.from('operations').upsert(updatedOp);
-            if (error) alert("Erreur BDD");
-            await fetchCloudData(); // Re-télécharge pour valider
+        document.getElementById('operationsList').addEventListener('change', async (e) => {
+            const id = parseInt(e.target.dataset.id); const op = operations.find(o => o.id === id); if (!op) return;
+            let updatePayload = {};
+            if (e.target.classList.contains('edit-cat')) updatePayload = { categorie: e.target.value };
+            if (e.target.classList.contains('edit-mode')) updatePayload = { modeReglement: e.target.value };
+            if (e.target.classList.contains('check-op')) updatePayload = { pointee: e.target.checked };
+            Object.assign(op, updatePayload); renderOperations(); updateTotals();
+            await supabaseClient.from('operations').update(updatePayload).eq('id', id);
         });
 
-        // ----------------------------------------------------
-        // 6. GESTION DES COMPTES (Banques)
-        // ----------------------------------------------------
-        function renderBanksDropdown() {
-            bankSelector.innerHTML = '';
-            banks.forEach(b => bankSelector.add(new Option(b.name, b.id)));
-            bankSelector.value = currentBankId;
-        }
+        const bankSelector = document.getElementById('bankSelector');
+        function renderBanksDropdown() { bankSelector.innerHTML = ''; banks.forEach(b => bankSelector.add(new Option(b.name, b.id))); bankSelector.value = currentBankId; }
         bankSelector.addEventListener('change', (e) => { currentBankId = e.target.value; saveLocalState(); renderOperations(); updateTotals(); });
 
         const modalBankManager = document.getElementById('modalBankManager');
-        document.getElementById('btnManageBanks').addEventListener('click', () => { renderBankManagerList(); modalBankManager.showModal(); });
-        document.getElementById('btnCloseBankManager').addEventListener('click', () => { modalBankManager.close(); renderBanksDropdown(); renderOperations(); updateTotals(); });
-
-        function renderBankManagerList() {
+        document.getElementById('btnManageBanks').addEventListener('click', () => { 
             const container = document.getElementById('bankListContainer'); container.innerHTML = '';
             banks.forEach(bank => {
                 const li = document.createElement('li'); li.style.marginBottom = "5px";
-                li.innerHTML = `<span style="${bank.id === currentBankId ? 'font-weight:bold' : ''}">${bank.name}</span> <button class="btn-icon" onclick="renameBank('${bank.id}')">✏️</button> <button class="btn-danger" onclick="deleteBank('${bank.id}')">❌</button>`;
+                li.innerHTML = `<span style="${bank.id === currentBankId ? 'font-weight:bold' : ''}">${bank.name}</span> <button class="btn-icon" onclick="renameBank('${bank.id}')">✏️</button><button class="btn-primary" style="background:#e53935; padding: 2px 5px;" onclick="deleteBank('${bank.id}')">❌</button>`;
                 container.appendChild(li);
             });
-        }
-        window.renameBank = (id) => { const b = banks.find(x=>x.id===id); const nn = prompt('Nouveau nom :', b.name); if(nn) { b.name = nn; saveLocalState(); renderBankManagerList(); } };
-        window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible de supprimer l'unique compte."); if(confirm('Supprimer ?')) { banks = banks.filter(x=>x.id!==id); if(currentBankId===id) currentBankId = banks[0].id; saveLocalState(); renderBankManagerList(); } };
-        document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value; if(n) { banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalState(); renderBankManagerList(); } });
+            modalBankManager.showModal(); 
+        });
+        document.getElementById('btnCloseBankManager').addEventListener('click', () => { modalBankManager.close(); renderBanksDropdown(); renderOperations(); updateTotals(); });
+        window.renameBank = (id) => { const b = banks.find(x=>x.id===id); const nn = prompt('Nouveau nom:', b.name); if(nn) { b.name = nn.trim(); saveLocalState(); document.getElementById('btnManageBanks').click(); } };
+        window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible de supprimer."); if(confirm('Supprimer ?')) { banks = banks.filter(b=>b.id!==id); if(currentBankId===id) currentBankId=banks[0].id; saveLocalState(); document.getElementById('btnManageBanks').click(); } };
+        document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value.trim(); if(n) { banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalState(); document.getElementById('btnManageBanks').click(); } });
 
-        // ----------------------------------------------------
-        // 7. FORMULAIRES & CRUD (Ajout/Modif/Suppression)
-        // ----------------------------------------------------
+        // VIREMENT INTERNE
+        const modalTransfer = document.getElementById('modalTransfer');
+        document.getElementById('btnTransfer').addEventListener('click', () => {
+            if(banks.length < 2) return alert("Il faut au moins 2 comptes.");
+            const sSelect = document.getElementById('compteSource'); const dSelect = document.getElementById('compteDest');
+            sSelect.innerHTML = ''; dSelect.innerHTML = '';
+            banks.forEach(b => { sSelect.add(new Option(b.name, b.id)); dSelect.add(new Option(b.name, b.id)); });
+            sSelect.value = currentBankId; dSelect.value = banks.find(b => b.id !== currentBankId)?.id || banks[0].id;
+            document.getElementById('dateTransfer').value = new Date().toISOString().split('T')[0];
+            document.getElementById('formTransfer').reset(); modalTransfer.showModal();
+        });
+        document.getElementById('btnCancelTransfer').addEventListener('click', () => modalTransfer.close());
+        document.getElementById('formTransfer').addEventListener('submit', async (e) => {
+            e.preventDefault(); const sId = document.getElementById('compteSource').value; const dId = document.getElementById('compteDest').value;
+            const amt = parseFloat(document.getElementById('montantTransfer').value); const dOp = document.getElementById('dateTransfer').value;
+            if(sId === dId) return alert("Comptes identiques !"); if(isNaN(amt) || amt <= 0) return alert("Montant invalide.");
+            showLoading(); const ts = Date.now();
+            const opS = { id: ts, "bankId": sId, date: dOp, objet: 'Virement émis', montant: -amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": false, "isAbonnement": false, pointee: false };
+            const opD = { id: ts+1, "bankId": dId, date: dOp, objet: 'Virement reçu', montant: amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": false, "isAbonnement": false, pointee: false };
+            const { error } = await supabaseClient.from('operations').insert([opS, opD]);
+            hideLoading(); if(error) alert("Erreur."); else modalTransfer.close();
+        });
+
+        // FORMULAIRE OPERATION
+        const modalOp = document.getElementById('modalOperation'); const formOp = document.getElementById('formOperation'); let installmentsData = null;
+        document.getElementById('isAbonnement').addEventListener('change', (e) => { document.getElementById('abonnementSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked){ document.getElementById('isRecurrent').checked = false; document.getElementById('recurrentSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
+        document.getElementById('isRecurrent').addEventListener('change', (e) => { document.getElementById('recurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked){ document.getElementById('isAbonnement').checked = false; document.getElementById('abonnementSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
         
-        // -- Solde Initial
         const modalInit = document.getElementById('modalInitBalance');
         document.getElementById('btnInitBalance').addEventListener('click', () => { editingOpId = null; document.getElementById('dateInit').value = new Date().toISOString().split('T')[0]; modalInit.showModal(); });
-        document.getElementById('btnCancelInit').addEventListener('click', () => { modalInit.close(); document.getElementById('formInitBalance').reset(); });
-        
-        document.getElementById('formInitBalance').addEventListener('submit', async (e) => {
-            e.preventDefault(); const fd = new FormData(e.target); showLoading();
-            const payload = editingOpId ? { ...operations.find(o=>o.id===editingOpId), date: fd.get('dateInit'), montant: parseFloat(fd.get('montantInit')) } 
-                                        : { id: Date.now(), bankId: currentBankId, date: fd.get('dateInit'), objet: 'Solde Initial', montant: parseFloat(fd.get('montantInit')), modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true };
-            const { error } = await supabaseClient.from('operations').upsert(payload);
-            if(error) alert("Erreur BDD");
-            await fetchCloudData(); modalInit.close(); e.target.reset(); editingOpId = null;
-        });
+        document.getElementById('btnCancelInit').addEventListener('click', () => { modalInit.close(); document.getElementById('formInitBalance').reset(); editingOpId = null; });
+        document.getElementById('formInitBalance').addEventListener('submit', async (e) => { e.preventDefault(); showLoading(); const opD = { bankId: currentBankId, date: document.getElementById('dateInit').value, objet: 'Solde Initial', montant: parseFloat(document.getElementById('montantInit').value), modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true }; if (editingOpId) opD.id = editingOpId; else opD.id = Date.now(); await supabaseClient.from('operations').upsert(opD); modalInit.close(); e.target.reset(); editingOpId = null; hideLoading(); });
 
-        // -- Opérations Courantes
-        const modalOp = document.getElementById('modalOperation'), formOp = document.getElementById('formOperation');
-        const btnOpenInstallments = document.getElementById('btnOpenInstallments'), recurrentContainer = document.getElementById('recurrentContainer'), abonnementContainer = document.getElementById('abonnementContainer');
-        let installmentsData = null;
+        const modalInst = document.getElementById('modalInstallments'); const instList = document.getElementById('installmentsList');
+        document.getElementById('btnOpenInstallments').addEventListener('click', () => { if(parseFloat(document.getElementById('montant').value)>0) modalInst.showModal(); else alert("Saisir montant."); });
+        document.getElementById('btnCancelInstallments').addEventListener('click', () => { installmentsData=null; document.getElementById('btnOpenInstallments').textContent="⏱️ Paiement X fois"; modalInst.close(); });
+        document.getElementById('btnGenerateInstallments').addEventListener('click', () => { const count = parseInt(document.getElementById('installmentsCount').value); const baseAmt = parseFloat(document.getElementById('montant').value); let [y, m, d] = (document.getElementById('dateOp').value||new Date().toISOString().split('T')[0]).split('-'); instList.innerHTML=''; const splitAmt = Math.floor((baseAmt/count)*100)/100; let rem = baseAmt; let cy=parseInt(y), cm=parseInt(m)-1; for(let i=0; i<count; i++) { let tD = new Date(cy, cm, parseInt(d)); if(tD.getMonth()!==cm) tD = new Date(cy, cm+1, 0); let rAmt = (i===count-1)?Math.round(rem*100)/100:splitAmt; rem-=splitAmt; instList.innerHTML += `<div class="installment-row"><span>#${i+1}</span><input type="date" class="inst-date" value="${tD.toISOString().split('T')[0]}"><input type="number" step="0.01" class="inst-amount" value="${rAmt.toFixed(2)}"></div>`; cm++; if(cm>11){cm=0; cy++;} } });
+        document.getElementById('btnSaveInstallments').addEventListener('click', () => { const rows = instList.querySelectorAll('.installment-row'); if(!rows.length) return; installmentsData=[]; rows.forEach((r,i) => installmentsData.push({part:i+1, totalParts:rows.length, date:r.querySelector('.inst-date').value, amount:parseFloat(r.querySelector('.inst-amount').value)})); document.getElementById('btnOpenInstallments').textContent=`✅ En ${rows.length} fois`; document.getElementById('isRecurrent').checked=false; document.getElementById('isAbonnement').checked=false; modalInst.close(); });
 
-        document.getElementById('isAbonnement').addEventListener('change', (e) => { document.getElementById('abonnementSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked) { document.getElementById('isRecurrent').checked = false; document.getElementById('recurrentSettingsWrapper').style.display = 'none'; btnOpenInstallments.style.display = 'none'; } else btnOpenInstallments.style.display = 'block'; });
-        document.getElementById('isRecurrent').addEventListener('change', (e) => { document.getElementById('recurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked) { document.getElementById('isAbonnement').checked = false; document.getElementById('abonnementSettingsWrapper').style.display = 'none'; btnOpenInstallments.style.display = 'none'; } else btnOpenInstallments.style.display = 'block'; });
-
-        // -- Échéancier
-        const modalInst = document.getElementById('modalInstallments'), instList = document.getElementById('installmentsList');
-        btnOpenInstallments.addEventListener('click', () => { if(parseFloat(document.getElementById('montant').value)>0) modalInst.showModal(); else alert("Saisir un montant d'abord."); });
-        document.getElementById('btnCancelInstallments').addEventListener('click', () => { installmentsData = null; btnOpenInstallments.textContent = "⏱️ Paiement X fois"; modalInst.close(); });
-        document.getElementById('btnGenerateInstallments').addEventListener('click', () => {
-            const count = parseInt(document.getElementById('installmentsCount').value), baseAmt = parseFloat(document.getElementById('montant').value), baseDate = document.getElementById('dateOp').value;
-            instList.innerHTML = ''; const splitAmt = Math.floor((baseAmt/count)*100)/100; let rem = baseAmt;
-            let [y, m, d] = baseDate.split('-'); let cy = parseInt(y), cm = parseInt(m)-1;
-            for(let i=0; i<count; i++) {
-                let tempD = new Date(cy, cm, parseInt(d)); if(tempD.getMonth()!==cm) tempD = new Date(cy, cm+1, 0);
-                let rAmt = (i===count-1) ? Math.round(rem*100)/100 : splitAmt; rem -= splitAmt;
-                instList.innerHTML += `<div class="installment-row">#${i+1} <input type="date" class="inst-date" value="${tempD.toISOString().split('T')[0]}"> <input type="number" step="0.01" class="inst-amount" value="${rAmt.toFixed(2)}"></div>`;
-                cm++; if(cm>11){cm=0; cy++;}
-            }
-        });
-        document.getElementById('btnSaveInstallments').addEventListener('click', () => {
-            const rows = instList.querySelectorAll('.installment-row'); installmentsData = [];
-            rows.forEach((r,i) => installmentsData.push({part:i+1, totalParts:rows.length, date:r.querySelector('.inst-date').value, amount:parseFloat(r.querySelector('.inst-amount').value)}));
-            btnOpenInstallments.textContent = `✅ En ${rows.length} fois`; modalInst.close();
-        });
-
-        // -- Soumission Formulaire Principal
-        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; installmentsData=null; formOp.reset(); btnOpenInstallments.textContent="⏱️ Paiement X fois"; btnOpenInstallments.style.display='block'; document.getElementById('dateOp').value = new Date().toISOString().split('T')[0]; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
-        document.getElementById('btnCancelModal').addEventListener('click', () => { modalOp.close(); formOp.reset(); installmentsData=null; });
+        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; installmentsData=null; document.getElementById('btnOpenInstallments').style.display='block'; document.getElementById('btnOpenInstallments').textContent="⏱️ Paiement X fois"; formOp.reset(); document.getElementById('dateOp').value=new Date().toISOString().split('T')[0]; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
+        document.getElementById('btnCancelModal').addEventListener('click', () => { modalOp.close(); formOp.reset(); });
 
         formOp.addEventListener('submit', async (e) => {
-            e.preventDefault(); const fd = new FormData(e.target); showLoading();
-            const mt = Math.abs(parseFloat(fd.get('montant'))); const mf = fd.get('opType') === 'sortie' ? -mt : mt;
-            let opsToInsert = [];
-
-            if (editingOpId) {
-                const cop = operations.find(o => o.id === editingOpId);
-                let applyFuture = false;
-                if(cop.recurringId) { const ans = prompt("1: Ce mois, 2: Ce mois et suivants"); if(ans==='2') applyFuture=true; if(ans!=='1'&&ans!=='2'){hideLoading();return;} }
-                
-                if(applyFuture) {
-                    const [ny, nm, nd] = fd.get('dateOp').split('-');
-                    operations.forEach(o => {
-                        if(o.recurringId === cop.recurringId && o.date >= cop.date) {
-                            const [oy, om, od] = o.date.split('-'); let td = new Date(parseInt(oy), parseInt(om)-1, parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td = new Date(parseInt(oy), parseInt(om), 0);
-                            opsToInsert.push({ ...o, date: td.toISOString().split('T')[0], objet: fd.get('objet'), montant: mf, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie') });
-                        }
-                    });
-                } else {
-                    opsToInsert.push({ ...cop, date: fd.get('dateOp'), objet: fd.get('objet'), montant: mf, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie') });
-                }
+            e.preventDefault(); showLoading(); const fd = new FormData(e.target); const amt = Math.abs(parseFloat(fd.get('montant'))); const fAmt = fd.get('opType')==='sortie'?-amt:amt;
+            const isAbo = fd.get('isAbonnement')==='on'; const isRec = fd.get('isRecurrent')==='on'||isAbo; let opsToPush=[];
+            if (editingOpId) { const cop = operations.find(o=>o.id===editingOpId); let aF = false; if(cop.recurringId){ const ans=prompt("1: Ce mois\n2: Ce mois ET suivants"); if(ans==='2') aF=true; else if(ans!=='1'){hideLoading();return;} }
+                if(aF){ const [ny,nm,nd]=fd.get('dateOp').split('-'); operations.filter(o=>o.recurringId===cop.recurringId&&o.date>=cop.date).forEach(o=>{ const [oy,om]=o.date.split('-'); let td=new Date(parseInt(oy),parseInt(om)-1,parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td=new Date(parseInt(oy),parseInt(om),0); opsToPush.push({...o, date:td.toISOString().split('T')[0], objet:fd.get('objet'), montant:fAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')}); }); }
+                else opsToPush.push({...cop, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
             } else {
-                if (installmentsData) {
-                    const iId = Date.now();
-                    installmentsData.forEach((inst, idx) => opsToInsert.push({ id: Date.now()+idx, installmentId: iId, totalInstallments: installmentsData.length, bankId: currentBankId, date: inst.date, objet: `${fd.get('objet')} (${inst.part}/${inst.totalParts})`, montant: fd.get('opType')==='sortie'?-inst.amount:inst.amount, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: false, pointee: false }));
-                } else if (fd.get('isRecurrent') || fd.get('isAbonnement')) {
-                    const rId = Date.now(), isAbo = !!fd.get('isAbonnement');
-                    let intM = parseInt(fd.get(isAbo?'freqAbonnement':'intervalMois'))||1;
-                    let maxO = isAbo ? (intM===12?10:120) : 120;
-                    let ey = 2099, em = 11; if(!isAbo && fd.get('dateFinRecurrence')) { const [y,m]=fd.get('dateFinRecurrence').split('-'); ey=parseInt(y); em=parseInt(m)-1; maxO=1200; }
-                    let [by, bm, bd] = fd.get('dateOp').split('-'); let cy=parseInt(by), cm=parseInt(bm)-1, d=parseInt(bd);
-                    for(let i=0; i<maxO; i++) {
-                        if(cy>ey || (cy===ey && cm>em)) break;
-                        let td = new Date(cy, cm, d); if(td.getMonth()!==cm) td = new Date(cy, cm+1, 0);
-                        opsToInsert.push({ id: rId+i, recurringId: rId, bankId: currentBankId, date: td.toISOString().split('T')[0], objet: fd.get('objet'), montant: mf, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: true, isAbonnement: isAbo, intervalMois: intM, pointee: false });
-                        cm+=intM; while(cm>11){cm-=12;cy++;}
-                    }
-                } else {
-                    opsToInsert.push({ id: Date.now(), bankId: currentBankId, date: fd.get('dateOp'), objet: fd.get('objet'), montant: mf, modeReglement: fd.get('modeReglement'), categorie: fd.get('categorie'), isRecurrent: false, pointee: false });
-                }
+                if(installmentsData){ const instId=Date.now(); installmentsData.forEach((inst,i)=>opsToPush.push({id:Date.now()+i, installmentId:instId, totalInstallments:installmentsData.length, bankId:currentBankId, date:inst.date, objet:`${fd.get('objet')} (${inst.part}/${inst.totalParts})`, montant:fd.get('opType')==='sortie'?-inst.amount:inst.amount, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false})); }
+                else if(isRec){ const recId=Date.now(); let intM=isAbo?parseInt(fd.get('freqAbonnement'))||1:parseInt(fd.get('intervalMois'))||1; let maxOp=isAbo?(intM===12?10:120):120; let eY=2099, eM=11; if(!isAbo&&fd.get('dateFinRecurrence')){ const [y,m]=fd.get('dateFinRecurrence').split('-'); eY=parseInt(y); eM=parseInt(m)-1; maxOp=1200; } let [cy,cm,d]=fd.get('dateOp').split('-'); cy=parseInt(cy); cm=parseInt(cm)-1; d=parseInt(d); for(let i=0; i<maxOp; i++){ if(cy>eY||(cy===eY&&cm>eM)) break; let td=new Date(cy,cm,d); if(td.getMonth()!==cm) td=new Date(cy,cm+1,0); opsToPush.push({id:recId+i, recurringId:recId, bankId:currentBankId, date:td.toISOString().split('T')[0], objet:fd.get('objet'), montant:fAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:true, isAbonnement:isAbo, intervalMois:intM, pointee:false}); cm+=intM; while(cm>11){cm-=12; cy++;} } }
+                else opsToPush.push({id:Date.now(), bankId:currentBankId, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false});
             }
-
-            const { error } = await supabaseClient.from('operations').upsert(opsToInsert);
-            if(error) alert("Erreur BDD");
-            await fetchCloudData(); modalOp.close(); formOp.reset(); editingOpId = null; installmentsData = null;
+            const { error } = await supabaseClient.from('operations').upsert(opsToPush); if(error) alert("Erreur BDD"); modalOp.close(); formOp.reset(); editingOpId=null; installmentsData=null; hideLoading();
         });
 
-        // -- Suppression
-        operationsList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('delete-op')) {
-                const op = operations.find(o => o.id === parseInt(e.target.dataset.id)); let ids = [];
-                if (op.recurringId) {
-                    const ans = prompt("1: Ce mois, 2: Cascade"); if(ans==='1') ids.push(op.id); else if(ans==='2') operations.filter(o=>o.recurringId===op.recurringId&&o.date>=op.date).forEach(o=>ids.push(o.id)); else return;
-                } else if (op.installmentId) {
-                    const ans = prompt("1: Cette échéance, 2: Toutes"); if(ans==='1') ids.push(op.id); else if(ans==='2') operations.filter(o=>o.installmentId===op.installmentId).forEach(o=>ids.push(o.id)); else return;
-                } else {
-                    if(!confirm('Supprimer ?')) return; ids.push(op.id);
-                }
-                showLoading();
-                const { error } = await supabaseClient.from('operations').delete().in('id', ids);
-                if(error) alert("Erreur BDD"); await fetchCloudData();
-            }
-            if (e.target.classList.contains('edit-op')) {
-                const op = operations.find(o => o.id === parseInt(e.target.dataset.id));
-                if(op.objet === 'Solde Initial') { editingOpId=op.id; document.getElementById('dateInit').value=op.date; document.getElementById('montantInit').value=op.montant; modalInit.showModal(); return; }
-                editingOpId = op.id; document.getElementById('dateOp').value=op.date; document.getElementById('objet').value=op.objet; document.getElementById('montant').value=Math.abs(op.montant); document.getElementById(op.montant<0?'typeSortie':'typeEntree').checked=true; document.getElementById('categorie').value=op.categorie; document.getElementById('modeReglement').value=op.modeReglement; document.getElementById('isRecurrent').checked = op.isRecurrent&&!op.isAbonnement; document.getElementById('isAbonnement').checked = op.isAbonnement||false; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; btnOpenInstallments.style.display='none'; modalOp.showModal();
-            }
+        document.getElementById('operationsList').addEventListener('click', async (e) => {
+            if (e.target.closest('.delete-op')) { const btn=e.target.closest('.delete-op'); const opId=parseInt(btn.dataset.id); const op=operations.find(o=>o.id===opId); let ids=[]; if(op.recurringId){ const ans=prompt("1: Ce mois\n2: Cascade"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.recurringId===op.recurringId&&o.date>=op.date).map(o=>o.id); else return; } else if(op.installmentId){ const ans=prompt("1: Cette échéance\n2: Toutes"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.installmentId===op.installmentId).map(o=>o.id); else return; } else { if(!confirm('Supprimer ?')) return; ids.push(opId); } showLoading(); await supabaseClient.from('operations').delete().in('id', ids); hideLoading(); }
+            if (e.target.closest('.edit-op')) { const btn=e.target.closest('.edit-op'); const opId=parseInt(btn.dataset.id); const op=operations.find(o=>o.id===opId); if(op){ editingOpId=opId; if(op.objet==='Solde Initial'){ document.getElementById('dateInit').value=op.date; document.getElementById('montantInit').value=op.montant; document.getElementById('modalInitBalance').showModal(); return; } document.getElementById('dateOp').value=op.date; document.getElementById('objet').value=op.objet; document.getElementById('montant').value=Math.abs(op.montant); document.getElementById(op.montant<0?'typeSortie':'typeEntree').checked=true; document.getElementById('modeReglement').value=op.modeReglement; document.getElementById('categorie').value=op.categorie; document.getElementById('btnOpenInstallments').style.display='none'; if(op.isRecurrent&&!op.isAbonnement) document.getElementById('isRecurrent').checked=true; if(op.isAbonnement) document.getElementById('isAbonnement').checked=true; modalOp.showModal(); } }
         });
 
-        // ----------------------------------------------------
-        // IMPORT / EXPORT (Sauvegarde et Restauration)
-        // ----------------------------------------------------
-        
-        // --- SAUVEGARDER (Export JSON) ---
-        document.getElementById('btnExport').addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ operations: operations, banks: banks, currentBankId: currentBankId }));
-            const dn = document.createElement('a'); 
-            dn.href = dataStr; 
-            dn.download = "budget_sauvegarde.json"; 
-            document.body.appendChild(dn); 
-            dn.click(); 
-            dn.remove();
-        });
-
-        // --- RESTAURER (Import JSON Blindé) ---
+        document.getElementById('btnExport').addEventListener('click', () => { const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({operations, banks, currentBankId})); const dn=document.createElement('a'); dn.href=dataStr; dn.download="budget_sauvegarde_cloud.json"; document.body.appendChild(dn); dn.click(); dn.remove(); });
         document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
-        
-        document.getElementById('fileImport').addEventListener('change', (e) => {
-            const file = e.target.files[0]; 
-            if(!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = async function(ev) {
-                try {
-                    const imported = JSON.parse(ev.target.result);
-                    
-                    if(imported.operations && imported.banks) {
-                        
-                        // 1. LE DIAGNOSTIC CRUCIAL
-                        const confirmation = confirm(`⚠️ DIAGNOSTIC :\nVotre fichier contient exactement ${imported.operations.length} opérations.\n\nSi ce chiffre vous paraît correct (c'est bien vos données à jour), cliquez sur OK pour écraser le cloud.`);
-                        if(!confirmation) return;
-                        
-                        showLoading();
-                        
-                        banks = imported.banks; 
-                        currentBankId = imported.currentBankId || banks[0].id; 
-                        saveLocalState(); 
-                        renderBanksDropdown();
-                        
-                        // 2. Nettoyage absolu (neq -1 garantit de contourner certaines sécurités Supabase)
-                        const { error: delError } = await supabaseClient.from('operations').delete().neq('id', -1);
-                        if(delError) {
-                            console.error("Erreur de suppression du Cloud:", delError);
-                            alert("Supabase a refusé de vider l'ancienne base ! Regardez la console.");
-                            throw delError;
-                        }
-                        
-                        // 3. Insertion par paquets (Chunks) pour ne jamais faire planter le serveur
-                        const chunkSize = 100;
-                        for (let i = 0; i < imported.operations.length; i += chunkSize) {
-                            const chunk = imported.operations.slice(i, i + chunkSize);
-                            const { error: insError } = await supabaseClient.from('operations').insert(chunk);
-                            
-                            if (insError) {
-                                console.error("Erreur d'insertion au paquet", i, ":", insError);
-                                alert("Supabase a bloqué l'insertion d'une partie des données !");
-                                throw insError;
-                            }
-                        }
-                        
-                        alert("✅ Restauration 100% validée ! Le cloud a parfaitement ingéré votre fichier.");
-                        
-                        await fetchCloudData();
-                        
-                    } else {
-                        alert("Fichier de sauvegarde invalide ou corrompu.");
-                    }
-                } catch(err) { 
-                    alert("Le processus a été interrompu par une erreur. Vérifiez la console avec F12."); 
-                    console.error(err); 
-                } finally {
-                    hideLoading(); 
-                }
-            }; 
-            reader.readAsText(file); 
-            e.target.value = ''; 
-        });
-        // ----------------------------------------------------
-        // 9. RECHERCHE ET STATISTIQUES
-        // ----------------------------------------------------
-        // -- Recherche
-        const modalSearch = document.getElementById('modalSearch'), searchInput = document.getElementById('searchInput'), searchResults = document.getElementById('searchResults');
-        document.getElementById('btnOpenSearch').addEventListener('click', () => { searchInput.value=''; searchResults.innerHTML=''; modalSearch.showModal(); setTimeout(()=>searchInput.focus(), 50); });
+        document.getElementById('fileImport').addEventListener('change', (e) => { const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.readAsText(file,"UTF-8"); reader.onload=async function(ev){ try{ const imp=JSON.parse(ev.target.result.trim().replace(/^\uFEFF/,"")); if(imp.operations&&imp.banks){ if(!confirm(`Écraser le Cloud avec ${imp.operations.length} lignes ?`)) return; showLoading(); banks=imp.banks; currentBankId=imp.currentBankId||banks[0].id; saveLocalState(); renderBanksDropdown(); await supabaseClient.from('operations').delete().neq('id',-1); for(let i=0; i<imp.operations.length; i+=100) await supabaseClient.from('operations').insert(imp.operations.slice(i,i+100)); alert("✅ Restauration réussie !"); await fetchCloudData(); }else alert("Fichier invalide."); }catch(err){alert("Erreur.");console.error(err);}finally{hideLoading();} }; e.target.value=''; });
+
+        const modalSearch=document.getElementById('modalSearch'), searchInput=document.getElementById('searchInput'), searchResults=document.getElementById('searchResults');
+        document.getElementById('btnOpenSearch').addEventListener('click', () => { searchInput.value=''; searchResults.innerHTML=''; modalSearch.showModal(); setTimeout(()=>searchInput.focus(),50); });
         document.getElementById('btnCloseSearch').addEventListener('click', () => modalSearch.close());
-        searchInput.addEventListener('input', (e) => {
-            const t = e.target.value.toLowerCase().trim(); searchResults.innerHTML=''; if(t.length<2) return;
-            const res = operations.filter(o=>o.bankId===currentBankId).filter(o=>`${o.date} ${o.objet} ${o.montant} ${o.categorie} ${o.modeReglement}`.toLowerCase().includes(t));
-            res.sort((a,b)=>a.date<b.date?-1:1).forEach(o => {
-                searchResults.innerHTML += `<div style="background:#f9f9f9; padding:0.5rem; border:1px solid #eee; margin-bottom:0.5rem; display:flex; justify-content:space-between;"><div><span style="font-size:0.8rem; color:#666;">${o.date} - ${o.categorie}</span><br><b>${o.objet}</b></div><div style="color:${o.montant<0?'#e53935':'#4CAF50'}; font-weight:bold;">${o.montant} €</div></div>`;
-            });
-        });
+        searchInput.addEventListener('input', (e) => { const t=e.target.value.toLowerCase().trim(); searchResults.innerHTML=''; if(t.length<2) return; const res=operations.filter(o=>o.bankId===currentBankId&&`${o.date} ${o.objet} ${o.montant} ${o.categorie} ${o.modeReglement}`.toLowerCase().includes(t)); res.sort((a,b)=>a.date<b.date?-1:1).forEach(o=>{ searchResults.innerHTML+=`<div style="background:#f9f9f9; padding:0.5rem; border:1px solid #eee; margin-bottom:0.5rem; display:flex; justify-content:space-between;"><div><span style="font-size:0.8rem; color:#666;">${o.date} - ${o.categorie}</span><br><b>${o.objet}</b></div><div style="color:${o.montant<0?'#e53935':'#4CAF50'}; font-weight:bold;">${o.montant} €</div></div>`; }); });
 
-        // -- Statistiques
-        const modalStats = document.getElementById('modalStats'), statTypeInput = document.getElementById('statType'), statStartInput = document.getElementById('statStartDate'), statEndInput = document.getElementById('statEndDate'), statsResults = document.getElementById('statsResults');
-        function calculateStats() {
-            const type = statTypeInput.value, start = statStartInput.value, end = statEndInput.value;
-            let fOps = operations.filter(o=>o.bankId===currentBankId && o.objet!=='Solde Initial');
-            if(start) fOps = fOps.filter(o=>o.date>=start); if(end) fOps = fOps.filter(o=>o.date<=end);
-            const totals = {}; let gTotal = 0;
-            fOps.forEach(o => { if((type==='depenses'&&o.montant>=0)||(type==='recettes'&&o.montant<=0)) return; const c = o.categorie||'Non catégorisé'; totals[c]=(totals[c]||0)+o.montant; gTotal+=o.montant; });
-            statsResults.innerHTML = `<div style="text-align:right; font-weight:bold; color:${type==='depenses'?'#e53935':'#4CAF50'}">Total : ${Math.abs(gTotal).toFixed(2)} €</div>`;
-            Object.entries(totals).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).forEach(([c, amt]) => {
-                const pct = gTotal!==0 ? (Math.abs(amt)/Math.abs(gTotal))*100 : 0;
-                statsResults.innerHTML += `<div style="margin-bottom:0.5rem;"><div style="display:flex; justify-content:space-between; font-size:0.9rem;"><span>${c}</span><span>${Math.abs(amt).toFixed(2)}€ (${pct.toFixed(1)}%)</span></div><div style="background:#eee; height:8px; border-radius:4px;"><div style="width:${pct}%; background:${type==='depenses'?'#f44336':'#4CAF50'}; height:100%; border-radius:4px;"></div></div></div>`;
-            });
-        }
-        document.getElementById('headerCat').addEventListener('click', () => {
-            const d = new Date(), fd = new Date(d.getFullYear(), d.getMonth(), 1), ld = new Date(d.getFullYear(), d.getMonth()+1, 0);
-            statStartInput.value=`${fd.getFullYear()}-${String(fd.getMonth()+1).padStart(2,'0')}-01`; statEndInput.value=`${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`;
-            calculateStats(); modalStats.showModal();
-        });
-        document.getElementById('btnCloseStats').addEventListener('click', () => modalStats.close());
-        ['change'].forEach(evt => { statTypeInput.addEventListener(evt, calculateStats); statStartInput.addEventListener(evt, calculateStats); statEndInput.addEventListener(evt, calculateStats); });
+        const modalStats=document.getElementById('modalStats'), statType=document.getElementById('statType'), statStart=document.getElementById('statStartDate'), statEnd=document.getElementById('statEndDate'), statsRes=document.getElementById('statsResults');
+        function calcStats() { const t=statType.value, s=statStart.value, e=statEnd.value; let f=operations.filter(o=>o.bankId===currentBankId&&o.objet!=='Solde Initial'); if(s) f=f.filter(o=>o.date>=s); if(e) f=f.filter(o=>o.date<=e); const tot={}; let gt=0; f.forEach(o=>{ if((t==='depenses'&&o.montant>=0)||(t==='recettes'&&o.montant<=0)) return; const c=o.categorie||'Non catégorisé'; tot[c]=(tot[c]||0)+o.montant; gt+=o.montant; }); statsRes.innerHTML=`<div style="text-align:right; font-weight:bold; color:${t==='depenses'?'#e53935':'#4CAF50'}">Total : ${Math.abs(gt).toFixed(2)} €</div>`; Object.entries(tot).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).forEach(([c,a])=>{ const pct=gt!==0?(Math.abs(a)/Math.abs(gt))*100:0; statsRes.innerHTML+=`<div style="margin-bottom:0.5rem;"><div style="display:flex; justify-content:space-between; font-size:0.9rem;"><span>${c}</span><span>${Math.abs(a).toFixed(2)}€ (${pct.toFixed(1)}%)</span></div><div style="background:#eee; height:8px; border-radius:4px;"><div style="width:${pct}%; background:${t==='depenses'?'#f44336':'#4CAF50'}; height:100%; border-radius:4px;"></div></div></div>`; }); }
+        document.getElementById('headerCat').addEventListener('click', () => { const d=new Date(), fd=new Date(d.getFullYear(),d.getMonth(),1), ld=new Date(d.getFullYear(),d.getMonth()+1,0); statStart.value=`${fd.getFullYear()}-${String(fd.getMonth()+1).padStart(2,'0')}-01`; statEnd.value=`${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`; calcStats(); modalStats.showModal(); });
+        document.getElementById('btnCloseStats').addEventListener('click', () => modalStats.close()); ['change'].forEach(evt=>{ statType.addEventListener(evt,calcStats); statStart.addEventListener(evt,calcStats); statEnd.addEventListener(evt,calcStats); });
 
-        // ----------------------------------------------------
-        // 10. LANCEMENT INITIAL
-        // ----------------------------------------------------
-        updateMonthDisplay();
+        document.getElementById('currentMonthLabel').textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(displayYear, displayMonth));
         renderBanksDropdown();
-        // Lancement du téléchargement BDD direct !
-        fetchCloudData();
-        // ----------------------------------------------------
-        // 11. ÉCOUTE TEMPS RÉEL (SUPABASE REALTIME)
-        // ----------------------------------------------------
-        if (supabaseClient) {
-            supabaseClient
-                .channel('ecoute-operations')
-                .on(
-                    'postgres_changes',
-                    { event: '*', schema: 'public', table: 'operations' },
-                    (payload) => {
-                        console.log('⚡ Changement en direct détecté !', payload.eventType);
-
-                        if (payload.eventType === 'INSERT') {
-                            // Si une nouvelle ligne est créée (ex: depuis le téléphone)
-                            // On vérifie qu'elle n'est pas déjà là (pour éviter les doublons avec nous-même)
-                            if (!operations.find(o => o.id === payload.new.id)) {
-                                operations.push(payload.new);
-                            }
-                        } 
-                        else if (payload.eventType === 'UPDATE') {
-                            // Si une ligne est modifiée (ex: pointage, changement de catégorie)
-                            const index = operations.findIndex(o => o.id === payload.new.id);
-                            if (index !== -1) {
-                                operations[index] = payload.new; // On remplace par la nouvelle version
-                            } else {
-                                operations.push(payload.new); // Au cas où on l'avait ratée
-                            }
-                        } 
-                        else if (payload.eventType === 'DELETE') {
-                            // Si une ligne est supprimée
-                            operations = operations.filter(o => o.id !== payload.old.id);
-                        }
-
-                        // On rafraîchit l'affichage en direct à l'écran
-                        renderOperations();
-                        updateTotals();
-                    }
-                )
-                .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') {
-                        console.log('🟢 Connecté');
-                    }
-                });
-        }
-
+        fetchCloudData().then(setupRealtime);
     </script>
 </body>
 </html>
