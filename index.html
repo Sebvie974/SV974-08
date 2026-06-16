@@ -188,8 +188,8 @@
                 </div>
                 
                 <div class="budget-summary">
-                    <div class="summary-item"><span class="label">Prévu</span><span class="amount" id="totalPrevu">0.00 €</span></div>
-                    <div class="summary-item"><span class="label">Pointé</span><span class="amount" id="totalPointe">0.00 €</span></div>
+                    <div class="summary-item"><span class="label">Prévu Fin de Mois</span><span class="amount" id="totalPrevu">0.00 €</span></div>
+                    <div class="summary-item"><span class="label">Solde Pointé Actuel</span><span class="amount" id="totalPointe">0.00 €</span></div>
                     <div class="cloud-status" title="Statut Supabase"><div id="statusDot" class="status-dot"></div><span id="statusText">Connexion...</span></div>
                 </div>
             </div>
@@ -313,14 +313,13 @@
         if (navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
         localStorage.removeItem('budget_operations');
 
-        // INIT SUPABASE CLOUD
+        // INIT SUPABASE CLOUD (Remplace bien le mot de passe secret)
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
             global: { headers: { 'x-my-secret-key': 'MON_MOT_DE_PASSE_SECRET' } }
         });
 
-        // FONCTION MAGIQUE ANTI-FUSEAU HORAIRE
         const toLocalISODate = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
         let operations = [];
@@ -401,10 +400,14 @@
             });
         }
 
+        // --- CORRECTION DU SOLDE POINTÉ GLOBAL ---
         function updateTotals() {
             const c = getCarryoverBalance(); const mOps = getCurrentMonthOps();
             document.getElementById('totalPrevu').textContent = (c + mOps.reduce((a, o) => a + o.montant, 0)).toFixed(2) + ' €';
-            document.getElementById('totalPointe').textContent = (c + mOps.filter(o => o.pointee).reduce((a, o) => a + o.montant, 0)).toFixed(2) + ' €';
+            
+            // Le solde pointé est maintenant le total absolu de toutes les opérations cochées
+            const globalPointe = operations.filter(o => o.bankId === currentBankId && o.pointee).reduce((a, o) => a + o.montant, 0);
+            document.getElementById('totalPointe').textContent = globalPointe.toFixed(2) + ' €';
         }
 
         document.getElementById('operationsList').addEventListener('change', async (e) => {
@@ -412,8 +415,18 @@
             let p = {}; if(e.target.classList.contains('edit-cat')) p = { categorie: e.target.value };
             if(e.target.classList.contains('edit-mode')) p = { modeReglement: e.target.value };
             if(e.target.classList.contains('check-op')) p = { pointee: e.target.checked };
+            
             Object.assign(op, p); renderOperations(); updateTotals();
             await supabaseClient.from('operations').update(p).eq('id', id);
+
+            // SYNC DU JUMEAU (Pour les éditions rapides de ligne)
+            if (!e.target.classList.contains('check-op')) {
+                const twin = operations.find(o => o.id !== op.id && o.date === op.date && o.montant === -op.montant && Math.abs(o.id - op.id) <= 5);
+                if (twin && (twin.categorie === 'Virement interne' || twin.objet.includes('Virement'))) {
+                    Object.assign(twin, p);
+                    await supabaseClient.from('operations').update(p).eq('id', twin.id);
+                }
+            }
         });
 
         const bankSel = document.getElementById('bankSelector');
@@ -435,7 +448,6 @@
         window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible."); if(confirm('Supprimer ?')){ banks=banks.filter(b=>b.id!==id); if(currentBankId===id) currentBankId=banks[0].id; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
         document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value.trim(); if(n){ banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } });
 
-        // VIREMENT INTERNE
         const modalTransfer = document.getElementById('modalTransfer');
         
         document.getElementById('isTransferRecurrent').addEventListener('change', (e) => {
@@ -525,9 +537,40 @@
         formOp.addEventListener('submit', async (e) => {
             e.preventDefault(); showLoading(); const fd = new FormData(e.target); const amt = Math.abs(parseFloat(fd.get('montant'))); const fA = fd.get('opType')==='sortie' ? -amt : amt;
             const isAbo = fd.get('isAbonnement')==='on'; const isRec = fd.get('isRecurrent')==='on'||isAbo; let pOps=[];
-            if (editingOpId) { const cop = operations.find(o=>o.id===editingOpId); let aF = false; if(cop.recurringId){ const ans=prompt("1: Ce mois\n2: Ce mois ET suivants"); if(ans==='2') aF=true; else if(ans!=='1'){hideLoading();return;} }
-                if(aF){ const [ny,nm,nd]=fd.get('dateOp').split('-'); operations.filter(o=>o.recurringId===cop.recurringId&&o.date>=cop.date).forEach(o=>{ const [oy,om]=o.date.split('-'); let td=new Date(parseInt(oy),parseInt(om)-1,parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td=new Date(parseInt(oy),parseInt(om),0); pOps.push({...o, date:toLocalISODate(td), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')}); }); }
-                else pOps.push({...cop, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
+            
+            if (editingOpId) { 
+                const cop = operations.find(o=>o.id===editingOpId); let aF = false; 
+                if(cop.recurringId){ const ans=prompt("1: Ce mois\n2: Ce mois ET suivants"); if(ans==='2') aF=true; else if(ans!=='1'){hideLoading();return;} }
+                
+                if(aF){ 
+                    const [ny,nm,nd]=fd.get('dateOp').split('-'); 
+                    operations.filter(o=>o.recurringId===cop.recurringId&&o.date>=cop.date).forEach(o=>{ 
+                        const [oy,om]=o.date.split('-'); let td=new Date(parseInt(oy),parseInt(om)-1,parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td=new Date(parseInt(oy),parseInt(om),0); 
+                        pOps.push({...o, date:toLocalISODate(td), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')}); 
+                        
+                        // MAJ Jumeau Récurrent
+                        const twin = operations.find(t => t.id !== o.id && t.date === o.date && t.montant === -o.montant && Math.abs(t.id - o.id) <= 5 && t.recurringId === cop.recurringId);
+                        if (twin) {
+                            const twinAmt = fA * (twin.montant / o.montant);
+                            let twinObj = fd.get('objet');
+                            if (twinObj.startsWith("Virement émis")) twinObj = twinObj.replace("Virement émis", "Virement reçu");
+                            else if (twinObj.startsWith("Virement reçu")) twinObj = twinObj.replace("Virement reçu", "Virement émis");
+                            pOps.push({...twin, date:toLocalISODate(td), objet:twinObj, montant:twinAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
+                        }
+                    }); 
+                }
+                else {
+                    pOps.push({...cop, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
+                    // MAJ Jumeau Unique
+                    const twin = operations.find(t => t.id !== cop.id && t.date === cop.date && t.montant === -cop.montant && Math.abs(t.id - cop.id) <= 5);
+                    if (twin && (twin.categorie === 'Virement interne' || twin.objet.includes('Virement'))) {
+                        const twinAmt = fA * (twin.montant / cop.montant);
+                        let twinObj = fd.get('objet');
+                        if (twinObj.startsWith("Virement émis")) twinObj = twinObj.replace("Virement émis", "Virement reçu");
+                        else if (twinObj.startsWith("Virement reçu")) twinObj = twinObj.replace("Virement reçu", "Virement émis");
+                        pOps.push({...twin, date:fd.get('dateOp'), objet:twinObj, montant:twinAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
+                    }
+                }
             } else {
                 if(instData){ const id=Date.now(); instData.forEach((inst,i)=>pOps.push({id:Date.now()+i, installmentId:id, totalInstallments:instData.length, bankId:currentBankId, date:inst.date, objet:`${fd.get('objet')} (${inst.part}/${inst.totalParts})`, montant:fd.get('opType')==='sortie'?-inst.amount:inst.amount, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false})); }
                 else if(isRec){ const rId=Date.now(); let intM=isAbo?parseInt(fd.get('freqAbonnement'))||1:parseInt(fd.get('intervalMois'))||1; let mOp=isAbo?(intM===12?10:120):120; let eY=2099, eM=11; if(!isAbo&&fd.get('dateFinRecurrence')){ const [y,m]=fd.get('dateFinRecurrence').split('-'); eY=parseInt(y); eM=parseInt(m)-1; mOp=1200; } let [cy,cm,d]=fd.get('dateOp').split('-'); cy=parseInt(cy); cm=parseInt(cm)-1; d=parseInt(d); for(let i=0; i<mOp; i++){ if(cy>eY||(cy===eY&&cm>eM)) break; let td=new Date(cy,cm,d); if(td.getMonth()!==cm) td=new Date(cy,cm+1,0); pOps.push({id:rId+i, recurringId:rId, bankId:currentBankId, date:toLocalISODate(td), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:true, isAbonnement:isAbo, intervalMois:intM, pointee:false}); cm+=intM; while(cm>11){cm-=12; cy++;} } }
@@ -537,7 +580,35 @@
         });
 
         document.getElementById('operationsList').addEventListener('click', async (e) => {
-            if(e.target.closest('.delete-op')){ const b=e.target.closest('.delete-op'); const opId=parseInt(b.dataset.id); const op=operations.find(o=>o.id===opId); let ids=[]; if(op.recurringId){ const ans=prompt("1: Ce mois\n2: Cascade"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.recurringId===op.recurringId&&o.date>=op.date).map(o=>o.id); else return; } else if(op.installmentId){ const ans=prompt("1: Echéance\n2: Toutes"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.installmentId===op.installmentId).map(o=>o.id); else return; } else { if(!confirm('Supprimer ?')) return; ids.push(opId); } showLoading(); await supabaseClient.from('operations').delete().in('id', ids); hideLoading(); }
+            if(e.target.closest('.delete-op')){ 
+                const b=e.target.closest('.delete-op'); const opId=parseInt(b.dataset.id); const op=operations.find(o=>o.id===opId); let ids=[]; 
+                if(op.recurringId){ 
+                    const ans=prompt("1: Ce mois\n2: Cascade"); 
+                    if(ans==='1') {
+                        ids.push(opId);
+                        const twin = operations.find(t => t.id !== op.id && t.date === op.date && t.montant === -op.montant && Math.abs(t.id - op.id) <= 5);
+                        if (twin) ids.push(twin.id);
+                    } 
+                    else if(ans==='2') {
+                        const opsToDel = operations.filter(o=>o.recurringId===op.recurringId&&o.date>=op.date);
+                        ids = opsToDel.map(o=>o.id);
+                        opsToDel.forEach(o => {
+                            const twin = operations.find(t => t.id !== o.id && t.date === o.date && t.montant === -o.montant && Math.abs(t.id - o.id) <= 5);
+                            if (twin) ids.push(twin.id);
+                        });
+                    } else return; 
+                } 
+                else if(op.installmentId){ 
+                    const ans=prompt("1: Echéance\n2: Toutes"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.installmentId===op.installmentId).map(o=>o.id); else return; 
+                } 
+                else { 
+                    if(!confirm('Supprimer ?')) return; 
+                    ids.push(opId); 
+                    const twin = operations.find(t => t.id !== op.id && t.date === op.date && t.montant === -op.montant && Math.abs(t.id - op.id) <= 5 && (t.categorie === 'Virement interne' || t.objet.includes('Virement')));
+                    if (twin) ids.push(twin.id);
+                } 
+                showLoading(); await supabaseClient.from('operations').delete().in('id', ids); hideLoading(); 
+            }
             if(e.target.closest('.edit-op')){ const b=e.target.closest('.edit-op'); const opId=parseInt(b.dataset.id); const op=operations.find(o=>o.id===opId); if(op){ editingOpId=opId; if(op.objet==='Solde Initial'){ document.getElementById('dateInit').value=op.date; document.getElementById('montantInit').value=op.montant; document.getElementById('modalInitBalance').showModal(); return; } document.getElementById('dateOp').value=op.date; document.getElementById('objet').value=op.objet; document.getElementById('montant').value=Math.abs(op.montant); document.getElementById(op.montant<0?'typeSortie':'typeEntree').checked=true; document.getElementById('modeReglement').value=op.modeReglement; document.getElementById('categorie').value=op.categorie; document.getElementById('btnOpenInstallments').style.display='none'; if(op.isRecurrent&&!op.isAbonnement) document.getElementById('isRecurrent').checked=true; if(op.isAbonnement) document.getElementById('isAbonnement').checked=true; modalOp.showModal(); } }
         });
 
