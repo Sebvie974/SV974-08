@@ -19,7 +19,7 @@
 
         body { font-family: Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
 
-        /* --- HEADER CLASSIQUE RESTAURÉ --- */
+        /* --- HEADER CLASSIQUE --- */
         .sticky-wrapper { position: sticky; top: 0; z-index: 100; background-color: var(--bg-color); padding-bottom: 5px; }
 
         header {
@@ -125,11 +125,9 @@
             .action-buttons { justify-content: center; width: 100%; margin-top: 5px; }
             .header-bottom { flex-direction: column; gap: 10px; margin-top: 5px; }
             
-            /* Totaux horizontaux sur mobile */
             .budget-summary { flex-direction: row; justify-content: space-between; width: 100%; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; box-sizing: border-box; align-items: center; }
             .summary-item { display: flex; flex-direction: column; align-items: center; margin: 0; }
             
-            /* Cartes opérations (identique à ton choix précédent) */
             .operations-header { display: none; }
             .operation-item { display: grid; grid-template-columns: 35px 1fr 1fr; grid-template-rows: auto auto auto; gap: 10px 5px; padding: 12px 8px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); border: 1px solid #eee; }
             
@@ -153,7 +151,6 @@
             .operation-item.op-report .op-details, .operation-item.op-report .col-balance { display: block; }
             .operation-item.op-report .col-balance::before { content: ""; }
             
-            /* Ajustement des boutons des modales (pas trop gros) */
             dialog { padding: 1.2rem; }
             .modal-actions { flex-direction: row; gap: 10px; }
             .btn-cancel, .btn-submit { flex: 1; text-align: center; font-size: 0.95rem; padding: 0.6rem; }
@@ -268,13 +265,26 @@
         </form>
     </dialog>
 
+    <!-- Modale Virement Interne Améliorée -->
     <dialog id="modalTransfer">
         <form id="formTransfer" method="dialog">
             <h2 style="margin-top: 0;">Virement Interne</h2>
             <div class="form-group"><label>Date du virement</label><input type="date" id="dateTransfer" required></div>
             <div class="form-group"><label>Montant transféré (€)</label><input type="number" step="0.01" min="0.01" id="montantTransfer" required></div>
+            
+            <div class="form-group"><label>Libellé (Optionnel)</label><input type="text" id="libelleTransfer" placeholder="Ex: Épargne mensuelle, Vacances..."></div>
+            
             <div class="form-group"><label>Depuis le compte (Débité)</label><select id="compteSource" required></select></div>
             <div class="form-group"><label>Vers le compte (Crédité)</label><select id="compteDest" required></select></div>
+            
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+                <input type="checkbox" id="isTransferRecurrent"><label for="isTransferRecurrent" style="margin: 0;">Virement récurrent</label>
+            </div>
+            <div id="transferRecurrentSettingsWrapper" style="display: none; background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <label style="font-size: 0.85rem;">Intervalle (mois):</label><input type="number" id="transferIntervalMois" min="1" value="1" style="width: 100%; margin: 5px 0 10px 0;">
+                <label style="font-size: 0.85rem;">Date de fin (optionnel):</label><input type="month" id="transferDateFin" style="width: 100%; margin-top: 5px;">
+            </div>
+
             <div class="modal-actions"><button type="button" id="btnCancelTransfer" class="btn-cancel">Annuler</button><button type="submit" class="btn-submit">Transférer</button></div>
         </form>
     </dialog>
@@ -305,7 +315,7 @@
         if (navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
         localStorage.removeItem('budget_operations');
 
-        // INIT SUPABASE CLOUD
+        // INIT SUPABASE CLOUD (Remplace bien le mot de passe secret si tu l'avais personnalisé)
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
@@ -424,26 +434,71 @@
         window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible."); if(confirm('Supprimer ?')){ banks=banks.filter(b=>b.id!==id); if(currentBankId===id) currentBankId=banks[0].id; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
         document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value.trim(); if(n){ banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } });
 
-        // VIREMENT INTERNE
+        // VIREMENT INTERNE AMÉLIORÉ
         const modalTransfer = document.getElementById('modalTransfer');
+        
+        document.getElementById('isTransferRecurrent').addEventListener('change', (e) => {
+            document.getElementById('transferRecurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none';
+        });
+
         document.getElementById('btnTransfer').addEventListener('click', () => {
             if(banks.length < 2) return alert("Besoin d'au moins 2 comptes.");
             const sSel = document.getElementById('compteSource'); const dSel = document.getElementById('compteDest');
             sSel.innerHTML = ''; dSel.innerHTML = '';
             banks.forEach(b => { sSel.add(new Option(b.name, b.id)); dSel.add(new Option(b.name, b.id)); });
             sSel.value = currentBankId; dSel.value = banks.find(b => b.id !== currentBankId)?.id || banks[0].id;
+            
             document.getElementById('dateTransfer').value = new Date().toISOString().split('T')[0];
+            document.getElementById('libelleTransfer').value = '';
+            document.getElementById('isTransferRecurrent').checked = false;
+            document.getElementById('transferRecurrentSettingsWrapper').style.display = 'none';
+            document.getElementById('transferIntervalMois').value = '1';
+            document.getElementById('transferDateFin').value = '';
+            
             document.getElementById('formTransfer').reset(); modalTransfer.showModal();
         });
+        
         document.getElementById('btnCancelTransfer').addEventListener('click', () => modalTransfer.close());
+        
         document.getElementById('formTransfer').addEventListener('submit', async (e) => {
-            e.preventDefault(); const sId = document.getElementById('compteSource').value; const dId = document.getElementById('compteDest').value;
-            const amt = parseFloat(document.getElementById('montantTransfer').value); const dOp = document.getElementById('dateTransfer').value;
-            if(sId === dId) return alert("Comptes identiques !"); if(isNaN(amt) || amt<=0) return alert("Montant invalide.");
-            showLoading(); const ts = Date.now();
-            const opS = { id: ts, "bankId": sId, date: dOp, objet: 'Virement émis', montant: -amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": false, "isAbonnement": false, pointee: false };
-            const opD = { id: ts+1, "bankId": dId, date: dOp, objet: 'Virement reçu', montant: amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": false, "isAbonnement": false, pointee: false };
-            const { error } = await supabaseClient.from('operations').insert([opS, opD]);
+            e.preventDefault(); 
+            const sId = document.getElementById('compteSource').value; 
+            const dId = document.getElementById('compteDest').value;
+            const amt = parseFloat(document.getElementById('montantTransfer').value); 
+            const dOp = document.getElementById('dateTransfer').value;
+            const lib = document.getElementById('libelleTransfer').value.trim();
+            const isRec = document.getElementById('isTransferRecurrent').checked;
+            const intM = parseInt(document.getElementById('transferIntervalMois').value) || 1;
+            const dateFin = document.getElementById('transferDateFin').value;
+
+            if(sId === dId) return alert("Comptes identiques !"); 
+            if(isNaN(amt) || amt<=0) return alert("Montant invalide.");
+            showLoading(); 
+            
+            let pOps = [];
+            let maxOp = 120; let eY = 2099, eM = 11; 
+            if(isRec && dateFin){ const [y,m] = dateFin.split('-'); eY = parseInt(y); eM = parseInt(m)-1; maxOp = 1200; } 
+            
+            let [cy, cm, d] = dOp.split('-'); cy = parseInt(cy); cm = parseInt(cm)-1; d = parseInt(d); 
+            const rId = isRec ? Date.now() : null;
+            let ts = Date.now();
+            
+            for(let i=0; i<(isRec ? maxOp : 1); i++){ 
+                if(isRec && (cy>eY || (cy===eY && cm>eM))) break; 
+                let td = new Date(cy, cm, d); if(td.getMonth() !== cm) td = new Date(cy, cm+1, 0); 
+                const fDate = td.toISOString().split('T')[0];
+                
+                const objS = lib ? `Virement émis : ${lib}` : 'Virement émis';
+                const objD = lib ? `Virement reçu : ${lib}` : 'Virement reçu';
+
+                pOps.push({ id: ts++, "bankId": sId, date: fDate, objet: objS, montant: -amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": isRec, "isAbonnement": false, pointee: false, recurringId: rId, intervalMois: isRec ? intM : null });
+                pOps.push({ id: ts++, "bankId": dId, date: fDate, objet: objD, montant: amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": isRec, "isAbonnement": false, pointee: false, recurringId: rId, intervalMois: isRec ? intM : null });
+                
+                if(!isRec) break;
+                cm += intM; while(cm>11){ cm-=12; cy++; } 
+            }
+            
+            const { error } = await supabaseClient.from('operations').insert(pOps);
             hideLoading(); if(error) alert("Erreur."); else modalTransfer.close();
         });
 
