@@ -7,85 +7,132 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Mon Budget</title>
+
     <style>
-        :root { --primary-color: #4CAF50; --bg-color: #f4f7f6; --text-color: #333; --expense-color: #e53935; --card-bg: #fff; }
+        :root {
+            --primary-color: #4CAF50;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --expense-color: #e53935;
+            --card-bg: #fff;
+        }
+
         body { font-family: Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
 
+        /* --- HEADER CLASSIQUE RESTAURÉ --- */
         .sticky-wrapper { position: sticky; top: 0; z-index: 100; background-color: var(--bg-color); padding-bottom: 5px; }
-        header { background-color: var(--primary-color); color: white; padding: 0.8rem 1rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .header-top h1 { margin: 0; font-size: 1.5rem; }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 950px !important;
+            margin: 0 auto;
+            box-sizing: border-box;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .bank-management { display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.2); padding: 0.5rem; border-radius: 4px; flex-wrap: wrap; }
+        .bank-management select { width: 150px; padding: 0.3rem; border-radius: 4px; border: none; font-weight: bold; }
         
-        .bank-controls { display: flex; align-items: center; gap: 0.5rem; }
-        .bank-controls select { padding: 0.5rem; border-radius: 4px; border: none; font-weight: bold; }
+        .btn-icon { background: var(--card-bg); color: var(--primary-color); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; padding: 0.3rem 0.6rem; }
+        .btn-secondary { background-color: #607d8b; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-left: auto; font-size: 0.85rem; }
+
+        .action-buttons { display: flex; gap: 0.5rem; margin-left: auto; flex-wrap: wrap; }
+
+        .header-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .month-selector { display: flex; align-items: center; gap: 0.5rem; }
+        .month-selector button { background: rgba(255, 255, 255, 0.2); border: none; border-radius: 4px; color: white; font-size: 1rem; padding: 0.3rem 0.6rem; cursor: pointer; }
+        .month-selector h2 { margin: 0; font-size: 1.1rem; font-weight: normal; min-width: 120px; text-align: center; text-transform: capitalize; }
+
+        .budget-summary { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.9rem; }
+        .summary-item { margin: 2px 0; }
+        .summary-item .label { opacity: 0.8; font-size: 0.8rem; margin-right: 5px; }
+        .summary-item .amount { font-weight: bold; font-size: 1rem; }
+
+        .cloud-status { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; background: rgba(0,0,0,0.15); padding: 3px 6px; border-radius: 8px; margin-top: 4px; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background-color: #ccc; }
+        .status-dot.online { background-color: #fff; box-shadow: 0 0 5px #fff; }
+
+        /* --- CONTENU PRINCIPAL --- */
+        main { padding-bottom: 80px; max-width: 950px; margin: 0 auto; }
+
+        .operations-header { display: grid; grid-template-columns: 30px 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr; padding: 0.5rem 1rem; font-weight: bold; font-size: 0.8rem; color: #666; border-bottom: 2px solid #ddd; margin: 0.5rem auto 0; max-width: 950px; box-sizing: border-box; }
+        .operations-list { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+        .operation-item { display: grid; grid-template-columns: 30px 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr; background: white; padding: 0.8rem 1rem; border-radius: 8px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); gap: 0.5rem; transition: background-color 0.2s ease; }
+        .operation-item.op-pointee { background-color: #f0db9b; }
+        .operation-item.op-report { background: #e3f2fd; font-style: italic; font-weight: bold; }
+
+        .col-check { display: flex; justify-content: center; align-items: center; }
+        .col-check input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        .col-actions { display: flex; gap: 5px; justify-content: flex-end; }
+        .btn-action { background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 2px; border-radius: 4px; transition: background 0.2s; }
+        .btn-action:hover:not([disabled]) { background: #eee; }
+
+        .op-details { display: flex; flex-direction: column; }
+        .op-date { font-size: 0.75rem; color: #666; margin-bottom: 2px; }
+        .op-objet { font-weight: bold; font-size: 1rem; }
         
-        .action-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .btn-secondary { background-color: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-        .btn-secondary:hover { background-color: white; color: var(--primary-color); }
+        .inline-input { border: 1px solid transparent; background: transparent; font-size: 0.8rem; width: 90%; padding: 2px 4px; border-radius: 3px; color: #555; transition: all 0.2s; }
+        .inline-input:hover, .inline-input:focus { border-color: #ccc; background: white; outline: none; }
 
-        .summary-cards { display: flex; gap: 1rem; justify-content: center; padding: 1rem; max-width: 1200px; margin: 0 auto; }
-        .card { background: var(--card-bg); padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); flex: 1; text-align: center; }
-        .card h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: #666; }
-        .card .amount { font-size: 1.5rem; font-weight: bold; color: var(--text-color); }
+        .col-out, .col-in, .col-balance { text-align: right; font-weight: bold; font-size: 0.95rem; }
+        .col-out { color: var(--expense-color); }
+        .col-in { color: var(--primary-color); }
 
-        .month-selector { display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; }
-        .month-selector button { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--primary-color); }
-        .month-selector h2 { margin: 0; min-width: 200px; text-align: center; text-transform: capitalize; }
+        .floating-btn { position: fixed; bottom: 2rem; right: 2rem; background-color: var(--primary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 2rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; z-index: 90; }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
-
-        /* DESIGN PC ORIGINAL */
-        .operations-header { display: grid; grid-template-columns: 40px 2.5fr 1fr 1fr 100px 100px 120px 80px; gap: 10px; background: #e0e0e0; padding: 10px; font-weight: bold; border-radius: 8px 8px 0 0; text-align: center; align-items: center; font-size: 0.9rem; }
-        .operations-list { background: var(--card-bg); border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 2rem; min-height: 200px; }
-        .operation-item { display: grid; grid-template-columns: 40px 2.5fr 1fr 1fr 100px 100px 120px 80px; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; align-items: center; transition: background-color 0.2s; }
-        .operation-item:hover { background-color: #f9f9f9; }
-        .operation-item.op-pointee { background-color: #e8f5e9; }
-        .operation-item.op-report { background-color: #fff3e0; font-weight: bold; font-style: italic; }
-
-        .col-check { text-align: center; }
-        .col-details { text-align: left; }
-        .col-out { text-align: right; color: var(--expense-color); font-weight: bold; }
-        .col-in { text-align: right; color: var(--primary-color); font-weight: bold; }
-        .col-balance { text-align: right; font-weight: bold; background: #f0f0f0; padding: 2px 5px; border-radius: 4px; }
-        .col-actions { text-align: right; }
-
-        .op-details { display: flex; flex-direction: column; gap: 2px; }
-        .op-date { font-size: 0.8rem; color: #666; }
-        .op-objet { font-weight: bold; }
-
-        .inline-input { width: 100%; border: 1px solid transparent; background: transparent; padding: 4px; text-align: center; font-size: 0.9rem; }
-        .inline-input:hover, .inline-input:focus { border-color: #ccc; background: white; border-radius: 4px; }
+        /* --- MODALES --- */
+        dialog { border: none; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); padding: 1.5rem; width: 90%; max-width: 400px; }
+        dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+        dialog h2 { margin-top: 0; font-size: 1.2rem; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 0.3rem; font-size: 0.9rem; font-weight: bold; }
+        .form-group input, .form-group select { padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
         
-        .btn-action { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 2px 5px; opacity: 0.7; }
-        .btn-action:hover { opacity: 1; }
+        .type-toggle { display: flex; flex-direction: row; border-radius: 4px; overflow: hidden; border: 1px solid #ccc; margin-bottom: 1rem; }
+        .type-toggle input[type="radio"] { display: none; }
+        .type-toggle label { flex: 1; text-align: center; padding: 0.6rem; cursor: pointer; background: #f4f7f6; transition: all 0.2s; font-weight: bold; font-size: 0.9rem; }
+        #typeSortie:checked + label { background: var(--expense-color); color: white; }
+        #typeEntree:checked + label { background: var(--primary-color); color: white; }
 
-        .floating-add { position: fixed; bottom: 2rem; right: 2rem; background: var(--primary-color); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s; z-index: 10; }
-        .floating-add:hover { transform: scale(1.1); }
+        .modal-actions { display: flex; justify-content: space-between; margin-top: 1.5rem; }
+        .btn-cancel, .btn-submit, .btn-danger { padding: 0.6rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold; }
+        .btn-cancel { background-color: #e0e0e0; color: #333; }
+        .btn-submit { background-color: var(--primary-color); color: white; }
 
-        /* MODALES */
-        dialog { border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 1.5rem; min-width: 300px; }
-        dialog::backdrop { background: rgba(0,0,0,0.5); }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.3rem; font-weight: bold; }
-        .form-group input, .form-group select { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .dialog-buttons { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
-        .btn-primary { background: var(--primary-color); color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 4px; cursor: pointer; }
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
-        .cloud-status { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; background: rgba(0,0,0,0.1); padding: 4px 8px; border-radius: 12px; margin-top: 10px; justify-content: center; width: fit-content; margin-left: auto; margin-right: auto;}
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ccc; }
-        .status-dot.online { background-color: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
+        .bank-list { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+        .bank-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #eee; }
+        
+        .installment-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+        .installment-row input { flex: 1; padding: 0.4rem; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
+        .installment-row span { width: 30px; font-weight: bold; color: #666; }
+
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
 
         /* ========================================= */
-        /* 📱 ADAPTATION SMARTPHONE (Ne s'active que sur mobile) */
+        /* 📱 ADAPTATION SMARTPHONE DISCRÈTE         */
         /* ========================================= */
         @media (max-width: 768px) {
-            .header-top { flex-direction: column; text-align: center; }
-            .bank-controls, .action-buttons { justify-content: center; }
-            .summary-cards { flex-direction: column; gap: 0.5rem; }
+            header { padding: 0.6rem; gap: 0.5rem; }
+            .bank-management { flex-direction: column; align-items: stretch; text-align: center; gap: 5px; }
+            .action-buttons { justify-content: center; width: 100%; margin-top: 5px; }
+            .header-bottom { flex-direction: column; gap: 10px; margin-top: 5px; }
             
+            /* Totaux horizontaux sur mobile */
+            .budget-summary { flex-direction: row; justify-content: space-between; width: 100%; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; box-sizing: border-box; align-items: center; }
+            .summary-item { display: flex; flex-direction: column; align-items: center; margin: 0; }
+            
+            /* Cartes opérations (identique à ton choix précédent) */
             .operations-header { display: none; }
+            .operation-item { display: grid; grid-template-columns: 35px 1fr 1fr; grid-template-rows: auto auto auto; gap: 10px 5px; padding: 12px 8px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); border: 1px solid #eee; }
             
-            .operation-item { display: grid; grid-template-columns: 35px 1fr 1fr; grid-template-rows: auto auto auto; gap: 10px 5px; padding: 15px 10px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
             .col-check { grid-column: 1; grid-row: 1 / 4; align-self: start; padding-top: 5px; }
             .col-check input[type="checkbox"] { transform: scale(1.3); }
             
@@ -95,9 +142,9 @@
             
             .operation-item > div:nth-child(3) { grid-column: 2; grid-row: 2; }
             .operation-item > div:nth-child(4) { grid-column: 3; grid-row: 2; }
-            .inline-input { width: 100%; background: #f9f9f9; border: 1px solid #eee; border-radius: 4px; }
+            .inline-input { width: 100%; background: #f9f9f9; border: 1px solid #eee; border-radius: 4px; padding: 6px 2px; }
             
-            .col-balance { grid-column: 2; grid-row: 3; text-align: left; background: none; padding: 0; color: #666; }
+            .col-balance { grid-column: 2; grid-row: 3; text-align: left; background: none; padding: 0; color: #666; font-size: 0.9rem;}
             .col-balance::before { content: "Solde : "; }
             .col-actions { grid-column: 3; grid-row: 3; text-align: right; }
             
@@ -105,126 +152,144 @@
             .operation-item.op-report > div { display: none; }
             .operation-item.op-report .op-details, .operation-item.op-report .col-balance { display: block; }
             .operation-item.op-report .col-balance::before { content: ""; }
-            dialog { width: 95%; padding: 1rem; }
-            .dialog-buttons { flex-direction: column; gap: 0.5rem; }
-            .dialog-buttons button { width: 100%; }
+            
+            /* Ajustement des boutons des modales (pas trop gros) */
+            dialog { padding: 1.2rem; }
+            .modal-actions { flex-direction: row; gap: 10px; }
+            .btn-cancel, .btn-submit { flex: 1; text-align: center; font-size: 0.95rem; padding: 0.6rem; }
         }
     </style>
 </head>
 <body>
     <div id="loadingOverlay">Synchronisation avec le Cloud... ⏳</div>
 
+    <datalist id="categoriesList"><option value="Alimentation"><option value="Logement"><option value="Transport"><option value="Loisirs"><option value="Santé"><option value="Virement interne"><option value="Autre"></datalist>
+    <datalist id="modesList"><option value="Carte Bancaire"><option value="Virement"><option value="Prélèvement"><option value="Espèces"><option value="Chèque"></datalist>
+
     <div class="sticky-wrapper">
         <header>
-            <div class="header-top">
-                <h1>Mon Budget</h1>
-                <div class="bank-controls">
-                    <select id="bankSelector" title="Changer de compte"></select>
-                    <button id="btnManageBanks" class="btn-secondary" title="Gérer les comptes">⚙️ Comptes</button>
-                    <button id="btnInitBalance" class="btn-secondary" title="Définir un solde de départ">💰 Solde</button>
-                    <button id="btnTransfer" class="btn-secondary" title="Virement entre comptes">🔁 Virement</button>
-                </div>
+            <div class="bank-management">
+                <select id="bankSelector"></select>
+                <button id="btnManageBanks" class="btn-icon" title="Gérer les banques">⚙️</button>
+                <button id="btnInitBalance" class="btn-secondary">Solde Initial</button>
+                <button id="btnTransfer" class="btn-secondary" title="Virement interne">🔁 Virement</button>
+                
                 <div class="action-buttons">
-                    <button id="btnForceSync" class="btn-secondary" title="Actualiser le cloud">🔄 Actu</button>
+                    <button id="btnForceSync" class="btn-secondary" title="Actualiser">🔄 Actu</button>
                     <button id="btnOpenSearch" class="btn-secondary" title="Rechercher">🔍</button>
                     <button id="btnExport" class="btn-secondary" title="Sauvegarder">💾 Exporter</button>
                     <button id="btnImport" class="btn-secondary" title="Restaurer">📂 Importer</button>
                     <input type="file" id="fileImport" accept=".json" style="display: none;">
                 </div>
             </div>
+            
+            <div class="header-bottom">
+                <div class="month-selector">
+                    <button id="prevMonth">&lt;</button>
+                    <h2 id="currentMonthLabel">Mois Année</h2>
+                    <button id="nextMonth">&gt;</button>
+                </div>
+                
+                <div class="budget-summary">
+                    <div class="summary-item"><span class="label">Prévu</span><span class="amount" id="totalPrevu">0.00 €</span></div>
+                    <div class="summary-item"><span class="label">Pointé</span><span class="amount" id="totalPointe">0.00 €</span></div>
+                    <div class="cloud-status" title="Statut Supabase"><div id="statusDot" class="status-dot"></div><span id="statusText">Connexion...</span></div>
+                </div>
+            </div>
         </header>
 
-        <div class="summary-cards">
-            <div class="card"><h3>Prévu Fin de Mois</h3><div class="amount" id="totalPrevu">0.00 €</div></div>
-            <div class="card"><h3>Réel (Pointé)</h3><div class="amount" id="totalPointe" style="color: var(--primary-color);">0.00 €</div></div>
-        </div>
-        <div class="cloud-status" title="Statut Supabase"><div id="statusDot" class="status-dot"></div><span id="statusText">Connexion...</span></div>
-
-        <div class="month-selector">
-            <button id="prevMonth">◀</button>
-            <h2 id="currentMonthLabel">Mois Année</h2>
-            <button id="nextMonth">▶</button>
-        </div>
-
-        <div class="container">
-            <div class="operations-header">
-                <div class="col-check" title="Pointage">✔</div>
-                <div class="col-details">Date & Objet</div>
-                <div class="col-cat" id="headerCat" style="cursor: pointer; color: #2196F3; text-decoration: underline;">Catégorie 📊</div>
-                <div class="col-mode">Mode</div>
-                <div class="col-out">Sorties</div>
-                <div class="col-in">Entrées</div>
-                <div class="col-balance">Solde</div>
-                <div class="col-actions">Actions</div>
-            </div>
+        <div class="operations-header">
+            <div class="col-check" title="Pointage bancaire">✔</div>
+            <div class="col-details">Date & Objet</div>
+            <div class="col-cat" id="headerCat" title="Voir les statistiques" style="cursor: pointer; color: #2196F3; text-decoration: underline;">Catégorie 📊</div>
+            <div class="col-mode">Mode</div>
+            <div class="col-out">Sorties</div>
+            <div class="col-in">Entrées</div>
+            <div class="col-balance">Solde</div>
+            <div class="col-actions" style="text-align: right; padding-right: 5px;">Actions</div>
         </div>
     </div>
 
-    <div class="container"><div class="operations-list" id="operationsList"></div></div>
-    <button class="floating-add" id="btnOpenModal" title="Nouvelle opération">+</button>
+    <main>
+        <section class="operations-list" id="operationsList"></section>
+        <button id="btnOpenModal" class="floating-btn">+</button>
+    </main>
 
+    <!-- Modale Opération -->
     <dialog id="modalOperation">
-        <h2 style="margin-top: 0;">Nouvelle Opération</h2>
-        <form id="formOperation">
-            <div style="display: flex; gap: 1rem;">
-                <div class="form-group" style="flex: 1;"><label>Type</label><div style="display: flex; gap: 1rem; margin-top: 0.5rem;"><label><input type="radio" name="opType" id="typeSortie" value="sortie" checked> Dépense</label><label><input type="radio" name="opType" id="typeEntree" value="entree"> Recette</label></div></div>
-                <div class="form-group" style="flex: 1;"><label for="dateOp">Date</label><input type="date" id="dateOp" name="dateOp" required></div>
+        <form id="formOperation" method="dialog">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <button type="button" id="btnOpenInstallments" class="btn-secondary" style="background-color: #ff9800; padding: 0.4rem 0.6rem; margin: 0;">⏱️ X fois</button>
+                <h2 style="margin: 0;">Nouvelle opération</h2>
+            </div>
+            
+            <div class="form-group"><label for="dateOp">Date</label><input type="date" id="dateOp" name="dateOp" required></div>
+            <div class="type-toggle">
+                <input type="radio" id="typeSortie" name="opType" value="sortie" checked><label for="typeSortie">Sortie (-)</label>
+                <input type="radio" id="typeEntree" name="opType" value="entree"><label for="typeEntree">Entrée (+)</label>
             </div>
             <div class="form-group"><label for="objet">Objet</label><input type="text" id="objet" name="objet" required></div>
-            <div style="display: flex; gap: 1rem;">
-                <div class="form-group" style="flex: 1;"><label for="montant">Montant total (€)</label><input type="number" id="montant" name="montant" step="0.01" min="0.01" required></div>
-                <div class="form-group" style="flex: 1; display: flex; align-items: flex-end;"><button type="button" id="btnOpenInstallments" class="btn-secondary" style="width: 100%; height: 38px; color: #333; border-color: #ccc;">⏱️ Paiement X fois</button></div>
+            <div class="form-group"><label for="montant">Montant total absolu (€)</label><input type="number" step="0.01" min="0" id="montant" name="montant" required></div>
+            <div class="form-group"><label for="modeReglement">Mode</label><input list="modesList" id="modeReglement" name="modeReglement" required></div>
+            <div class="form-group"><label for="categorie">Catégorie</label><input list="categoriesList" id="categorie" name="categorie" required></div>
+
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0.5rem;" id="abonnementContainer">
+                <input type="checkbox" id="isAbonnement" name="isAbonnement"><label for="isAbonnement" style="margin: 0;">Abonnement</label>
             </div>
-            <div style="display: flex; gap: 1rem;">
-                <div class="form-group" style="flex: 1;"><label for="categorie">Catégorie</label><input type="text" id="categorie" name="categorie" list="categoriesList" required></div>
-                <div class="form-group" style="flex: 1;"><label for="modeReglement">Mode</label><input type="text" id="modeReglement" name="modeReglement" list="modesList" required></div>
+            <div id="abonnementSettingsWrapper" style="display: none; background: #e8f5e9; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <label for="freqAbonnement" style="font-size: 0.85rem;">Fréquence :</label>
+                <select id="freqAbonnement" name="freqAbonnement" style="width: 100%; margin-top: 5px;"><option value="1">Mensuel</option><option value="12">Annuel</option></select>
             </div>
-            <div class="form-group" id="recurrentContainer" style="display: flex; align-items: center; gap: 0.5rem; background: #f0f8ff; padding: 0.5rem; border-radius: 4px;"><input type="checkbox" id="isRecurrent" name="isRecurrent"><label for="isRecurrent" style="margin: 0; font-weight: normal;">Opération récurrente classique</label></div>
-            <div id="recurrentSettingsWrapper" style="display: none; background: #f0f8ff; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #cce5ff;"><div style="display: flex; gap: 1rem;"><div class="form-group" style="flex: 1;"><label>Répéter tous les (mois):</label><input type="number" id="intervalMois" name="intervalMois" min="1" value="1"></div><div class="form-group" style="flex: 1;"><label>Date de fin (Optionnel):</label><input type="date" id="dateFinRecurrence" name="dateFinRecurrence"></div></div></div>
-            <div class="form-group" id="abonnementContainer" style="display: flex; align-items: center; gap: 0.5rem; background: #e8f5e9; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;"><input type="checkbox" id="isAbonnement" name="isAbonnement"><label for="isAbonnement" style="margin: 0; font-weight: normal; color: #2e7d32; font-weight: bold;">Abonnement</label></div>
-            <div id="abonnementSettingsWrapper" style="display: none; background: #e8f5e9; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #c8e6c9;"><div class="form-group" style="margin-bottom: 0;"><label>Fréquence :</label><select id="freqAbonnement" name="freqAbonnement"><option value="1">Mensuel</option><option value="12">Annuel</option></select></div></div>
-            <div class="dialog-buttons"><button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelModal">Annuler</button><button type="submit" class="btn-primary">Enregistrer</button></div>
+
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;" id="recurrentContainer">
+                <input type="checkbox" id="isRecurrent" name="isRecurrent"><label for="isRecurrent" style="margin: 0;">Récurrence personnalisée</label>
+            </div>
+            <div id="recurrentSettingsWrapper" style="display: none; background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <label style="font-size: 0.85rem;">Intervalle (mois):</label><input type="number" id="intervalMois" name="intervalMois" min="1" value="1" style="width: 100%; margin: 5px 0 10px 0;">
+                <label style="font-size: 0.85rem;">Date de fin (optionnel):</label><input type="month" id="dateFinRecurrence" name="dateFinRecurrence" style="width: 100%; margin-top: 5px;">
+            </div>
+            <div class="modal-actions"><button type="button" id="btnCancelModal" class="btn-cancel">Annuler</button><button type="submit" class="btn-submit">Valider</button></div>
         </form>
     </dialog>
 
     <dialog id="modalInstallments">
-        <h2 style="margin-top: 0;">Échéancier</h2>
-        <div class="form-group"><label>Nombre d'échéances</label><div style="display: flex; gap: 1rem;"><input type="number" id="installmentsCount" min="2" max="24" value="3" style="flex: 1;"><button type="button" id="btnGenerateInstallments" class="btn-secondary" style="color:#333; border-color:#ccc;">Calculer</button></div></div>
-        <div id="installmentsList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
-        <div class="dialog-buttons"><button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelInstallments">Annuler</button><button type="button" class="btn-primary" id="btnSaveInstallments">Valider</button></div>
+        <h2 style="margin-bottom: 1rem;">Échéancier</h2>
+        <div class="form-group"><label>Nombre de mensualités</label><div style="display: flex; gap: 0.5rem;"><input type="number" id="installmentsCount" min="2" max="48" value="3" style="flex: 1;"><button type="button" id="btnGenerateInstallments" class="btn-secondary" style="margin:0;">Calculer</button></div></div>
+        <div id="installmentsList" style="max-height: 250px; overflow-y: auto; margin-bottom: 1rem;"></div>
+        <div class="modal-actions"><button type="button" id="btnCancelInstallments" class="btn-cancel">Annuler</button><button type="button" id="btnSaveInstallments" class="btn-submit">Valider</button></div>
     </dialog>
 
     <dialog id="modalInitBalance">
-        <h2 style="margin-top: 0;">Solde Initial</h2>
-        <form id="formInitBalance">
+        <form id="formInitBalance" method="dialog">
+            <h2>Solde Initial</h2>
             <div class="form-group"><label>Date</label><input type="date" id="dateInit" required></div>
-            <div class="form-group"><label>Montant (€)</label><input type="number" id="montantInit" step="0.01" required></div>
-            <div class="dialog-buttons"><button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelInit">Annuler</button><button type="submit" class="btn-primary">Valider</button></div>
+            <div class="form-group"><label>Montant (€)</label><input type="number" step="0.01" id="montantInit" required></div>
+            <div class="modal-actions"><button type="button" id="btnCancelInit" class="btn-cancel">Annuler</button><button type="submit" class="btn-submit">Valider</button></div>
         </form>
     </dialog>
 
     <dialog id="modalTransfer">
         <form id="formTransfer" method="dialog">
             <h2 style="margin-top: 0;">Virement Interne</h2>
-            <div class="form-group"><label for="dateTransfer">Date du virement</label><input type="date" id="dateTransfer" required></div>
-            <div class="form-group"><label for="montantTransfer">Montant transféré (€)</label><input type="number" step="0.01" min="0.01" id="montantTransfer" required></div>
-            <div class="form-group"><label for="compteSource">Depuis (Débité)</label><select id="compteSource" required></select></div>
-            <div class="form-group"><label for="compteDest">Vers (Crédité)</label><select id="compteDest" required></select></div>
-            <div class="dialog-buttons"><button type="button" class="btn-secondary" style="color:#333; border-color:#ccc;" id="btnCancelTransfer">Annuler</button><button type="submit" class="btn-primary">Transférer</button></div>
+            <div class="form-group"><label>Date du virement</label><input type="date" id="dateTransfer" required></div>
+            <div class="form-group"><label>Montant transféré (€)</label><input type="number" step="0.01" min="0.01" id="montantTransfer" required></div>
+            <div class="form-group"><label>Depuis le compte (Débité)</label><select id="compteSource" required></select></div>
+            <div class="form-group"><label>Vers le compte (Crédité)</label><select id="compteDest" required></select></div>
+            <div class="modal-actions"><button type="button" id="btnCancelTransfer" class="btn-cancel">Annuler</button><button type="submit" class="btn-submit">Transférer</button></div>
         </form>
     </dialog>
 
-    <dialog id="modalBankManager">
-        <h2 style="margin-top: 0;">Gérer les Comptes</h2>
-        <ul id="bankListContainer" style="list-style: none; padding: 0; margin-bottom: 1.5rem;"></ul>
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;"><input type="text" id="newBankName" placeholder="Nouveau compte..." style="flex: 1; padding: 0.5rem;"><button type="button" id="btnAddNewBank" class="btn-primary">Ajouter</button></div>
-        <div class="dialog-buttons" style="border-top: 1px solid #eee; padding-top: 1rem;"><button type="button" id="btnCloseBankManager" class="btn-primary">Fermer</button></div>
+    <dialog id="modalSearch" style="max-width: 600px; width: 95%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;"><h2 style="margin: 0;">Rechercher</h2><button type="button" id="btnCloseSearch" class="btn-action">❌</button></div>
+        <input type="text" id="searchInput" placeholder="Mot-clé, montant..." style="width: 100%; padding: 0.8rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem;">
+        <div id="searchResults" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;"></div>
     </dialog>
 
-    <dialog id="modalSearch">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;"><h2 style="margin: 0;">Rechercher</h2><button type="button" id="btnCloseSearch" class="btn-action">❌</button></div>
-        <input type="text" id="searchInput" placeholder="Mot clé, montant, date..." style="width: 100%; padding: 0.8rem; font-size: 1rem; border: 2px solid var(--primary-color); border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem;">
-        <div id="searchResults" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;"></div>
+    <dialog id="modalBankManager">
+        <h2>Gérer les comptes</h2>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;"><input type="text" id="newBankName" placeholder="Nouveau compte..." style="flex:1;"><button type="button" id="btnAddNewBank" class="btn-submit" style="padding: 0.4rem;">Ajouter</button></div>
+        <ul class="bank-list" id="bankListContainer"></ul>
+        <div class="modal-actions" style="justify-content: flex-end;"><button type="button" id="btnCloseBankManager" class="btn-cancel">Fermer</button></div>
     </dialog>
 
     <dialog id="modalStats" style="max-width: 500px; width: 95%;">
@@ -234,34 +299,32 @@
         <div id="statsResults" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; border-top: 1px solid #eee; padding-top: 1rem;"></div>
     </dialog>
 
-    <datalist id="categoriesList"><option value="Alimentation"><option value="Logement"><option value="Transport"><option value="Loisirs"><option value="Santé"><option value="Salaire"><option value="Virement interne"></datalist>
-    <datalist id="modesList"><option value="CB"><option value="Prélèvement"><option value="Virement"><option value="Chèque"><option value="Espèces"></datalist>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        if (navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(r => r.forEach(x => x.unregister()));
+        if (navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
         localStorage.removeItem('budget_operations');
 
-        // INITIALISATION SUPABASE AVEC LE SECRET (Met ton mot de passe ici)
+        // INIT SUPABASE CLOUD
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
             global: { headers: { 'x-my-secret-key': 'MON_MOT_DE_PASSE_SECRET' } }
         });
 
-        let operations = []; 
+        let operations = [];
         let banks = JSON.parse(localStorage.getItem('budget_banks')) || [{ id: 'bank_1', name: 'Compte Courant' }];
         let currentBankId = localStorage.getItem('budget_currentBankId') || 'bank_1';
         let editingOpId = null;
 
-        let displayMonth = new Date().getMonth(); let displayYear = new Date().getFullYear();
+        let displayMonth = new Date().getMonth();
+        let displayYear = new Date().getFullYear();
 
         const loadingOverlay = document.getElementById('loadingOverlay');
         const showLoading = () => loadingOverlay.style.display = 'flex';
         const hideLoading = () => loadingOverlay.style.display = 'none';
 
-        function saveLocalState() { localStorage.setItem('budget_banks', JSON.stringify(banks)); localStorage.setItem('budget_currentBankId', currentBankId); }
+        function saveLocalBanks() { localStorage.setItem('budget_banks', JSON.stringify(banks)); localStorage.setItem('budget_currentBankId', currentBankId); }
 
         async function fetchCloudData() {
             showLoading();
@@ -273,104 +336,102 @@
         }
 
         function setupRealtime() {
-            supabaseClient.channel('public:operations').on('postgres_changes', { event: '*', schema: 'public', table: 'operations' }, (payload) => {
-                const dot = document.getElementById('statusDot'); dot.style.backgroundColor = '#ffeb3b'; setTimeout(() => dot.style.backgroundColor = '#4CAF50', 500);
-                if (payload.eventType === 'INSERT' && !operations.some(o => o.id === payload.new.id)) operations.push(payload.new);
-                else if (payload.eventType === 'UPDATE') { const idx = operations.findIndex(o => o.id === payload.new.id); if (idx !== -1) operations[idx] = payload.new; else operations.push(payload.new); }
-                else if (payload.eventType === 'DELETE') operations = operations.filter(o => o.id !== payload.old.id);
+            supabaseClient.channel('public:operations').on('postgres_changes', { event: '*', schema: 'public', table: 'operations' }, (p) => {
+                const dot = document.getElementById('statusDot'); dot.style.backgroundColor = '#ffeb3b'; setTimeout(() => dot.style.backgroundColor = '#fff', 500);
+                if (p.eventType === 'INSERT' && !operations.some(o => o.id === p.new.id)) operations.push(p.new);
+                else if (p.eventType === 'UPDATE') { const i = operations.findIndex(o => o.id === p.new.id); if (i !== -1) operations[i] = p.new; else operations.push(p.new); }
+                else if (p.eventType === 'DELETE') operations = operations.filter(o => o.id !== p.old.id);
                 renderOperations(); updateTotals();
-            }).subscribe((status) => { if(status === 'SUBSCRIBED') { document.getElementById('statusDot').classList.add('online'); document.getElementById('statusText').textContent = 'En direct'; } });
+            }).subscribe((s) => { if(s === 'SUBSCRIBED') { document.getElementById('statusDot').classList.add('online'); document.getElementById('statusText').textContent = 'En direct'; } });
         }
 
         document.getElementById('btnForceSync').addEventListener('click', fetchCloudData);
         document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
         document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
 
-        function changeMonth(delta) {
-            displayMonth += delta; if (displayMonth > 11) { displayMonth = 0; displayYear++; } else if (displayMonth < 0) { displayMonth = 11; displayYear--; }
+        function changeMonth(d) {
+            displayMonth += d; if(displayMonth > 11) { displayMonth = 0; displayYear++; } else if(displayMonth < 0) { displayMonth = 11; displayYear--; }
             document.getElementById('currentMonthLabel').textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(displayYear, displayMonth));
             renderOperations(); updateTotals();
         }
 
-        function getCarryoverBalance() { return operations.filter(op => op.bankId === currentBankId).reduce((sum, op) => { const [y, m] = op.date.split('-'); if (parseInt(y) < displayYear || (parseInt(y) === displayYear && parseInt(m) - 1 < displayMonth)) return sum + op.montant; return sum; }, 0); }
-        function getCurrentMonthOps() { return operations.filter(op => { if (op.bankId !== currentBankId) return false; const [y, m] = op.date.split('-'); return parseInt(y) === displayYear && parseInt(m) - 1 === displayMonth; }).sort((a, b) => a.date < b.date ? -1 : 1); }
+        function getCarryoverBalance() { return operations.filter(o => o.bankId === currentBankId).reduce((s, o) => { const [y, m] = o.date.split('-'); if (parseInt(y) < displayYear || (parseInt(y) === displayYear && parseInt(m)-1 < displayMonth)) return s + o.montant; return s; }, 0); }
+        function getCurrentMonthOps() { return operations.filter(o => { if (o.bankId !== currentBankId) return false; const [y, m] = o.date.split('-'); return parseInt(y) === displayYear && parseInt(m)-1 === displayMonth; }).sort((a,b) => a.date < b.date ? -1 : 1); }
 
         function renderOperations() {
-            const list = document.getElementById('operationsList'); list.innerHTML = ''; 
-            const carryover = getCarryoverBalance(); const currentMonthOps = getCurrentMonthOps();
+            const list = document.getElementById('operationsList'); list.innerHTML = '';
+            const carryover = getCarryoverBalance(); const monthOps = getCurrentMonthOps();
             
-            const reportDiv = document.createElement('div'); reportDiv.className = 'operation-item op-report';
-            reportDiv.innerHTML = `<div class="col-check"></div><div class="op-details"><span class="op-objet">Report du mois précédent</span></div><div></div><div></div><div class="col-out"></div><div class="col-in"></div><div class="col-balance">${carryover.toFixed(2)} €</div><div class="col-actions"></div>`;
-            list.appendChild(reportDiv);
+            const rDiv = document.createElement('div'); rDiv.className = 'operation-item op-report';
+            rDiv.innerHTML = `<div class="col-check"></div><div class="op-details"><span class="op-objet">Report du mois précédent</span></div><div></div><div></div><div class="col-out"></div><div class="col-in"></div><div class="col-balance">${carryover.toFixed(2)} €</div><div class="col-actions"></div>`;
+            list.appendChild(rDiv);
 
-            let currentBalance = carryover;
-            currentMonthOps.forEach(op => {
-                currentBalance += op.montant; const isDep = op.montant < 0; const [y, m, d] = op.date.split('-');
+            let bal = carryover;
+            monthOps.forEach(op => {
+                bal += op.montant; const isDep = op.montant < 0; const [y, m, d] = op.date.split('-');
                 
-                // BADGE ABO RETROACTIF ET ICONES
-                const aboIcon = op.isAbonnement ? `<span style="background: #4CAF50; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;">📅 Abo</span>` : '';
-                const instIcon = op.totalInstallments ? `<span style="background: #ff9800; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;">${op.totalInstallments}x</span>` : '';
+                const aboIcon = op.isAbonnement ? `<span style="background: #4CAF50; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;" title="Abonnement">📅 Abo</span>` : '';
+                const instIcon = op.totalInstallments ? `<span style="background: #ff9800; color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; margin-right: 5px;" title="${op.totalInstallments} fois">${op.totalInstallments}x</span>` : '';
                 const recIcon = (op.isRecurrent && !op.isAbonnement) ? '🔄 ' : '';
                 const icons = `${aboIcon}${instIcon}${recIcon}`;
 
-                const opDiv = document.createElement('div'); opDiv.className = `operation-item ${op.pointee ? 'op-pointee' : ''}`; 
-                opDiv.innerHTML = `
+                const div = document.createElement('div'); div.className = `operation-item ${op.pointee ? 'op-pointee' : ''}`;
+                div.innerHTML = `
                     <div class="col-check"><input type="checkbox" class="check-op" data-id="${op.id}" ${op.pointee ? 'checked' : ''}></div>
                     <div class="op-details"><span class="op-date">${d}/${m}</span><span class="op-objet">${icons}${op.objet}</span></div>
                     <div><input class="inline-input edit-cat" list="categoriesList" value="${op.categorie}" data-id="${op.id}" ${op.objet==='Solde Initial'?'disabled':''}></div>
                     <div><input class="inline-input edit-mode" list="modesList" value="${op.modeReglement}" data-id="${op.id}" ${op.objet==='Solde Initial'?'disabled':''}></div>
                     <div class="col-out">${isDep ? Math.abs(op.montant).toFixed(2) + ' €' : ''}</div>
                     <div class="col-in">${!isDep ? '+' + op.montant.toFixed(2) + ' €' : ''}</div>
-                    <div class="col-balance">${currentBalance.toFixed(2)} €</div>
+                    <div class="col-balance">${bal.toFixed(2)} €</div>
                     <div class="col-actions"><button type="button" class="btn-action edit-op" data-id="${op.id}">✏️</button><button type="button" class="btn-action delete-op" data-id="${op.id}">🗑️</button></div>
                 `;
-                list.appendChild(opDiv);
+                list.appendChild(div);
             });
         }
 
         function updateTotals() {
-            const carryover = getCarryoverBalance(); const currentMonthOps = getCurrentMonthOps();
-            document.getElementById('totalPrevu').textContent = (carryover + currentMonthOps.reduce((a, c) => a + c.montant, 0)).toFixed(2) + ' €';
-            document.getElementById('totalPointe').textContent = (carryover + currentMonthOps.filter(o => o.pointee).reduce((a, c) => a + c.montant, 0)).toFixed(2) + ' €';
+            const c = getCarryoverBalance(); const mOps = getCurrentMonthOps();
+            document.getElementById('totalPrevu').textContent = (c + mOps.reduce((a, o) => a + o.montant, 0)).toFixed(2) + ' €';
+            document.getElementById('totalPointe').textContent = (c + mOps.filter(o => o.pointee).reduce((a, o) => a + o.montant, 0)).toFixed(2) + ' €';
         }
 
         document.getElementById('operationsList').addEventListener('change', async (e) => {
-            const id = parseInt(e.target.dataset.id); const op = operations.find(o => o.id === id); if (!op) return;
-            let updatePayload = {};
-            if (e.target.classList.contains('edit-cat')) updatePayload = { categorie: e.target.value };
-            if (e.target.classList.contains('edit-mode')) updatePayload = { modeReglement: e.target.value };
-            if (e.target.classList.contains('check-op')) updatePayload = { pointee: e.target.checked };
-            Object.assign(op, updatePayload); renderOperations(); updateTotals();
-            await supabaseClient.from('operations').update(updatePayload).eq('id', id);
+            const id = parseInt(e.target.dataset.id); const op = operations.find(o => o.id === id); if(!op) return;
+            let p = {}; if(e.target.classList.contains('edit-cat')) p = { categorie: e.target.value };
+            if(e.target.classList.contains('edit-mode')) p = { modeReglement: e.target.value };
+            if(e.target.classList.contains('check-op')) p = { pointee: e.target.checked };
+            Object.assign(op, p); renderOperations(); updateTotals();
+            await supabaseClient.from('operations').update(p).eq('id', id);
         });
 
-        const bankSelector = document.getElementById('bankSelector');
-        function renderBanksDropdown() { bankSelector.innerHTML = ''; banks.forEach(b => bankSelector.add(new Option(b.name, b.id))); bankSelector.value = currentBankId; }
-        bankSelector.addEventListener('change', (e) => { currentBankId = e.target.value; saveLocalState(); renderOperations(); updateTotals(); });
+        const bankSel = document.getElementById('bankSelector');
+        function renderBanksDropdown() { bankSel.innerHTML = ''; banks.forEach(b => bankSel.add(new Option(b.name, b.id))); bankSel.value = currentBankId; }
+        bankSel.addEventListener('change', (e) => { currentBankId = e.target.value; saveLocalBanks(); renderOperations(); updateTotals(); });
 
-        const modalBankManager = document.getElementById('modalBankManager');
-        document.getElementById('btnManageBanks').addEventListener('click', () => { 
-            const container = document.getElementById('bankListContainer'); container.innerHTML = '';
-            banks.forEach(bank => {
-                const li = document.createElement('li'); li.style.marginBottom = "5px";
-                li.innerHTML = `<span style="${bank.id === currentBankId ? 'font-weight:bold' : ''}">${bank.name}</span> <button class="btn-icon" onclick="renameBank('${bank.id}')">✏️</button><button class="btn-primary" style="background:#e53935; padding: 2px 5px;" onclick="deleteBank('${bank.id}')">❌</button>`;
-                container.appendChild(li);
+        const modalBank = document.getElementById('modalBankManager');
+        document.getElementById('btnManageBanks').addEventListener('click', () => {
+            const c = document.getElementById('bankListContainer'); c.innerHTML = '';
+            banks.forEach(b => {
+                const li = document.createElement('li'); li.className = 'bank-list-item';
+                li.innerHTML = `<span style="${b.id===currentBankId?'font-weight:bold':''}">${b.name}</span> <div><button class="btn-icon" onclick="renameBank('${b.id}')">✏️</button><button class="btn-danger" style="padding:2px 6px;" onclick="deleteBank('${b.id}')">❌</button></div>`;
+                c.appendChild(li);
             });
-            modalBankManager.showModal(); 
+            modalBank.showModal();
         });
-        document.getElementById('btnCloseBankManager').addEventListener('click', () => { modalBankManager.close(); renderBanksDropdown(); renderOperations(); updateTotals(); });
-        window.renameBank = (id) => { const b = banks.find(x=>x.id===id); const nn = prompt('Nouveau nom:', b.name); if(nn) { b.name = nn.trim(); saveLocalState(); document.getElementById('btnManageBanks').click(); } };
-        window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible de supprimer."); if(confirm('Supprimer ?')) { banks = banks.filter(b=>b.id!==id); if(currentBankId===id) currentBankId=banks[0].id; saveLocalState(); document.getElementById('btnManageBanks').click(); } };
-        document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value.trim(); if(n) { banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalState(); document.getElementById('btnManageBanks').click(); } });
+        document.getElementById('btnCloseBankManager').addEventListener('click', () => { modalBank.close(); renderBanksDropdown(); renderOperations(); updateTotals(); });
+        window.renameBank = (id) => { const b = banks.find(x=>x.id===id); const n = prompt('Nouveau nom:', b.name); if(n){ b.name=n.trim(); saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
+        window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible."); if(confirm('Supprimer ?')){ banks=banks.filter(b=>b.id!==id); if(currentBankId===id) currentBankId=banks[0].id; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
+        document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value.trim(); if(n){ banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } });
 
         // VIREMENT INTERNE
         const modalTransfer = document.getElementById('modalTransfer');
         document.getElementById('btnTransfer').addEventListener('click', () => {
-            if(banks.length < 2) return alert("Il faut au moins 2 comptes.");
-            const sSelect = document.getElementById('compteSource'); const dSelect = document.getElementById('compteDest');
-            sSelect.innerHTML = ''; dSelect.innerHTML = '';
-            banks.forEach(b => { sSelect.add(new Option(b.name, b.id)); dSelect.add(new Option(b.name, b.id)); });
-            sSelect.value = currentBankId; dSelect.value = banks.find(b => b.id !== currentBankId)?.id || banks[0].id;
+            if(banks.length < 2) return alert("Besoin d'au moins 2 comptes.");
+            const sSel = document.getElementById('compteSource'); const dSel = document.getElementById('compteDest');
+            sSel.innerHTML = ''; dSel.innerHTML = '';
+            banks.forEach(b => { sSel.add(new Option(b.name, b.id)); dSel.add(new Option(b.name, b.id)); });
+            sSel.value = currentBankId; dSel.value = banks.find(b => b.id !== currentBankId)?.id || banks[0].id;
             document.getElementById('dateTransfer').value = new Date().toISOString().split('T')[0];
             document.getElementById('formTransfer').reset(); modalTransfer.showModal();
         });
@@ -378,7 +439,7 @@
         document.getElementById('formTransfer').addEventListener('submit', async (e) => {
             e.preventDefault(); const sId = document.getElementById('compteSource').value; const dId = document.getElementById('compteDest').value;
             const amt = parseFloat(document.getElementById('montantTransfer').value); const dOp = document.getElementById('dateTransfer').value;
-            if(sId === dId) return alert("Comptes identiques !"); if(isNaN(amt) || amt <= 0) return alert("Montant invalide.");
+            if(sId === dId) return alert("Comptes identiques !"); if(isNaN(amt) || amt<=0) return alert("Montant invalide.");
             showLoading(); const ts = Date.now();
             const opS = { id: ts, "bankId": sId, date: dOp, objet: 'Virement émis', montant: -amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": false, "isAbonnement": false, pointee: false };
             const opD = { id: ts+1, "bankId": dId, date: dOp, objet: 'Virement reçu', montant: amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": false, "isAbonnement": false, pointee: false };
@@ -386,61 +447,60 @@
             hideLoading(); if(error) alert("Erreur."); else modalTransfer.close();
         });
 
-        // FORMULAIRE OPERATION
-        const modalOp = document.getElementById('modalOperation'); const formOp = document.getElementById('formOperation'); let installmentsData = null;
+        // FORMULAIRES & MODALES (Opération, Init, etc.)
+        const modalOp = document.getElementById('modalOperation'); const formOp = document.getElementById('formOperation'); let instData = null;
         document.getElementById('isAbonnement').addEventListener('change', (e) => { document.getElementById('abonnementSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked){ document.getElementById('isRecurrent').checked = false; document.getElementById('recurrentSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
         document.getElementById('isRecurrent').addEventListener('change', (e) => { document.getElementById('recurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked){ document.getElementById('isAbonnement').checked = false; document.getElementById('abonnementSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
-        
+
         const modalInit = document.getElementById('modalInitBalance');
         document.getElementById('btnInitBalance').addEventListener('click', () => { editingOpId = null; document.getElementById('dateInit').value = new Date().toISOString().split('T')[0]; modalInit.showModal(); });
         document.getElementById('btnCancelInit').addEventListener('click', () => { modalInit.close(); document.getElementById('formInitBalance').reset(); editingOpId = null; });
-        document.getElementById('formInitBalance').addEventListener('submit', async (e) => { e.preventDefault(); showLoading(); const opD = { bankId: currentBankId, date: document.getElementById('dateInit').value, objet: 'Solde Initial', montant: parseFloat(document.getElementById('montantInit').value), modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true }; if (editingOpId) opD.id = editingOpId; else opD.id = Date.now(); await supabaseClient.from('operations').upsert(opD); modalInit.close(); e.target.reset(); editingOpId = null; hideLoading(); });
+        document.getElementById('formInitBalance').addEventListener('submit', async (e) => { e.preventDefault(); showLoading(); const opD = { bankId: currentBankId, date: document.getElementById('dateInit').value, objet: 'Solde Initial', montant: parseFloat(document.getElementById('montantInit').value), modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true }; if(editingOpId) opD.id = editingOpId; else opD.id = Date.now(); await supabaseClient.from('operations').upsert(opD); modalInit.close(); e.target.reset(); editingOpId = null; hideLoading(); });
 
         const modalInst = document.getElementById('modalInstallments'); const instList = document.getElementById('installmentsList');
         document.getElementById('btnOpenInstallments').addEventListener('click', () => { if(parseFloat(document.getElementById('montant').value)>0) modalInst.showModal(); else alert("Saisir montant."); });
-        document.getElementById('btnCancelInstallments').addEventListener('click', () => { installmentsData=null; document.getElementById('btnOpenInstallments').textContent="⏱️ Paiement X fois"; modalInst.close(); });
-        document.getElementById('btnGenerateInstallments').addEventListener('click', () => { const count = parseInt(document.getElementById('installmentsCount').value); const baseAmt = parseFloat(document.getElementById('montant').value); let [y, m, d] = (document.getElementById('dateOp').value||new Date().toISOString().split('T')[0]).split('-'); instList.innerHTML=''; const splitAmt = Math.floor((baseAmt/count)*100)/100; let rem = baseAmt; let cy=parseInt(y), cm=parseInt(m)-1; for(let i=0; i<count; i++) { let tD = new Date(cy, cm, parseInt(d)); if(tD.getMonth()!==cm) tD = new Date(cy, cm+1, 0); let rAmt = (i===count-1)?Math.round(rem*100)/100:splitAmt; rem-=splitAmt; instList.innerHTML += `<div class="installment-row"><span>#${i+1}</span><input type="date" class="inst-date" value="${tD.toISOString().split('T')[0]}"><input type="number" step="0.01" class="inst-amount" value="${rAmt.toFixed(2)}"></div>`; cm++; if(cm>11){cm=0; cy++;} } });
-        document.getElementById('btnSaveInstallments').addEventListener('click', () => { const rows = instList.querySelectorAll('.installment-row'); if(!rows.length) return; installmentsData=[]; rows.forEach((r,i) => installmentsData.push({part:i+1, totalParts:rows.length, date:r.querySelector('.inst-date').value, amount:parseFloat(r.querySelector('.inst-amount').value)})); document.getElementById('btnOpenInstallments').textContent=`✅ En ${rows.length} fois`; document.getElementById('isRecurrent').checked=false; document.getElementById('isAbonnement').checked=false; modalInst.close(); });
+        document.getElementById('btnCancelInstallments').addEventListener('click', () => { instData = null; document.getElementById('btnOpenInstallments').textContent="⏱️ X fois"; modalInst.close(); });
+        document.getElementById('btnGenerateInstallments').addEventListener('click', () => { const c = parseInt(document.getElementById('installmentsCount').value); const bA = parseFloat(document.getElementById('montant').value); let [y,m,d] = (document.getElementById('dateOp').value||new Date().toISOString().split('T')[0]).split('-'); instList.innerHTML=''; const sA = Math.floor((bA/c)*100)/100; let r = bA; let cy=parseInt(y), cm=parseInt(m)-1; for(let i=0; i<c; i++){ let tD = new Date(cy, cm, parseInt(d)); if(tD.getMonth()!==cm) tD = new Date(cy, cm+1, 0); let rA = (i===c-1) ? Math.round(r*100)/100 : sA; r-=sA; instList.innerHTML += `<div class="installment-row"><span>#${i+1}</span><input type="date" class="inst-date" value="${tD.toISOString().split('T')[0]}"><input type="number" step="0.01" class="inst-amount" value="${rA.toFixed(2)}"></div>`; cm++; if(cm>11){cm=0; cy++;} } });
+        document.getElementById('btnSaveInstallments').addEventListener('click', () => { const rs = instList.querySelectorAll('.installment-row'); if(!rs.length) return; instData=[]; rs.forEach((r,i) => instData.push({part:i+1, totalParts:rs.length, date:r.querySelector('.inst-date').value, amount:parseFloat(r.querySelector('.inst-amount').value)})); document.getElementById('btnOpenInstallments').textContent=`✅ ${rs.length} fois`; document.getElementById('isRecurrent').checked=false; document.getElementById('isAbonnement').checked=false; modalInst.close(); });
 
-        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; installmentsData=null; document.getElementById('btnOpenInstallments').style.display='block'; document.getElementById('btnOpenInstallments').textContent="⏱️ Paiement X fois"; formOp.reset(); document.getElementById('dateOp').value=new Date().toISOString().split('T')[0]; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
+        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; instData=null; document.getElementById('btnOpenInstallments').style.display='block'; document.getElementById('btnOpenInstallments').textContent="⏱️ X fois"; formOp.reset(); document.getElementById('dateOp').value=new Date().toISOString().split('T')[0]; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
         document.getElementById('btnCancelModal').addEventListener('click', () => { modalOp.close(); formOp.reset(); });
 
         formOp.addEventListener('submit', async (e) => {
-            e.preventDefault(); showLoading(); const fd = new FormData(e.target); const amt = Math.abs(parseFloat(fd.get('montant'))); const fAmt = fd.get('opType')==='sortie'?-amt:amt;
-            const isAbo = fd.get('isAbonnement')==='on'; const isRec = fd.get('isRecurrent')==='on'||isAbo; let opsToPush=[];
+            e.preventDefault(); showLoading(); const fd = new FormData(e.target); const amt = Math.abs(parseFloat(fd.get('montant'))); const fA = fd.get('opType')==='sortie' ? -amt : amt;
+            const isAbo = fd.get('isAbonnement')==='on'; const isRec = fd.get('isRecurrent')==='on'||isAbo; let pOps=[];
             if (editingOpId) { const cop = operations.find(o=>o.id===editingOpId); let aF = false; if(cop.recurringId){ const ans=prompt("1: Ce mois\n2: Ce mois ET suivants"); if(ans==='2') aF=true; else if(ans!=='1'){hideLoading();return;} }
-                if(aF){ const [ny,nm,nd]=fd.get('dateOp').split('-'); operations.filter(o=>o.recurringId===cop.recurringId&&o.date>=cop.date).forEach(o=>{ const [oy,om]=o.date.split('-'); let td=new Date(parseInt(oy),parseInt(om)-1,parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td=new Date(parseInt(oy),parseInt(om),0); opsToPush.push({...o, date:td.toISOString().split('T')[0], objet:fd.get('objet'), montant:fAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')}); }); }
-                else opsToPush.push({...cop, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
+                if(aF){ const [ny,nm,nd]=fd.get('dateOp').split('-'); operations.filter(o=>o.recurringId===cop.recurringId&&o.date>=cop.date).forEach(o=>{ const [oy,om]=o.date.split('-'); let td=new Date(parseInt(oy),parseInt(om)-1,parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td=new Date(parseInt(oy),parseInt(om),0); pOps.push({...o, date:td.toISOString().split('T')[0], objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')}); }); }
+                else pOps.push({...cop, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
             } else {
-                if(installmentsData){ const instId=Date.now(); installmentsData.forEach((inst,i)=>opsToPush.push({id:Date.now()+i, installmentId:instId, totalInstallments:installmentsData.length, bankId:currentBankId, date:inst.date, objet:`${fd.get('objet')} (${inst.part}/${inst.totalParts})`, montant:fd.get('opType')==='sortie'?-inst.amount:inst.amount, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false})); }
-                else if(isRec){ const recId=Date.now(); let intM=isAbo?parseInt(fd.get('freqAbonnement'))||1:parseInt(fd.get('intervalMois'))||1; let maxOp=isAbo?(intM===12?10:120):120; let eY=2099, eM=11; if(!isAbo&&fd.get('dateFinRecurrence')){ const [y,m]=fd.get('dateFinRecurrence').split('-'); eY=parseInt(y); eM=parseInt(m)-1; maxOp=1200; } let [cy,cm,d]=fd.get('dateOp').split('-'); cy=parseInt(cy); cm=parseInt(cm)-1; d=parseInt(d); for(let i=0; i<maxOp; i++){ if(cy>eY||(cy===eY&&cm>eM)) break; let td=new Date(cy,cm,d); if(td.getMonth()!==cm) td=new Date(cy,cm+1,0); opsToPush.push({id:recId+i, recurringId:recId, bankId:currentBankId, date:td.toISOString().split('T')[0], objet:fd.get('objet'), montant:fAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:true, isAbonnement:isAbo, intervalMois:intM, pointee:false}); cm+=intM; while(cm>11){cm-=12; cy++;} } }
-                else opsToPush.push({id:Date.now(), bankId:currentBankId, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false});
+                if(instData){ const id=Date.now(); instData.forEach((inst,i)=>pOps.push({id:Date.now()+i, installmentId:id, totalInstallments:instData.length, bankId:currentBankId, date:inst.date, objet:`${fd.get('objet')} (${inst.part}/${inst.totalParts})`, montant:fd.get('opType')==='sortie'?-inst.amount:inst.amount, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false})); }
+                else if(isRec){ const rId=Date.now(); let intM=isAbo?parseInt(fd.get('freqAbonnement'))||1:parseInt(fd.get('intervalMois'))||1; let mOp=isAbo?(intM===12?10:120):120; let eY=2099, eM=11; if(!isAbo&&fd.get('dateFinRecurrence')){ const [y,m]=fd.get('dateFinRecurrence').split('-'); eY=parseInt(y); eM=parseInt(m)-1; mOp=1200; } let [cy,cm,d]=fd.get('dateOp').split('-'); cy=parseInt(cy); cm=parseInt(cm)-1; d=parseInt(d); for(let i=0; i<mOp; i++){ if(cy>eY||(cy===eY&&cm>eM)) break; let td=new Date(cy,cm,d); if(td.getMonth()!==cm) td=new Date(cy,cm+1,0); pOps.push({id:rId+i, recurringId:rId, bankId:currentBankId, date:td.toISOString().split('T')[0], objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:true, isAbonnement:isAbo, intervalMois:intM, pointee:false}); cm+=intM; while(cm>11){cm-=12; cy++;} } }
+                else pOps.push({id:Date.now(), bankId:currentBankId, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false});
             }
-            const { error } = await supabaseClient.from('operations').upsert(opsToPush); if(error) alert("Erreur BDD"); modalOp.close(); formOp.reset(); editingOpId=null; installmentsData=null; hideLoading();
+            const { error } = await supabaseClient.from('operations').upsert(pOps); if(error) alert("Erreur."); modalOp.close(); formOp.reset(); editingOpId=null; instData=null; hideLoading();
         });
 
         document.getElementById('operationsList').addEventListener('click', async (e) => {
-            if (e.target.closest('.delete-op')) { const btn=e.target.closest('.delete-op'); const opId=parseInt(btn.dataset.id); const op=operations.find(o=>o.id===opId); let ids=[]; if(op.recurringId){ const ans=prompt("1: Ce mois\n2: Cascade"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.recurringId===op.recurringId&&o.date>=op.date).map(o=>o.id); else return; } else if(op.installmentId){ const ans=prompt("1: Cette échéance\n2: Toutes"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.installmentId===op.installmentId).map(o=>o.id); else return; } else { if(!confirm('Supprimer ?')) return; ids.push(opId); } showLoading(); await supabaseClient.from('operations').delete().in('id', ids); hideLoading(); }
-            if (e.target.closest('.edit-op')) { const btn=e.target.closest('.edit-op'); const opId=parseInt(btn.dataset.id); const op=operations.find(o=>o.id===opId); if(op){ editingOpId=opId; if(op.objet==='Solde Initial'){ document.getElementById('dateInit').value=op.date; document.getElementById('montantInit').value=op.montant; document.getElementById('modalInitBalance').showModal(); return; } document.getElementById('dateOp').value=op.date; document.getElementById('objet').value=op.objet; document.getElementById('montant').value=Math.abs(op.montant); document.getElementById(op.montant<0?'typeSortie':'typeEntree').checked=true; document.getElementById('modeReglement').value=op.modeReglement; document.getElementById('categorie').value=op.categorie; document.getElementById('btnOpenInstallments').style.display='none'; if(op.isRecurrent&&!op.isAbonnement) document.getElementById('isRecurrent').checked=true; if(op.isAbonnement) document.getElementById('isAbonnement').checked=true; modalOp.showModal(); } }
+            if(e.target.closest('.delete-op')){ const b=e.target.closest('.delete-op'); const opId=parseInt(b.dataset.id); const op=operations.find(o=>o.id===opId); let ids=[]; if(op.recurringId){ const ans=prompt("1: Ce mois\n2: Cascade"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.recurringId===op.recurringId&&o.date>=op.date).map(o=>o.id); else return; } else if(op.installmentId){ const ans=prompt("1: Echéance\n2: Toutes"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.installmentId===op.installmentId).map(o=>o.id); else return; } else { if(!confirm('Supprimer ?')) return; ids.push(opId); } showLoading(); await supabaseClient.from('operations').delete().in('id', ids); hideLoading(); }
+            if(e.target.closest('.edit-op')){ const b=e.target.closest('.edit-op'); const opId=parseInt(b.dataset.id); const op=operations.find(o=>o.id===opId); if(op){ editingOpId=opId; if(op.objet==='Solde Initial'){ document.getElementById('dateInit').value=op.date; document.getElementById('montantInit').value=op.montant; document.getElementById('modalInitBalance').showModal(); return; } document.getElementById('dateOp').value=op.date; document.getElementById('objet').value=op.objet; document.getElementById('montant').value=Math.abs(op.montant); document.getElementById(op.montant<0?'typeSortie':'typeEntree').checked=true; document.getElementById('modeReglement').value=op.modeReglement; document.getElementById('categorie').value=op.categorie; document.getElementById('btnOpenInstallments').style.display='none'; if(op.isRecurrent&&!op.isAbonnement) document.getElementById('isRecurrent').checked=true; if(op.isAbonnement) document.getElementById('isAbonnement').checked=true; modalOp.showModal(); } }
         });
 
-        document.getElementById('btnExport').addEventListener('click', () => { const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({operations, banks, currentBankId})); const dn=document.createElement('a'); dn.href=dataStr; dn.download="budget_sauvegarde_cloud.json"; document.body.appendChild(dn); dn.click(); dn.remove(); });
+        document.getElementById('btnExport').addEventListener('click', () => { const ds="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({operations, banks, currentBankId})); const dn=document.createElement('a'); dn.href=ds; dn.download="budget_sauvegarde.json"; document.body.appendChild(dn); dn.click(); dn.remove(); });
         document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
-        document.getElementById('fileImport').addEventListener('change', (e) => { const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.readAsText(file,"UTF-8"); reader.onload=async function(ev){ try{ const imp=JSON.parse(ev.target.result.trim().replace(/^\uFEFF/,"")); if(imp.operations&&imp.banks){ if(!confirm(`Écraser le Cloud avec ${imp.operations.length} lignes ?`)) return; showLoading(); banks=imp.banks; currentBankId=imp.currentBankId||banks[0].id; saveLocalState(); renderBanksDropdown(); await supabaseClient.from('operations').delete().neq('id',-1); for(let i=0; i<imp.operations.length; i+=100) await supabaseClient.from('operations').insert(imp.operations.slice(i,i+100)); alert("✅ Restauration réussie !"); await fetchCloudData(); }else alert("Fichier invalide."); }catch(err){alert("Erreur.");console.error(err);}finally{hideLoading();} }; e.target.value=''; });
+        document.getElementById('fileImport').addEventListener('change', (e) => { const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.readAsText(f,"UTF-8"); r.onload=async function(ev){ try{ const imp=JSON.parse(ev.target.result.trim().replace(/^\uFEFF/,"")); if(imp.operations&&imp.banks){ if(!confirm(`Écraser Cloud avec ${imp.operations.length} lignes ?`)) return; showLoading(); banks=imp.banks; currentBankId=imp.currentBankId||banks[0].id; saveLocalBanks(); renderBanksDropdown(); await supabaseClient.from('operations').delete().neq('id',-1); for(let i=0; i<imp.operations.length; i+=100) await supabaseClient.from('operations').insert(imp.operations.slice(i,i+100)); alert("✅ OK !"); await fetchCloudData(); }else alert("Fichier invalide."); }catch(err){alert("Erreur.");console.error(err);}finally{hideLoading();} }; e.target.value=''; });
 
-        const modalSearch=document.getElementById('modalSearch'), searchInput=document.getElementById('searchInput'), searchResults=document.getElementById('searchResults');
-        document.getElementById('btnOpenSearch').addEventListener('click', () => { searchInput.value=''; searchResults.innerHTML=''; modalSearch.showModal(); setTimeout(()=>searchInput.focus(),50); });
+        const modalSearch=document.getElementById('modalSearch'), sInp=document.getElementById('searchInput'), sRes=document.getElementById('searchResults');
+        document.getElementById('btnOpenSearch').addEventListener('click', () => { sInp.value=''; sRes.innerHTML=''; modalSearch.showModal(); setTimeout(()=>sInp.focus(),50); });
         document.getElementById('btnCloseSearch').addEventListener('click', () => modalSearch.close());
-        searchInput.addEventListener('input', (e) => { const t=e.target.value.toLowerCase().trim(); searchResults.innerHTML=''; if(t.length<2) return; const res=operations.filter(o=>o.bankId===currentBankId&&`${o.date} ${o.objet} ${o.montant} ${o.categorie} ${o.modeReglement}`.toLowerCase().includes(t)); res.sort((a,b)=>a.date<b.date?-1:1).forEach(o=>{ searchResults.innerHTML+=`<div style="background:#f9f9f9; padding:0.5rem; border:1px solid #eee; margin-bottom:0.5rem; display:flex; justify-content:space-between;"><div><span style="font-size:0.8rem; color:#666;">${o.date} - ${o.categorie}</span><br><b>${o.objet}</b></div><div style="color:${o.montant<0?'#e53935':'#4CAF50'}; font-weight:bold;">${o.montant} €</div></div>`; }); });
+        sInp.addEventListener('input', (e) => { const t=e.target.value.toLowerCase().trim(); sRes.innerHTML=''; if(t.length<2) return; const r=operations.filter(o=>o.bankId===currentBankId&&`${o.date} ${o.objet} ${o.montant} ${o.categorie} ${o.modeReglement}`.toLowerCase().includes(t)); r.sort((a,b)=>a.date<b.date?-1:1).forEach(o=>{ sRes.innerHTML+=`<div style="background:#f9f9f9; padding:0.5rem; border:1px solid #eee; margin-bottom:0.5rem; display:flex; justify-content:space-between;"><div><span style="font-size:0.8rem; color:#666;">${o.date} - ${o.categorie}</span><br><b>${o.objet}</b></div><div style="color:${o.montant<0?'#e53935':'#4CAF50'}; font-weight:bold;">${o.montant} €</div></div>`; }); });
 
-        const modalStats=document.getElementById('modalStats'), statType=document.getElementById('statType'), statStart=document.getElementById('statStartDate'), statEnd=document.getElementById('statEndDate'), statsRes=document.getElementById('statsResults');
-        function calcStats() { const t=statType.value, s=statStart.value, e=statEnd.value; let f=operations.filter(o=>o.bankId===currentBankId&&o.objet!=='Solde Initial'); if(s) f=f.filter(o=>o.date>=s); if(e) f=f.filter(o=>o.date<=e); const tot={}; let gt=0; f.forEach(o=>{ if((t==='depenses'&&o.montant>=0)||(t==='recettes'&&o.montant<=0)) return; const c=o.categorie||'Non catégorisé'; tot[c]=(tot[c]||0)+o.montant; gt+=o.montant; }); statsRes.innerHTML=`<div style="text-align:right; font-weight:bold; color:${t==='depenses'?'#e53935':'#4CAF50'}">Total : ${Math.abs(gt).toFixed(2)} €</div>`; Object.entries(tot).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).forEach(([c,a])=>{ const pct=gt!==0?(Math.abs(a)/Math.abs(gt))*100:0; statsRes.innerHTML+=`<div style="margin-bottom:0.5rem;"><div style="display:flex; justify-content:space-between; font-size:0.9rem;"><span>${c}</span><span>${Math.abs(a).toFixed(2)}€ (${pct.toFixed(1)}%)</span></div><div style="background:#eee; height:8px; border-radius:4px;"><div style="width:${pct}%; background:${t==='depenses'?'#f44336':'#4CAF50'}; height:100%; border-radius:4px;"></div></div></div>`; }); }
-        document.getElementById('headerCat').addEventListener('click', () => { const d=new Date(), fd=new Date(d.getFullYear(),d.getMonth(),1), ld=new Date(d.getFullYear(),d.getMonth()+1,0); statStart.value=`${fd.getFullYear()}-${String(fd.getMonth()+1).padStart(2,'0')}-01`; statEnd.value=`${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`; calcStats(); modalStats.showModal(); });
-        document.getElementById('btnCloseStats').addEventListener('click', () => modalStats.close()); ['change'].forEach(evt=>{ statType.addEventListener(evt,calcStats); statStart.addEventListener(evt,calcStats); statEnd.addEventListener(evt,calcStats); });
+        const modalStats=document.getElementById('modalStats'), stT=document.getElementById('statType'), stS=document.getElementById('statStartDate'), stE=document.getElementById('statEndDate'), stRes=document.getElementById('statsResults');
+        function calcStats() { const t=stT.value, s=stS.value, e=stE.value; let f=operations.filter(o=>o.bankId===currentBankId&&o.objet!=='Solde Initial'); if(s) f=f.filter(o=>o.date>=s); if(e) f=f.filter(o=>o.date<=e); const tot={}; let gt=0; f.forEach(o=>{ if((t==='depenses'&&o.montant>=0)||(t==='recettes'&&o.montant<=0)) return; const c=o.categorie||'Autre'; tot[c]=(tot[c]||0)+o.montant; gt+=o.montant; }); stRes.innerHTML=`<div style="text-align:right; font-weight:bold; color:${t==='depenses'?'#e53935':'#4CAF50'}">Total : ${Math.abs(gt).toFixed(2)} €</div>`; Object.entries(tot).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).forEach(([c,a])=>{ const p=gt!==0?(Math.abs(a)/Math.abs(gt))*100:0; stRes.innerHTML+=`<div style="margin-bottom:0.5rem;"><div style="display:flex; justify-content:space-between; font-size:0.9rem;"><span>${c}</span><span>${Math.abs(a).toFixed(2)}€ (${p.toFixed(1)}%)</span></div><div style="background:#eee; height:8px; border-radius:4px;"><div style="width:${p}%; background:${t==='depenses'?'#f44336':'#4CAF50'}; height:100%; border-radius:4px;"></div></div></div>`; }); }
+        document.getElementById('headerCat').addEventListener('click', () => { const d=new Date(), fd=new Date(d.getFullYear(),d.getMonth(),1), ld=new Date(d.getFullYear(),d.getMonth()+1,0); stS.value=`${fd.getFullYear()}-${String(fd.getMonth()+1).padStart(2,'0')}-01`; stE.value=`${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`; calcStats(); modalStats.showModal(); });
+        document.getElementById('btnCloseStats').addEventListener('click', () => modalStats.close()); ['change'].forEach(ev=>{ stT.addEventListener(ev,calcStats); stS.addEventListener(ev,calcStats); stE.addEventListener(ev,calcStats); });
 
         document.getElementById('currentMonthLabel').textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(displayYear, displayMonth));
-        renderBanksDropdown();
-        fetchCloudData().then(setupRealtime);
+        renderBanksDropdown(); fetchCloudData().then(setupRealtime);
     </script>
 </body>
 </html>
