@@ -212,7 +212,6 @@
         <button id="btnOpenModal" class="floating-btn">+</button>
     </main>
 
-    <!-- Modale Opération -->
     <dialog id="modalOperation">
         <form id="formOperation" method="dialog">
             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
@@ -265,7 +264,6 @@
         </form>
     </dialog>
 
-    <!-- Modale Virement Interne Améliorée -->
     <dialog id="modalTransfer">
         <form id="formTransfer" method="dialog">
             <h2 style="margin-top: 0;">Virement Interne</h2>
@@ -315,12 +313,15 @@
         if (navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
         localStorage.removeItem('budget_operations');
 
-        // INIT SUPABASE CLOUD (Remplace bien le mot de passe secret si tu l'avais personnalisé)
+        // INIT SUPABASE CLOUD
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
             global: { headers: { 'x-my-secret-key': 'MON_MOT_DE_PASSE_SECRET' } }
         });
+
+        // FONCTION MAGIQUE ANTI-FUSEAU HORAIRE
+        const toLocalISODate = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
         let operations = [];
         let banks = JSON.parse(localStorage.getItem('budget_banks')) || [{ id: 'bank_1', name: 'Compte Courant' }];
@@ -434,7 +435,7 @@
         window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible."); if(confirm('Supprimer ?')){ banks=banks.filter(b=>b.id!==id); if(currentBankId===id) currentBankId=banks[0].id; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
         document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value.trim(); if(n){ banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } });
 
-        // VIREMENT INTERNE AMÉLIORÉ
+        // VIREMENT INTERNE
         const modalTransfer = document.getElementById('modalTransfer');
         
         document.getElementById('isTransferRecurrent').addEventListener('change', (e) => {
@@ -448,7 +449,7 @@
             banks.forEach(b => { sSel.add(new Option(b.name, b.id)); dSel.add(new Option(b.name, b.id)); });
             sSel.value = currentBankId; dSel.value = banks.find(b => b.id !== currentBankId)?.id || banks[0].id;
             
-            document.getElementById('dateTransfer').value = new Date().toISOString().split('T')[0];
+            document.getElementById('dateTransfer').value = toLocalISODate();
             document.getElementById('libelleTransfer').value = '';
             document.getElementById('isTransferRecurrent').checked = false;
             document.getElementById('transferRecurrentSettingsWrapper').style.display = 'none';
@@ -486,7 +487,7 @@
             for(let i=0; i<(isRec ? maxOp : 1); i++){ 
                 if(isRec && (cy>eY || (cy===eY && cm>eM))) break; 
                 let td = new Date(cy, cm, d); if(td.getMonth() !== cm) td = new Date(cy, cm+1, 0); 
-                const fDate = td.toISOString().split('T')[0];
+                const fDate = toLocalISODate(td);
                 
                 const objS = lib ? `Virement émis : ${lib}` : 'Virement émis';
                 const objD = lib ? `Virement reçu : ${lib}` : 'Virement reçu';
@@ -508,28 +509,28 @@
         document.getElementById('isRecurrent').addEventListener('change', (e) => { document.getElementById('recurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked){ document.getElementById('isAbonnement').checked = false; document.getElementById('abonnementSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
 
         const modalInit = document.getElementById('modalInitBalance');
-        document.getElementById('btnInitBalance').addEventListener('click', () => { editingOpId = null; document.getElementById('dateInit').value = new Date().toISOString().split('T')[0]; modalInit.showModal(); });
+        document.getElementById('btnInitBalance').addEventListener('click', () => { editingOpId = null; document.getElementById('dateInit').value = toLocalISODate(); modalInit.showModal(); });
         document.getElementById('btnCancelInit').addEventListener('click', () => { modalInit.close(); document.getElementById('formInitBalance').reset(); editingOpId = null; });
         document.getElementById('formInitBalance').addEventListener('submit', async (e) => { e.preventDefault(); showLoading(); const opD = { bankId: currentBankId, date: document.getElementById('dateInit').value, objet: 'Solde Initial', montant: parseFloat(document.getElementById('montantInit').value), modeReglement: '-', categorie: 'Solde', isRecurrent: false, pointee: true }; if(editingOpId) opD.id = editingOpId; else opD.id = Date.now(); await supabaseClient.from('operations').upsert(opD); modalInit.close(); e.target.reset(); editingOpId = null; hideLoading(); });
 
         const modalInst = document.getElementById('modalInstallments'); const instList = document.getElementById('installmentsList');
         document.getElementById('btnOpenInstallments').addEventListener('click', () => { if(parseFloat(document.getElementById('montant').value)>0) modalInst.showModal(); else alert("Saisir montant."); });
         document.getElementById('btnCancelInstallments').addEventListener('click', () => { instData = null; document.getElementById('btnOpenInstallments').textContent="⏱️ X fois"; modalInst.close(); });
-        document.getElementById('btnGenerateInstallments').addEventListener('click', () => { const c = parseInt(document.getElementById('installmentsCount').value); const bA = parseFloat(document.getElementById('montant').value); let [y,m,d] = (document.getElementById('dateOp').value||new Date().toISOString().split('T')[0]).split('-'); instList.innerHTML=''; const sA = Math.floor((bA/c)*100)/100; let r = bA; let cy=parseInt(y), cm=parseInt(m)-1; for(let i=0; i<c; i++){ let tD = new Date(cy, cm, parseInt(d)); if(tD.getMonth()!==cm) tD = new Date(cy, cm+1, 0); let rA = (i===c-1) ? Math.round(r*100)/100 : sA; r-=sA; instList.innerHTML += `<div class="installment-row"><span>#${i+1}</span><input type="date" class="inst-date" value="${tD.toISOString().split('T')[0]}"><input type="number" step="0.01" class="inst-amount" value="${rA.toFixed(2)}"></div>`; cm++; if(cm>11){cm=0; cy++;} } });
+        document.getElementById('btnGenerateInstallments').addEventListener('click', () => { const c = parseInt(document.getElementById('installmentsCount').value); const bA = parseFloat(document.getElementById('montant').value); let [y,m,d] = (document.getElementById('dateOp').value||toLocalISODate()).split('-'); instList.innerHTML=''; const sA = Math.floor((bA/c)*100)/100; let r = bA; let cy=parseInt(y), cm=parseInt(m)-1; for(let i=0; i<c; i++){ let tD = new Date(cy, cm, parseInt(d)); if(tD.getMonth()!==cm) tD = new Date(cy, cm+1, 0); let rA = (i===c-1) ? Math.round(r*100)/100 : sA; r-=sA; instList.innerHTML += `<div class="installment-row"><span>#${i+1}</span><input type="date" class="inst-date" value="${toLocalISODate(tD)}"><input type="number" step="0.01" class="inst-amount" value="${rA.toFixed(2)}"></div>`; cm++; if(cm>11){cm=0; cy++;} } });
         document.getElementById('btnSaveInstallments').addEventListener('click', () => { const rs = instList.querySelectorAll('.installment-row'); if(!rs.length) return; instData=[]; rs.forEach((r,i) => instData.push({part:i+1, totalParts:rs.length, date:r.querySelector('.inst-date').value, amount:parseFloat(r.querySelector('.inst-amount').value)})); document.getElementById('btnOpenInstallments').textContent=`✅ ${rs.length} fois`; document.getElementById('isRecurrent').checked=false; document.getElementById('isAbonnement').checked=false; modalInst.close(); });
 
-        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; instData=null; document.getElementById('btnOpenInstallments').style.display='block'; document.getElementById('btnOpenInstallments').textContent="⏱️ X fois"; formOp.reset(); document.getElementById('dateOp').value=new Date().toISOString().split('T')[0]; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
+        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; instData=null; document.getElementById('btnOpenInstallments').style.display='block'; document.getElementById('btnOpenInstallments').textContent="⏱️ X fois"; formOp.reset(); document.getElementById('dateOp').value=toLocalISODate(); document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
         document.getElementById('btnCancelModal').addEventListener('click', () => { modalOp.close(); formOp.reset(); });
 
         formOp.addEventListener('submit', async (e) => {
             e.preventDefault(); showLoading(); const fd = new FormData(e.target); const amt = Math.abs(parseFloat(fd.get('montant'))); const fA = fd.get('opType')==='sortie' ? -amt : amt;
             const isAbo = fd.get('isAbonnement')==='on'; const isRec = fd.get('isRecurrent')==='on'||isAbo; let pOps=[];
             if (editingOpId) { const cop = operations.find(o=>o.id===editingOpId); let aF = false; if(cop.recurringId){ const ans=prompt("1: Ce mois\n2: Ce mois ET suivants"); if(ans==='2') aF=true; else if(ans!=='1'){hideLoading();return;} }
-                if(aF){ const [ny,nm,nd]=fd.get('dateOp').split('-'); operations.filter(o=>o.recurringId===cop.recurringId&&o.date>=cop.date).forEach(o=>{ const [oy,om]=o.date.split('-'); let td=new Date(parseInt(oy),parseInt(om)-1,parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td=new Date(parseInt(oy),parseInt(om),0); pOps.push({...o, date:td.toISOString().split('T')[0], objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')}); }); }
+                if(aF){ const [ny,nm,nd]=fd.get('dateOp').split('-'); operations.filter(o=>o.recurringId===cop.recurringId&&o.date>=cop.date).forEach(o=>{ const [oy,om]=o.date.split('-'); let td=new Date(parseInt(oy),parseInt(om)-1,parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td=new Date(parseInt(oy),parseInt(om),0); pOps.push({...o, date:toLocalISODate(td), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')}); }); }
                 else pOps.push({...cop, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
             } else {
                 if(instData){ const id=Date.now(); instData.forEach((inst,i)=>pOps.push({id:Date.now()+i, installmentId:id, totalInstallments:instData.length, bankId:currentBankId, date:inst.date, objet:`${fd.get('objet')} (${inst.part}/${inst.totalParts})`, montant:fd.get('opType')==='sortie'?-inst.amount:inst.amount, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false})); }
-                else if(isRec){ const rId=Date.now(); let intM=isAbo?parseInt(fd.get('freqAbonnement'))||1:parseInt(fd.get('intervalMois'))||1; let mOp=isAbo?(intM===12?10:120):120; let eY=2099, eM=11; if(!isAbo&&fd.get('dateFinRecurrence')){ const [y,m]=fd.get('dateFinRecurrence').split('-'); eY=parseInt(y); eM=parseInt(m)-1; mOp=1200; } let [cy,cm,d]=fd.get('dateOp').split('-'); cy=parseInt(cy); cm=parseInt(cm)-1; d=parseInt(d); for(let i=0; i<mOp; i++){ if(cy>eY||(cy===eY&&cm>eM)) break; let td=new Date(cy,cm,d); if(td.getMonth()!==cm) td=new Date(cy,cm+1,0); pOps.push({id:rId+i, recurringId:rId, bankId:currentBankId, date:td.toISOString().split('T')[0], objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:true, isAbonnement:isAbo, intervalMois:intM, pointee:false}); cm+=intM; while(cm>11){cm-=12; cy++;} } }
+                else if(isRec){ const rId=Date.now(); let intM=isAbo?parseInt(fd.get('freqAbonnement'))||1:parseInt(fd.get('intervalMois'))||1; let mOp=isAbo?(intM===12?10:120):120; let eY=2099, eM=11; if(!isAbo&&fd.get('dateFinRecurrence')){ const [y,m]=fd.get('dateFinRecurrence').split('-'); eY=parseInt(y); eM=parseInt(m)-1; mOp=1200; } let [cy,cm,d]=fd.get('dateOp').split('-'); cy=parseInt(cy); cm=parseInt(cm)-1; d=parseInt(d); for(let i=0; i<mOp; i++){ if(cy>eY||(cy===eY&&cm>eM)) break; let td=new Date(cy,cm,d); if(td.getMonth()!==cm) td=new Date(cy,cm+1,0); pOps.push({id:rId+i, recurringId:rId, bankId:currentBankId, date:toLocalISODate(td), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:true, isAbonnement:isAbo, intervalMois:intM, pointee:false}); cm+=intM; while(cm>11){cm-=12; cy++;} } }
                 else pOps.push({id:Date.now(), bankId:currentBankId, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie'), isRecurrent:false, pointee:false});
             }
             const { error } = await supabaseClient.from('operations').upsert(pOps); if(error) alert("Erreur."); modalOp.close(); formOp.reset(); editingOpId=null; instData=null; hideLoading();
