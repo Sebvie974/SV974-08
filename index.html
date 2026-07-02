@@ -116,9 +116,6 @@
 
         #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
 
-        /* ========================================= */
-        /* 📱 ADAPTATION SMARTPHONE DISCRÈTE         */
-        /* ========================================= */
         @media (max-width: 768px) {
             header { padding: 0.6rem; gap: 0.5rem; }
             .bank-management { flex-direction: column; align-items: stretch; text-align: center; gap: 5px; }
@@ -313,7 +310,7 @@
         if (navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
         localStorage.removeItem('budget_operations');
 
-        // INIT SUPABASE CLOUD (Remplace bien le mot de passe secret)
+        // INIT SUPABASE CLOUD
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
@@ -323,7 +320,7 @@
         const toLocalISODate = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
         let operations = [];
-        let banks = JSON.parse(localStorage.getItem('budget_banks')) || [{ id: 'bank_1', name: 'Compte Courant' }];
+        let banks = []; // Chargé depuis Supabase désormais
         let currentBankId = localStorage.getItem('budget_currentBankId') || 'bank_1';
         let editingOpId = null;
 
@@ -334,26 +331,61 @@
         const showLoading = () => loadingOverlay.style.display = 'flex';
         const hideLoading = () => loadingOverlay.style.display = 'none';
 
-        function saveLocalBanks() { localStorage.setItem('budget_banks', JSON.stringify(banks)); localStorage.setItem('budget_currentBankId', currentBankId); }
+        function saveLocalCurrentBank() { localStorage.setItem('budget_currentBankId', currentBankId); }
 
         async function fetchCloudData() {
             showLoading();
             try {
+                // 1. Récupération des banques depuis le cloud
+                const { data: bankData, error: bankError } = await supabaseClient.from('banks').select('*').order('name', { ascending: true });
+                if (bankError) throw bankError;
+                
+                if (bankData && bankData.length > 0) {
+                    banks = bankData;
+                } else {
+                    // Si la table cloud est neuve, on l'initialise avec le premier compte par défaut
+                    banks = [{ id: 'bank_1', name: 'Compte Courant' }];
+                    await supabaseClient.from('banks').insert(banks);
+                }
+                
+                if (!banks.some(b => b.id === currentBankId)) {
+                    currentBankId = banks[0].id;
+                    saveLocalCurrentBank();
+                }
+
+                // 2. Récupération des opérations
                 const { data, error } = await supabaseClient.from('operations').select('*').order('date', { ascending: true });
                 if (error) throw error;
-                operations = data || []; renderOperations(); updateTotals();
-            } catch (err) { console.error(err); alert("Erreur cloud."); } finally { hideLoading(); }
+                operations = data || []; 
+
+                renderBanksDropdown(); renderOperations(); updateTotals();
+            } catch (err) { console.error(err); alert("Erreur cloud au chargement."); } finally { hideLoading(); }
         }
 
         function setupRealtime() {
+            // Synchro opérations
             supabaseClient.channel('public:operations').on('postgres_changes', { event: '*', schema: 'public', table: 'operations' }, (p) => {
-                const dot = document.getElementById('statusDot'); dot.style.backgroundColor = '#ffeb3b'; setTimeout(() => dot.style.backgroundColor = '#fff', 500);
+                blinkStatusDot();
                 if (p.eventType === 'INSERT' && !operations.some(o => o.id === p.new.id)) operations.push(p.new);
                 else if (p.eventType === 'UPDATE') { const i = operations.findIndex(o => o.id === p.new.id); if (i !== -1) operations[i] = p.new; else operations.push(p.new); }
                 else if (p.eventType === 'DELETE') operations = operations.filter(o => o.id !== p.old.id);
                 renderOperations(); updateTotals();
             }).subscribe((s) => { if(s === 'SUBSCRIBED') { document.getElementById('statusDot').classList.add('online'); document.getElementById('statusText').textContent = 'En direct'; } });
+
+            // Synchro banques
+            supabaseClient.channel('public:banks').on('postgres_changes', { event: '*', schema: 'public', table: 'banks' }, (p) => {
+                blinkStatusDot();
+                if (p.eventType === 'INSERT' && !banks.some(b => b.id === p.new.id)) banks.push(p.new);
+                else if (p.eventType === 'UPDATE') { const i = banks.findIndex(b => b.id === p.new.id); if (i !== -1) banks[i] = p.new; }
+                else if (p.eventType === 'DELETE') {
+                    banks = banks.filter(b => b.id !== p.old.id);
+                    if (currentBankId === p.old.id && banks.length > 0) { currentBankId = banks[0].id; saveLocalCurrentBank(); }
+                }
+                renderBanksDropdown(); renderOperations(); updateTotals();
+            }).subscribe();
         }
+
+        function blinkStatusDot() { const dot = document.getElementById('statusDot'); dot.style.backgroundColor = '#ffeb3b'; setTimeout(() => dot.style.backgroundColor = '#fff', 500); }
 
         document.getElementById('btnForceSync').addEventListener('click', fetchCloudData);
         document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
@@ -400,12 +432,9 @@
             });
         }
 
-        // --- CORRECTION DU SOLDE POINTÉ GLOBAL ---
         function updateTotals() {
             const c = getCarryoverBalance(); const mOps = getCurrentMonthOps();
             document.getElementById('totalPrevu').textContent = (c + mOps.reduce((a, o) => a + o.montant, 0)).toFixed(2) + ' €';
-            
-            // Le solde pointé est maintenant le total absolu de toutes les opérations cochées
             const globalPointe = operations.filter(o => o.bankId === currentBankId && o.pointee).reduce((a, o) => a + o.montant, 0);
             document.getElementById('totalPointe').textContent = globalPointe.toFixed(2) + ' €';
         }
@@ -419,20 +448,19 @@
             Object.assign(op, p); renderOperations(); updateTotals();
             await supabaseClient.from('operations').update(p).eq('id', id);
 
-            // SYNC DU JUMEAU (Pour les éditions rapides de ligne)
             if (!e.target.classList.contains('check-op')) {
                 const twin = operations.find(o => o.id !== op.id && o.date === op.date && o.montant === -op.montant && Math.abs(o.id - op.id) <= 5);
                 if (twin && (twin.categorie === 'Virement interne' || twin.objet.includes('Virement'))) {
-                    Object.assign(twin, p);
-                    await supabaseClient.from('operations').update(p).eq('id', twin.id);
+                    Object.assign(twin, p); await supabaseClient.from('operations').update(p).eq('id', twin.id);
                 }
             }
         });
 
         const bankSel = document.getElementById('bankSelector');
         function renderBanksDropdown() { bankSel.innerHTML = ''; banks.forEach(b => bankSel.add(new Option(b.name, b.id))); bankSel.value = currentBankId; }
-        bankSel.addEventListener('change', (e) => { currentBankId = e.target.value; saveLocalBanks(); renderOperations(); updateTotals(); });
+        bankSel.addEventListener('change', (e) => { currentBankId = e.target.value; saveLocalCurrentBank(); renderOperations(); updateTotals(); });
 
+        // GESTIONNAIRE DE COMPTES CLOUD
         const modalBank = document.getElementById('modalBankManager');
         document.getElementById('btnManageBanks').addEventListener('click', () => {
             const c = document.getElementById('bankListContainer'); c.innerHTML = '';
@@ -443,79 +471,73 @@
             });
             modalBank.showModal();
         });
-        document.getElementById('btnCloseBankManager').addEventListener('click', () => { modalBank.close(); renderBanksDropdown(); renderOperations(); updateTotals(); });
-        window.renameBank = (id) => { const b = banks.find(x=>x.id===id); const n = prompt('Nouveau nom:', b.name); if(n){ b.name=n.trim(); saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
-        window.deleteBank = (id) => { if(banks.length===1) return alert("Impossible."); if(confirm('Supprimer ?')){ banks=banks.filter(b=>b.id!==id); if(currentBankId===id) currentBankId=banks[0].id; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } };
-        document.getElementById('btnAddNewBank').addEventListener('click', () => { const n = document.getElementById('newBankName').value.trim(); if(n){ banks.push({id:'bank_'+Date.now(), name:n}); document.getElementById('newBankName').value=''; saveLocalBanks(); document.getElementById('btnManageBanks').click(); } });
-
-        const modalTransfer = document.getElementById('modalTransfer');
+        document.getElementById('btnCloseBankManager').addEventListener('click', () => modalBank.close());
         
-        document.getElementById('isTransferRecurrent').addEventListener('change', (e) => {
-            document.getElementById('transferRecurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none';
+        window.renameBank = async (id) => {
+            const b = banks.find(x=>x.id===id); const n = prompt('Nouveau nom du compte :', b.name);
+            if(n && n.trim()){
+                b.name = n.trim(); showLoading();
+                await supabaseClient.from('banks').update({ name: b.name }).eq('id', id);
+                hideLoading(); document.getElementById('btnManageBanks').click();
+            }
+        };
+        window.deleteBank = async (id) => {
+            if(banks.length===1) return alert("Impossible de tout supprimer.");
+            if(confirm('Supprimer ce compte définitivement ? (Vos opérations associées resteront dans la table mais masquées)')){
+                showLoading();
+                await supabaseClient.from('banks').delete().eq('id', id);
+                banks = banks.filter(b=>b.id!==id);
+                if(currentBankId===id) currentBankId=banks[0].id;
+                saveLocalCurrentBank();
+                hideLoading(); document.getElementById('btnManageBanks').click();
+            }
+        };
+        document.getElementById('btnAddNewBank').addEventListener('click', async () => {
+            const n = document.getElementById('newBankName').value.trim();
+            if(n){
+                const newB = { id: 'bank_' + Date.now(), name: n };
+                document.getElementById('newBankName').value = ''; showLoading();
+                await supabaseClient.from('banks').insert([newB]);
+                hideLoading(); document.getElementById('btnManageBanks').click();
+            }
         });
 
+        // VIREMENT INTERNE
+        const modalTransfer = document.getElementById('modalTransfer');
+        document.getElementById('isTransferRecurrent').addEventListener('change', (e) => { document.getElementById('transferRecurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; });
         document.getElementById('btnTransfer').addEventListener('click', () => {
             if(banks.length < 2) return alert("Besoin d'au moins 2 comptes.");
             const sSel = document.getElementById('compteSource'); const dSel = document.getElementById('compteDest');
             sSel.innerHTML = ''; dSel.innerHTML = '';
             banks.forEach(b => { sSel.add(new Option(b.name, b.id)); dSel.add(new Option(b.name, b.id)); });
             sSel.value = currentBankId; dSel.value = banks.find(b => b.id !== currentBankId)?.id || banks[0].id;
-            
             document.getElementById('dateTransfer').value = toLocalISODate();
-            document.getElementById('libelleTransfer').value = '';
-            document.getElementById('isTransferRecurrent').checked = false;
-            document.getElementById('transferRecurrentSettingsWrapper').style.display = 'none';
-            document.getElementById('transferIntervalMois').value = '1';
-            document.getElementById('transferDateFin').value = '';
-            
-            document.getElementById('formTransfer').reset(); modalTransfer.showModal();
+            document.getElementById('libelleTransfer').value = ''; document.getElementById('isTransferRecurrent').checked = false;
+            document.getElementById('transferRecurrentSettingsWrapper').style.display = 'none'; document.getElementById('transferIntervalMois').value = '1';
+            document.getElementById('transferDateFin').value = ''; modalTransfer.showModal();
         });
-        
         document.getElementById('btnCancelTransfer').addEventListener('click', () => modalTransfer.close());
-        
         document.getElementById('formTransfer').addEventListener('submit', async (e) => {
-            e.preventDefault(); 
-            const sId = document.getElementById('compteSource').value; 
-            const dId = document.getElementById('compteDest').value;
-            const amt = parseFloat(document.getElementById('montantTransfer').value); 
-            const dOp = document.getElementById('dateTransfer').value;
-            const lib = document.getElementById('libelleTransfer').value.trim();
-            const isRec = document.getElementById('isTransferRecurrent').checked;
-            const intM = parseInt(document.getElementById('transferIntervalMois').value) || 1;
-            const dateFin = document.getElementById('transferDateFin').value;
-
-            if(sId === dId) return alert("Comptes identiques !"); 
-            if(isNaN(amt) || amt<=0) return alert("Montant invalide.");
-            showLoading(); 
-            
-            let pOps = [];
-            let maxOp = 120; let eY = 2099, eM = 11; 
-            if(isRec && dateFin){ const [y,m] = dateFin.split('-'); eY = parseInt(y); eM = parseInt(m)-1; maxOp = 1200; } 
-            
-            let [cy, cm, d] = dOp.split('-'); cy = parseInt(cy); cm = parseInt(cm)-1; d = parseInt(d); 
-            const rId = isRec ? Date.now() : null;
-            let ts = Date.now();
-            
+            e.preventDefault(); const sId = document.getElementById('compteSource').value; const dId = document.getElementById('compteDest').value;
+            const amt = parseFloat(document.getElementById('montantTransfer').value); const dOp = document.getElementById('dateTransfer').value;
+            const lib = document.getElementById('libelleTransfer').value.trim(); const isRec = document.getElementById('isTransferRecurrent').checked;
+            const intM = parseInt(document.getElementById('transferIntervalMois').value) || 1; const dateFin = document.getElementById('transferDateFin').value;
+            if(sId === dId) return alert("Comptes identiques !"); if(isNaN(amt) || amt<=0) return alert("Montant invalide.");
+            showLoading(); let pOps = []; let maxOp = 120; let eY = 2099, eM = 11; if(isRec && dateFin){ const [y,m] = dateFin.split('-'); eY = parseInt(y); eM = parseInt(m)-1; maxOp = 1200; } 
+            let [cy, cm, d] = dOp.split('-'); cy = parseInt(cy); cm = parseInt(cm)-1; d = parseInt(d); const rId = isRec ? Date.now() : null; let ts = Date.now();
             for(let i=0; i<(isRec ? maxOp : 1); i++){ 
                 if(isRec && (cy>eY || (cy===eY && cm>eM))) break; 
-                let td = new Date(cy, cm, d); if(td.getMonth() !== cm) td = new Date(cy, cm+1, 0); 
-                const fDate = toLocalISODate(td);
-                
-                const objS = lib ? `Virement émis : ${lib}` : 'Virement émis';
-                const objD = lib ? `Virement reçu : ${lib}` : 'Virement reçu';
-
+                let td = new Date(cy, cm, d); if(td.getMonth() !== cm) td = new Date(cy, cm+1, 0); const fDate = toLocalISODate(td);
+                const objS = lib ? `Virement émis : ${lib}` : 'Virement émis'; const objD = lib ? `Virement reçu : ${lib}` : 'Virement reçu';
                 pOps.push({ id: ts++, "bankId": sId, date: fDate, objet: objS, montant: -amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": isRec, "isAbonnement": false, pointee: false, recurringId: rId, intervalMois: isRec ? intM : null });
                 pOps.push({ id: ts++, "bankId": dId, date: fDate, objet: objD, montant: amt, "modeReglement": 'Virement', categorie: 'Virement interne', "isRecurrent": isRec, "isAbonnement": false, pointee: false, recurringId: rId, intervalMois: isRec ? intM : null });
-                
                 if(!isRec) break;
                 cm += intM; while(cm>11){ cm-=12; cy++; } 
             }
-            
-            const { error } = await supabaseClient.from('operations').insert(pOps);
-            hideLoading(); if(error) alert("Erreur."); else modalTransfer.close();
+            const { error } = await supabaseClient.from('operations').insert(pOps); hideLoading(); if(error) alert("Erreur."); else modalTransfer.close();
         });
 
-        // FORMULAIRES & MODALES (Opération, Init, etc.)
+        // MODALE OPERATIONS CLASSIC
         const modalOp = document.getElementById('modalOperation'); const formOp = document.getElementById('formOperation'); let instData = null;
         document.getElementById('isAbonnement').addEventListener('change', (e) => { document.getElementById('abonnementSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked){ document.getElementById('isRecurrent').checked = false; document.getElementById('recurrentSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
         document.getElementById('isRecurrent').addEventListener('change', (e) => { document.getElementById('recurrentSettingsWrapper').style.display = e.target.checked ? 'block' : 'none'; if(e.target.checked){ document.getElementById('isAbonnement').checked = false; document.getElementById('abonnementSettingsWrapper').style.display = 'none'; document.getElementById('btnOpenInstallments').style.display = 'none'; } else document.getElementById('btnOpenInstallments').style.display = 'block'; });
@@ -548,24 +570,19 @@
                         const [oy,om]=o.date.split('-'); let td=new Date(parseInt(oy),parseInt(om)-1,parseInt(nd)); if(td.getMonth()!==parseInt(om)-1) td=new Date(parseInt(oy),parseInt(om),0); 
                         pOps.push({...o, date:toLocalISODate(td), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')}); 
                         
-                        // MAJ Jumeau Récurrent
                         const twin = operations.find(t => t.id !== o.id && t.date === o.date && t.montant === -o.montant && Math.abs(t.id - o.id) <= 5 && t.recurringId === cop.recurringId);
                         if (twin) {
-                            const twinAmt = fA * (twin.montant / o.montant);
-                            let twinObj = fd.get('objet');
+                            const twinAmt = fA * (twin.montant / o.montant); let twinObj = fd.get('objet');
                             if (twinObj.startsWith("Virement émis")) twinObj = twinObj.replace("Virement émis", "Virement reçu");
                             else if (twinObj.startsWith("Virement reçu")) twinObj = twinObj.replace("Virement reçu", "Virement émis");
                             pOps.push({...twin, date:toLocalISODate(td), objet:twinObj, montant:twinAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
                         }
                     }); 
-                }
-                else {
+                } else {
                     pOps.push({...cop, date:fd.get('dateOp'), objet:fd.get('objet'), montant:fA, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
-                    // MAJ Jumeau Unique
                     const twin = operations.find(t => t.id !== cop.id && t.date === cop.date && t.montant === -cop.montant && Math.abs(t.id - cop.id) <= 5);
                     if (twin && (twin.categorie === 'Virement interne' || twin.objet.includes('Virement'))) {
-                        const twinAmt = fA * (twin.montant / cop.montant);
-                        let twinObj = fd.get('objet');
+                        const twinAmt = fA * (twin.montant / cop.montant); let twinObj = fd.get('objet');
                         if (twinObj.startsWith("Virement émis")) twinObj = twinObj.replace("Virement émis", "Virement reçu");
                         else if (twinObj.startsWith("Virement reçu")) twinObj = twinObj.replace("Virement reçu", "Virement émis");
                         pOps.push({...twin, date:fd.get('dateOp'), objet:twinObj, montant:twinAmt, modeReglement:fd.get('modeReglement'), categorie:fd.get('categorie')});
@@ -584,38 +601,35 @@
                 const b=e.target.closest('.delete-op'); const opId=parseInt(b.dataset.id); const op=operations.find(o=>o.id===opId); let ids=[]; 
                 if(op.recurringId){ 
                     const ans=prompt("1: Ce mois\n2: Cascade"); 
-                    if(ans==='1') {
-                        ids.push(opId);
-                        const twin = operations.find(t => t.id !== op.id && t.date === op.date && t.montant === -op.montant && Math.abs(t.id - op.id) <= 5);
-                        if (twin) ids.push(twin.id);
-                    } 
+                    if(ans==='1') { ids.push(opId); const twin = operations.find(t => t.id !== op.id && t.date === op.date && t.montant === -op.montant && Math.abs(t.id - op.id) <= 5); if (twin) ids.push(twin.id); } 
                     else if(ans==='2') {
-                        const opsToDel = operations.filter(o=>o.recurringId===op.recurringId&&o.date>=op.date);
-                        ids = opsToDel.map(o=>o.id);
-                        opsToDel.forEach(o => {
-                            const twin = operations.find(t => t.id !== o.id && t.date === o.date && t.montant === -o.montant && Math.abs(t.id - o.id) <= 5);
-                            if (twin) ids.push(twin.id);
-                        });
+                        const opsToDel = operations.filter(o=>o.recurringId===op.recurringId&&o.date>=op.date); ids = opsToDel.map(o=>o.id);
+                        opsToDel.forEach(o => { const twin = operations.find(t => t.id !== o.id && t.date === o.date && t.montant === -o.montant && Math.abs(t.id - o.id) <= 5); if (twin) ids.push(twin.id); });
                     } else return; 
-                } 
-                else if(op.installmentId){ 
+                } else if(op.installmentId){ 
                     const ans=prompt("1: Echéance\n2: Toutes"); if(ans==='1') ids.push(opId); else if(ans==='2') ids=operations.filter(o=>o.installmentId===op.installmentId).map(o=>o.id); else return; 
-                } 
-                else { 
-                    if(!confirm('Supprimer ?')) return; 
-                    ids.push(opId); 
-                    const twin = operations.find(t => t.id !== op.id && t.date === op.date && t.montant === -op.montant && Math.abs(t.id - op.id) <= 5 && (t.categorie === 'Virement interne' || t.objet.includes('Virement')));
-                    if (twin) ids.push(twin.id);
+                } else { 
+                    if(!confirm('Supprimer ?')) return; ids.push(opId); 
+                    const twin = operations.find(t => t.id !== op.id && t.date === op.date && t.montant === -op.montant && Math.abs(t.id - op.id) <= 5 && (t.categorie === 'Virement interne' || t.objet.includes('Virement'))); if (twin) ids.push(twin.id);
                 } 
                 showLoading(); await supabaseClient.from('operations').delete().in('id', ids); hideLoading(); 
             }
             if(e.target.closest('.edit-op')){ const b=e.target.closest('.edit-op'); const opId=parseInt(b.dataset.id); const op=operations.find(o=>o.id===opId); if(op){ editingOpId=opId; if(op.objet==='Solde Initial'){ document.getElementById('dateInit').value=op.date; document.getElementById('montantInit').value=op.montant; document.getElementById('modalInitBalance').showModal(); return; } document.getElementById('dateOp').value=op.date; document.getElementById('objet').value=op.objet; document.getElementById('montant').value=Math.abs(op.montant); document.getElementById(op.montant<0?'typeSortie':'typeEntree').checked=true; document.getElementById('modeReglement').value=op.modeReglement; document.getElementById('categorie').value=op.categorie; document.getElementById('btnOpenInstallments').style.display='none'; if(op.isRecurrent&&!op.isAbonnement) document.getElementById('isRecurrent').checked=true; if(op.isAbonnement) document.getElementById('isAbonnement').checked=true; modalOp.showModal(); } }
         });
 
+        // IMPORT / EXPORT (Sauvegarde locale incluant la structure)
         document.getElementById('btnExport').addEventListener('click', () => { const ds="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({operations, banks, currentBankId})); const dn=document.createElement('a'); dn.href=ds; dn.download="budget_sauvegarde.json"; document.body.appendChild(dn); dn.click(); dn.remove(); });
         document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
-        document.getElementById('fileImport').addEventListener('change', (e) => { const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.readAsText(f,"UTF-8"); r.onload=async function(ev){ try{ const imp=JSON.parse(ev.target.result.trim().replace(/^\uFEFF/,"")); if(imp.operations&&imp.banks){ if(!confirm(`Écraser Cloud avec ${imp.operations.length} lignes ?`)) return; showLoading(); banks=imp.banks; currentBankId=imp.currentBankId||banks[0].id; saveLocalBanks(); renderBanksDropdown(); await supabaseClient.from('operations').delete().neq('id',-1); for(let i=0; i<imp.operations.length; i+=100) await supabaseClient.from('operations').insert(imp.operations.slice(i,i+100)); alert("✅ OK !"); await fetchCloudData(); }else alert("Fichier invalide."); }catch(err){alert("Erreur.");console.error(err);}finally{hideLoading();} }; e.target.value=''; });
+        document.getElementById('fileImport').addEventListener('change', (e) => { const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.readAsText(f,"UTF-8"); r.onload=async function(ev){ try{ const imp=JSON.parse(ev.target.result.trim().replace(/^\uFEFF/,"")); if(imp.operations && imp.banks){ if(!confirm(`Écraser TOUT le Cloud (Opérations ET Banques) avec ce fichier ?`)) return; showLoading(); 
+            // Restauration des banques sur le cloud
+            await supabaseClient.from('banks').delete().neq('id','-1');
+            await supabaseClient.from('banks').insert(imp.banks);
+            // Restauration des opérations sur le cloud
+            await supabaseClient.from('operations').delete().neq('id',-1);
+            for(let i=0; i<imp.operations.length; i+=100) await supabaseClient.from('operations').insert(imp.operations.slice(i,i+100));
+            alert("✅ Restauration complète réussie !"); await fetchCloudData(); }else alert("Fichier invalide."); }catch(err){alert("Erreur.");console.error(err);}finally{hideLoading();} }; e.target.value=''; });
 
+        // RECHERCHE & STATS
         const modalSearch=document.getElementById('modalSearch'), sInp=document.getElementById('searchInput'), sRes=document.getElementById('searchResults');
         document.getElementById('btnOpenSearch').addEventListener('click', () => { sInp.value=''; sRes.innerHTML=''; modalSearch.showModal(); setTimeout(()=>sInp.focus(),50); });
         document.getElementById('btnCloseSearch').addEventListener('click', () => modalSearch.close());
@@ -627,7 +641,9 @@
         document.getElementById('btnCloseStats').addEventListener('click', () => modalStats.close()); ['change'].forEach(ev=>{ stT.addEventListener(ev,calcStats); stS.addEventListener(ev,calcStats); stE.addEventListener(ev,calcStats); });
 
         document.getElementById('currentMonthLabel').textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(displayYear, displayMonth));
-        renderBanksDropdown(); fetchCloudData().then(setupRealtime);
+        
+        // Chargement initial unifié
+        fetchCloudData().then(setupRealtime);
     </script>
 </body>
 </html>
