@@ -164,7 +164,12 @@
             <p id="loginChecking" style="text-align: center; color: #666;">Vérification de la connexion...</p>
             <form id="loginForm" style="display: none;">
                 <div class="form-group"><label for="loginEmail">E-mail</label><input type="email" id="loginEmail" autocomplete="username" required></div>
-                <div class="form-group"><label for="loginPassword">Mot de passe</label><input type="password" id="loginPassword" autocomplete="current-password" required></div>
+                <div class="form-group"><label for="loginPassword">Mot de passe</label>
+                    <div style="position: relative; display: flex;">
+                        <input type="password" id="loginPassword" autocomplete="current-password" required style="flex: 1; min-width: 0; padding-right: 2.6rem;">
+                        <button type="button" id="btnTogglePassword" title="Afficher le mot de passe" aria-label="Afficher le mot de passe" style="position: absolute; right: 0; top: 0; bottom: 0; width: 2.6rem; background: none; border: none; cursor: pointer; font-size: 1.1rem;">👁️</button>
+                    </div>
+                </div>
                 <p id="loginError" style="color: #c0392b; font-size: 0.9rem; min-height: 1.2em; margin: 0 0 0.8rem;"></p>
                 <button type="submit" id="btnLogin" class="btn-submit" style="width: 100%; padding: 0.7rem;">Se connecter</button>
             </form>
@@ -339,9 +344,7 @@
         // INIT SUPABASE CLOUD
         const supabaseUrl = 'https://zwbwkhqyjeeykixtpldi.supabase.co';
         const supabaseKey = 'sb_publishable_RdxzQzvTpjj8nS1B2hDpmw_w4GH_9UC';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
-            global: { headers: { 'x-my-secret-key': 'MON_MOT_DE_PASSE_SECRET' } }
-        });
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         const toLocalISODate = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
@@ -716,7 +719,15 @@
             btn.disabled = false; btn.textContent = 'Se connecter';
             if (error) { loginError.textContent = (error.status === 400) ? 'E-mail ou mot de passe incorrect.' : 'Connexion impossible : ' + error.message; return; }
             document.getElementById('loginPassword').value = '';
+            document.getElementById('loginPassword').type = 'password'; document.getElementById('btnTogglePassword').textContent = '👁️';
             afficherSelonSession(data.session);
+        });
+        document.getElementById('btnTogglePassword').addEventListener('click', () => {
+            const champ = document.getElementById('loginPassword'), btn = document.getElementById('btnTogglePassword');
+            const afficher = champ.type === 'password';
+            champ.type = afficher ? 'text' : 'password';
+            btn.textContent = afficher ? '🙈' : '👁️';
+            btn.title = btn.ariaLabel = afficher ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
         });
         document.getElementById('btnLogout').addEventListener('click', async () => { await supabaseClient.auth.signOut(); location.reload(); });
         supabaseClient.auth.onAuthStateChange((event) => { if (event === 'SIGNED_OUT') location.reload(); });
