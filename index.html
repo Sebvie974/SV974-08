@@ -176,18 +176,6 @@
                 </div>
             </div>
 
-            <div id="calcSoustraction" style="display: none; background: #fff8e1; border: 1px solid #ffe08a; border-radius: 4px; padding: 0.6rem; margin-bottom: 1rem;">
-                <label for="calcMontant" style="display: block; font-weight: bold; margin-bottom: 0.3rem;">🧮 Soustraire un montant</label>
-                <div style="display: flex; gap: 0.5rem;">
-                    <input type="number" id="calcMontant" step="0.01" min="0.01" placeholder="Montant à retirer (€)" style="flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                    <button type="button" id="btnCalcSoustraire" class="btn-primary">− Soustraire</button>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; gap: 0.5rem;">
-                    <span id="calcResultat" style="font-size: 0.85rem; color: #555;"></span>
-                    <button type="button" id="btnCalcAnnuler" style="display: none; background: none; border: none; color: #0066cc; cursor: pointer; font-size: 0.85rem; padding: 0; white-space: nowrap;">↩ Montant d'origine</button>
-                </div>
-            </div>
-
             <div style="display: flex; gap: 1rem;">
                 <div class="form-group" style="flex: 1;">
                     <label for="categorie">Catégorie</label>
@@ -576,35 +564,8 @@
             btnOpenInstallments.textContent = `✅ En ${rows.length} fois`; modalInst.close();
         });
 
-        // -- Calculatrice de soustraction (fenêtre de modification)
-        const calcBlock = document.getElementById('calcSoustraction'), calcInput = document.getElementById('calcMontant');
-        const calcResultat = document.getElementById('calcResultat'), btnCalcAnnuler = document.getElementById('btnCalcAnnuler');
-        let montantOrigine = null;
-        const fmtEuro = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-        function resetCalc(show, original) {
-            montantOrigine = original ?? null; calcInput.value = ''; calcResultat.textContent = ''; calcResultat.style.color = '#555';
-            btnCalcAnnuler.style.display = 'none'; calcBlock.style.display = show ? 'block' : 'none';
-        }
-        function appliquerSoustraction() {
-            const montantEl = document.getElementById('montant');
-            const actuel = parseFloat(montantEl.value), aRetirer = parseFloat(calcInput.value);
-            if (isNaN(actuel) || isNaN(aRetirer) || aRetirer <= 0) { calcResultat.style.color = '#c0392b'; calcResultat.textContent = 'Saisis un montant valide à soustraire.'; return; }
-            const resultat = Math.round((actuel - aRetirer) * 100) / 100;
-            if (resultat <= 0) { calcResultat.style.color = '#c0392b'; calcResultat.textContent = `Impossible : le résultat (${fmtEuro(resultat)}) doit rester supérieur à 0.`; return; }
-            montantEl.value = resultat.toFixed(2);
-            calcResultat.style.color = '#2e7d32'; calcResultat.textContent = `${fmtEuro(actuel)} − ${fmtEuro(aRetirer)} = ${fmtEuro(resultat)}`;
-            calcInput.value = ''; btnCalcAnnuler.style.display = 'inline'; calcInput.focus();
-        }
-        document.getElementById('btnCalcSoustraire').addEventListener('click', appliquerSoustraction);
-        calcInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); appliquerSoustraction(); } });
-        btnCalcAnnuler.addEventListener('click', () => {
-            if (montantOrigine === null) return;
-            document.getElementById('montant').value = montantOrigine.toFixed(2);
-            calcResultat.style.color = '#555'; calcResultat.textContent = `Montant d'origine rétabli : ${fmtEuro(montantOrigine)}`; btnCalcAnnuler.style.display = 'none';
-        });
-
         // -- Soumission Formulaire Principal
-        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; installmentsData=null; formOp.reset(); resetCalc(false); btnOpenInstallments.textContent="⏱️ Paiement X fois"; btnOpenInstallments.style.display='block'; document.getElementById('dateOp').value = new Date().toISOString().split('T')[0]; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
+        document.getElementById('btnOpenModal').addEventListener('click', () => { editingOpId=null; installmentsData=null; formOp.reset(); btnOpenInstallments.textContent="⏱️ Paiement X fois"; btnOpenInstallments.style.display='block'; document.getElementById('dateOp').value = new Date().toISOString().split('T')[0]; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; modalOp.showModal(); });
         document.getElementById('btnCancelModal').addEventListener('click', () => { modalOp.close(); formOp.reset(); installmentsData=null; });
 
         formOp.addEventListener('submit', async (e) => {
@@ -672,7 +633,7 @@
             if (e.target.classList.contains('edit-op')) {
                 const op = operations.find(o => o.id === parseInt(e.target.dataset.id));
                 if(op.objet === 'Solde Initial') { editingOpId=op.id; document.getElementById('dateInit').value=op.date; document.getElementById('montantInit').value=op.montant; modalInit.showModal(); return; }
-                editingOpId = op.id; document.getElementById('dateOp').value=op.date; document.getElementById('objet').value=op.objet; document.getElementById('montant').value=Math.abs(op.montant); document.getElementById(op.montant<0?'typeSortie':'typeEntree').checked=true; document.getElementById('categorie').value=op.categorie; document.getElementById('modeReglement').value=op.modeReglement; document.getElementById('isRecurrent').checked = op.isRecurrent&&!op.isAbonnement; document.getElementById('isAbonnement').checked = op.isAbonnement||false; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; btnOpenInstallments.style.display='none'; resetCalc(true, Math.abs(op.montant)); modalOp.showModal();
+                editingOpId = op.id; document.getElementById('dateOp').value=op.date; document.getElementById('objet').value=op.objet; document.getElementById('montant').value=Math.abs(op.montant); document.getElementById(op.montant<0?'typeSortie':'typeEntree').checked=true; document.getElementById('categorie').value=op.categorie; document.getElementById('modeReglement').value=op.modeReglement; document.getElementById('isRecurrent').checked = op.isRecurrent&&!op.isAbonnement; document.getElementById('isAbonnement').checked = op.isAbonnement||false; document.getElementById('recurrentSettingsWrapper').style.display='none'; document.getElementById('abonnementSettingsWrapper').style.display='none'; btnOpenInstallments.style.display='none'; modalOp.showModal();
             }
         });
 
