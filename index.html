@@ -674,7 +674,7 @@
         });
 
         // IMPORT / EXPORT (Sauvegarde locale incluant la structure)
-        document.getElementById('btnExport').addEventListener('click', () => { const ds="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({operations, banks, currentBankId})); const dn=document.createElement('a'); dn.href=ds; dn.download="budget_sauvegarde.json"; document.body.appendChild(dn); dn.click(); dn.remove(); });
+        document.getElementById('btnExport').addEventListener('click', () => { const ds="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({operations, banks, currentBankId})); const dn=document.createElement('a'); dn.href=ds; dn.download="budget_sauvegarde_"+toLocalISODate()+".json"; document.body.appendChild(dn); dn.click(); dn.remove(); });
         document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
         document.getElementById('fileImport').addEventListener('change', (e) => { const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.readAsText(f,"UTF-8"); r.onload=async function(ev){ try{ const imp=JSON.parse(ev.target.result.trim().replace(/^\uFEFF/,"")); if(imp.operations && imp.banks){ if(!confirm(`Écraser TOUT le Cloud (Opérations ET Banques) avec ce fichier ?`)) return; showLoading(); 
             // Restauration des banques sur le cloud
